@@ -1,0 +1,11 @@
+# Local profile — points at the docker-compose Postgres defined in infra/docker-compose.yml
+# Run with: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/virtualkitchen
+    username: vk_user
+    password: change_me
+
+app:
+  cors:
+    allowed-origins: http://localhost:3000

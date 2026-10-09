@@ -1,0 +1,19 @@
+Kitchen Recording Consent (version v1)
+
+DRAFT — must be reviewed by legal counsel before production use.
+
+By accepting, I agree that:
+
+1. While I am assigned to a kitchen station, cameras at that station may record video of me
+   preparing customer orders.
+2. Short clips (typically 30–60 seconds) of an order being prepared may be shown to the customer
+   who placed that order. That customer may view, download, and share the clip.
+3. My display name, photo, and specialty may be shown alongside clips I appear in, and customers
+   may send me tips.
+4. Clips may be analysed by automated systems to assess kitchen hygiene (for example, whether
+   gloves, caps, and masks are worn). These assessments may be shared with my restaurant.
+5. I can withdraw this consent at any time from the app. After withdrawal, no new recordings will
+   be made of me. Clips recorded before withdrawal may continue to be available to the customers
+   who received them.
+6. Accepting or withdrawing this consent does not, by itself, change my employment with the
+   restaurant.

@@ -1,0 +1,16 @@
+# Test-only values; never used outside the test classpath.
+app:
+  jwt:
+    secret: test-only-jwt-secret-that-is-at-least-32-bytes-long
+  auth:
+    login-rate-limit:
+      capacity: 5
+      refill-period: 15m
+  storage:
+    # endpoint/keys come from the MinIO Testcontainer (IntegrationTest)
+    media-bucket: media-test
+    create-buckets: true
+  admin:
+    name: Test Admin
+    phone: "+910000000001"
+    password: test-admin-password
