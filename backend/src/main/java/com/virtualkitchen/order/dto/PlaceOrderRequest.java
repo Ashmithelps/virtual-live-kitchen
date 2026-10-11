@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * DINE_IN needs {@code tableQrToken} (from the scanned QR code); DELIVERY needs
+ * DINE_IN needs {@code tableSessionToken} (from GET /api/tables/{qrToken}), which pins the order to
+ * the scanned table; DELIVERY needs
  * {@code deliveryAddress}; TAKEAWAY needs neither. {@code paymentMethod} defaults to ONLINE;
  * PAY_LATER is allowed for DINE_IN only.
  */
@@ -19,7 +20,7 @@ public record PlaceOrderRequest(
         @NotNull UUID restaurantId,
         @NotNull OrderType orderType,
         @NotEmpty @Size(max = 50) List<@NotNull @Valid OrderLineRequest> items,
-        @Size(max = 64) String tableQrToken,
+        @Size(max = 1000) String tableSessionToken,
         @Valid DeliveryAddressRequest deliveryAddress,
         PaymentMethod paymentMethod,
         @Size(max = 500) String notes) {

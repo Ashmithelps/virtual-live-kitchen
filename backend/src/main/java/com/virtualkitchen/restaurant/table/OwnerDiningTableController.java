@@ -2,7 +2,11 @@ package com.virtualkitchen.restaurant.table;
 
 import com.virtualkitchen.auth.security.AuthenticatedUser;
 import jakarta.validation.Valid;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +36,17 @@ public class OwnerDiningTableController {
     @GetMapping
     public List<DiningTableResponse> list(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId) {
         return service.list(owner.id(), restaurantId);
+    }
+
+    /** Printable PDF, one QR code per page. Binary download, so no JSON DTO here. */
+    @GetMapping(value = "/qr-codes.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> qrSheet(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId) {
+        DiningTableService.QrSheet sheet = service.qrSheet(owner.id(), restaurantId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(sheet.filename()).build().toString())
+                .body(sheet.pdf());
     }
 
     @PostMapping

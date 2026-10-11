@@ -10,8 +10,10 @@ public enum PaymentStatus {
     /** Last online attempt failed; the customer may retry. */
     FAILED,
     PAY_LATER,
+    /** Order rejected/cancelled after payment; the refund is on its way. */
+    REFUND_PENDING,
     REFUNDED;
 
     /** Orders with these payment states are shown to the restaurant. */
-    public static final Set<PaymentStatus> VISIBLE_TO_RESTAURANT = EnumSet.of(PAID, PAY_LATER, REFUNDED);
+    public static final Set<PaymentStatus> VISIBLE_TO_RESTAURANT = EnumSet.of(PAID, PAY_LATER, REFUND_PENDING, REFUNDED);
 }

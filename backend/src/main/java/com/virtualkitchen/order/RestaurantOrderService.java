@@ -27,18 +27,20 @@ public class RestaurantOrderService {
     private final OrderRepository orders;
     private final RestaurantAccess restaurantAccess;
     private final KitchenStaffing kitchenStaffing;
-    private final OrderPayments payments;
+    private final OrderPaymentService payments;
     private final OrderMapper mapper;
+    private final OrderEvents events;
     private final Clock clock;
 
     public RestaurantOrderService(OrderRepository orders, RestaurantAccess restaurantAccess,
-                                  KitchenStaffing kitchenStaffing, OrderPayments payments, OrderMapper mapper,
-                                  Clock clock) {
+                                  KitchenStaffing kitchenStaffing, OrderPaymentService payments, OrderMapper mapper,
+                                  OrderEvents events, Clock clock) {
         this.orders = orders;
         this.restaurantAccess = restaurantAccess;
         this.kitchenStaffing = kitchenStaffing;
         this.payments = payments;
         this.mapper = mapper;
+        this.events = events;
         this.clock = clock;
     }
 
@@ -102,9 +104,10 @@ public class RestaurantOrderService {
             order.setStatusReason(request.reason() == null || request.reason().isBlank()
                     ? (target == OrderStatus.REJECTED ? "Rejected by restaurant" : "Cancelled by restaurant")
                     : request.reason().strip());
-            payments.refundIfPaid(order);
+            payments.requestRefundIfPaid(order);
         }
         orders.saveAndFlush(order); // surfaces @Version conflicts as 409 inside this request
+        events.changed(order);
         return mapper.toResponse(order);
     }
 

@@ -58,7 +58,16 @@ public class AuthService {
         if (!SELF_REGISTRATION_ROLES.contains(role)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Only CUSTOMER or RESTAURANT_OWNER accounts can self-register");
         }
-        if (userRepository.existsByPhone(registration.phone())) {
+        var existing = userRepository.findByPhone(registration.phone());
+        if (existing.isPresent()) {
+            User user = existing.get();
+            // A guest who ordered with this phone is now registering: claim the passwordless account.
+            // Until OTP verification exists, this trusts the phone number like every other auth path.
+            if (role == Role.CUSTOMER && user.getRole() == Role.CUSTOMER && !user.hasPassword() && !user.isDisabled()) {
+                user.claim(registration.name().strip(), blankToNull(registration.email()),
+                        passwordEncoder.encode(registration.password()));
+                return new AuthResult(user, issueTokens(user));
+            }
             throw new ApiException(HttpStatus.CONFLICT, "Phone number is already registered");
         }
         UserStatus status = role == Role.RESTAURANT_OWNER ? UserStatus.PENDING_APPROVAL : UserStatus.ACTIVE;

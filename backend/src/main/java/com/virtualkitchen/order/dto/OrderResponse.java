@@ -1,5 +1,6 @@
 package com.virtualkitchen.order.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.virtualkitchen.order.OrderStatus;
 import com.virtualkitchen.order.PaymentMethod;
 import com.virtualkitchen.order.PaymentStatus;
@@ -16,23 +17,23 @@ public record OrderResponse(
         UUID restaurantId,
         String restaurantName,
         OrderType orderType,
-        String tableLabel,
-        String deliveryAddress,
-        Double deliveryDistanceKm,
+        @Schema(nullable = true) String tableLabel,
+        @Schema(nullable = true) String deliveryAddress,
+        @Schema(nullable = true) Double deliveryDistanceKm,
         OrderStatus status,
-        String statusReason,
+        @Schema(nullable = true) String statusReason,
         PaymentMethod paymentMethod,
         PaymentStatus paymentStatus,
-        PaymentInfo payment,
+        @Schema(nullable = true) PaymentSummary payment,
         List<OrderItemResponse> items,
         long subtotalPaise,
         long taxPaise,
         long totalPaise,
-        String notes,
-        Preparation preparation,
+        @Schema(nullable = true) String notes,
+        @Schema(nullable = true) Preparation preparation,
         OrderTimeline timeline) {
 
     /** Who cooked it and where; set when the order moved to PREPARING. */
-    public record Preparation(UUID chefId, String chefDisplayName, UUID stationId, String stationName) {
+    public record Preparation(UUID chefId, @Schema(nullable = true) String chefDisplayName, UUID stationId, @Schema(nullable = true) String stationName) {
     }
 }

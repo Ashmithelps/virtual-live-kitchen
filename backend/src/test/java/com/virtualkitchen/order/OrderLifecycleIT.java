@@ -49,7 +49,10 @@ class OrderLifecycleIT extends IntegrationTest {
         String id = placed.path("id").asText();
         assertThat(placed.path("status").asText()).isEqualTo("PLACED");
         assertThat(placed.path("paymentStatus").asText()).isEqualTo("PENDING");
-        assertThat(placed.path("payment").path("providerOrderId").asText()).startsWith("mock_order_");
+        assertThat(placed.path("payment").isNull()).isTrue(); // checkout is opened separately
+        JsonNode checkout = client.body(k.startPayment(placed.path("id").asText()).andExpect(status().isOk()));
+        assertThat(checkout.path("providerOrderId").asText()).startsWith("mock_order_");
+        assertThat(checkout.path("amountPaise").asLong()).isEqualTo(62685);
         assertThat(placed.path("displayNumber").asInt()).isEqualTo(1);
         // 2 × 24900 + 9900 = 59700; 5% GST = 2985
         assertThat(placed.path("subtotalPaise").asLong()).isEqualTo(59700);
@@ -260,15 +263,15 @@ class OrderLifecycleIT extends IntegrationTest {
         k.place(payLaterTakeaway).andExpect(status().isBadRequest());
 
         Map<String, Object> noTable = k.order("DINE_IN");
-        noTable.remove("tableQrToken");
+        noTable.remove("tableSessionToken");
         k.place(noTable).andExpect(status().isBadRequest());
 
         Map<String, Object> badTable = k.order("DINE_IN");
-        badTable.put("tableQrToken", "not-a-real-token");
+        badTable.put("tableSessionToken", "not-a-real-token");
         k.place(badTable).andExpect(status().isBadRequest());
 
         Map<String, Object> tableOnTakeaway = k.order("TAKEAWAY");
-        tableOnTakeaway.put("tableQrToken", k.tableQr);
+        tableOnTakeaway.put("tableSessionToken", k.tableSession);
         k.place(tableOnTakeaway).andExpect(status().isBadRequest());
 
         Map<String, Object> noAddress = k.order("DELIVERY");
@@ -337,14 +340,21 @@ class OrderLifecycleIT extends IntegrationTest {
         client.send(GET, ordersPath + "/" + id, k.owner, null).andExpect(status().isNotFound());
         k.pay(id, "pay_ok").andExpect(status().isOk()).andExpect(jsonPath("$.paymentStatus").value("PAID"));
         k.pay(id, "pay_again").andExpect(status().isConflict());
+        client.send(GET, "/api/orders/" + id, k.customer, null)
+                .andExpect(jsonPath("$.payment.status").value("CAPTURED"))
+                .andExpect(jsonPath("$.payment.provider").value("mock"));
     }
 
     @Test
     void rejectingOrCancellingAPaidOrderRefundsIt() throws Exception {
         String rejected = k.visibleOrder("TAKEAWAY");
+        // Refunds go to the gateway after the rejection commits; the mock completes them at once.
         k.ownerSets(rejected, Map.of("status", "REJECTED", "reason", "Out of chicken"))
+                .andExpect(jsonPath("$.paymentStatus").value("REFUND_PENDING"))
+                .andExpect(jsonPath("$.statusReason").value("Out of chicken"));
+        client.send(GET, "/api/orders/" + rejected, k.customer, null)
                 .andExpect(jsonPath("$.paymentStatus").value("REFUNDED"))
-                .andExpect(jsonPath("$.statusReason").value("Out of chicken"))
+                .andExpect(jsonPath("$.payment.status").value("REFUNDED"))
                 .andExpect(jsonPath("$.timeline.refundedAt", notNullValue()));
 
         String cancelled = k.visibleOrder("TAKEAWAY");
@@ -352,7 +362,8 @@ class OrderLifecycleIT extends IntegrationTest {
         client.send(POST, "/api/orders/" + cancelled + "/cancel", k.customer, Map.of("reason", "Changed my mind"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"))
-                .andExpect(jsonPath("$.paymentStatus").value("REFUNDED"));
+                .andExpect(jsonPath("$.paymentStatus").value("REFUND_PENDING"));
+        client.send(GET, "/api/orders/" + cancelled, k.customer, null).andExpect(jsonPath("$.paymentStatus").value("REFUNDED"));
     }
 
     @Test

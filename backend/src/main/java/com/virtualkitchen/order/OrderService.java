@@ -7,9 +7,10 @@ import com.virtualkitchen.menu.MenuItem;
 import com.virtualkitchen.menu.MenuItemRepository;
 import com.virtualkitchen.order.dto.DeliveryAddressRequest;
 import com.virtualkitchen.order.dto.OrderLineRequest;
+import com.virtualkitchen.order.dto.ConfirmPaymentRequest;
 import com.virtualkitchen.order.dto.OrderResponse;
+import com.virtualkitchen.order.dto.PaymentCheckoutResponse;
 import com.virtualkitchen.order.dto.PlaceOrderRequest;
-import com.virtualkitchen.payment.PaymentProvider;
 import com.virtualkitchen.restaurant.OpeningSlot;
 import com.virtualkitchen.restaurant.OrderType;
 import com.virtualkitchen.restaurant.Restaurant;
@@ -17,7 +18,7 @@ import com.virtualkitchen.restaurant.RestaurantProperties;
 import com.virtualkitchen.restaurant.RestaurantRepository;
 import com.virtualkitchen.restaurant.RestaurantStatus;
 import com.virtualkitchen.restaurant.table.DiningTable;
-import com.virtualkitchen.restaurant.table.DiningTableRepository;
+import com.virtualkitchen.restaurant.table.TableSessions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -40,25 +41,27 @@ public class OrderService {
     private final OrderRepository orders;
     private final RestaurantRepository restaurants;
     private final MenuItemRepository menuItems;
-    private final DiningTableRepository tables;
+    private final TableSessions tableSessions;
     private final DisplayNumberAllocator displayNumbers;
-    private final OrderPayments payments;
+    private final OrderPaymentService payments;
     private final OrderMapper mapper;
+    private final OrderEvents events;
     private final OrderProperties orderProperties;
     private final RestaurantProperties restaurantProperties;
     private final Clock clock;
 
     public OrderService(OrderRepository orders, RestaurantRepository restaurants, MenuItemRepository menuItems,
-                        DiningTableRepository tables, DisplayNumberAllocator displayNumbers, OrderPayments payments,
-                        OrderMapper mapper, OrderProperties orderProperties, RestaurantProperties restaurantProperties,
-                        Clock clock) {
+                        TableSessions tableSessions, DisplayNumberAllocator displayNumbers, OrderPaymentService payments,
+                        OrderMapper mapper, OrderEvents events, OrderProperties orderProperties,
+                        RestaurantProperties restaurantProperties, Clock clock) {
         this.orders = orders;
         this.restaurants = restaurants;
         this.menuItems = menuItems;
-        this.tables = tables;
+        this.tableSessions = tableSessions;
         this.displayNumbers = displayNumbers;
         this.payments = payments;
         this.mapper = mapper;
+        this.events = events;
         this.orderProperties = orderProperties;
         this.restaurantProperties = restaurantProperties;
         this.clock = clock;
@@ -90,27 +93,22 @@ public class OrderService {
         long subtotal = addItems(order, restaurant.getId(), request);
         order.setTotals(subtotal, orderProperties.taxOn(subtotal));
 
-        // Gateway call before taking the display-number lock, so the lock isn't held during it.
-        PaymentProvider.PaymentSession session = paymentMethod == PaymentMethod.ONLINE ? payments.start(order) : null;
-
+        // Payment starts separately (POST .../payment), so no gateway call happens in this transaction.
         // Last step before insert: the counter row stays locked until this transaction commits.
         order.assignDisplayNumber(localNow.toLocalDate(), displayNumbers.next(restaurant.getId(), localNow.toLocalDate()));
         orders.saveAndFlush(order);
-        return session == null ? mapper.toResponse(order) : mapper.toResponse(order, session);
+        events.changed(order); // a PAY_LATER order goes straight to the kitchen
+        return mapper.toResponse(order);
     }
 
-    @Transactional
-    public OrderResponse confirmPayment(UUID customerId, UUID orderId, String providerPaymentId, String signature) {
-        Order order = requireOwn(customerId, orderId);
-        if (order.getPaymentMethod() != PaymentMethod.ONLINE
-                || (order.getPaymentStatus() != PaymentStatus.PENDING && order.getPaymentStatus() != PaymentStatus.FAILED)) {
-            throw new ApiException(HttpStatus.CONFLICT, "Order has no outstanding payment (status " + order.getPaymentStatus() + ")");
-        }
-        if (order.getStatus() != OrderStatus.PLACED) {
-            throw new ApiException(HttpStatus.CONFLICT, "Order is " + order.getStatus() + " and can no longer be paid");
-        }
-        payments.confirm(order, providerPaymentId, signature);
-        return mapper.toResponse(order);
+    /** Not transactional: the gateway is called between short transactions inside. */
+    public PaymentCheckoutResponse startPayment(UUID customerId, UUID orderId) {
+        return payments.startCheckout(orderId, customerId);
+    }
+
+    /** Once PAID, the kitchen sees the order as new (pushed by OrderEvents). */
+    public OrderResponse confirmPayment(UUID customerId, UUID orderId, ConfirmPaymentRequest request) {
+        return payments.confirmCheckout(orderId, customerId, request.providerOrderId(), request.providerPaymentId(), request.signature());
     }
 
     /** Allowed while PLACED or ACCEPTED (state machine); a captured payment is refunded. */
@@ -119,7 +117,8 @@ public class OrderService {
         Order order = requireOwn(customerId, orderId);
         OrderStateMachine.transition(order, OrderStatus.CANCELLED, OrderActor.CUSTOMER, clock.instant());
         order.setStatusReason(reason == null || reason.isBlank() ? "Cancelled by customer" : reason.strip());
-        payments.refundIfPaid(order);
+        payments.requestRefundIfPaid(order);
+        events.changed(order);
         return mapper.toResponse(order);
     }
 
@@ -137,24 +136,24 @@ public class OrderService {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private void applyFulfilment(Order order, Restaurant restaurant, PlaceOrderRequest request) {
-        boolean hasTable = request.tableQrToken() != null && !request.tableQrToken().isBlank();
+        boolean hasTable = request.tableSessionToken() != null && !request.tableSessionToken().isBlank();
         DeliveryAddressRequest address = request.deliveryAddress();
         switch (request.orderType()) {
             case DINE_IN -> {
                 if (!hasTable) {
-                    throw new ApiException(HttpStatus.BAD_REQUEST, "tableQrToken is required for DINE_IN orders");
+                    throw new ApiException(HttpStatus.BAD_REQUEST,
+                            "tableSessionToken is required for DINE_IN orders; scan the table's QR code");
                 }
                 rejectIf(address != null, "deliveryAddress is only allowed for DELIVERY orders");
-                DiningTable table = tables.findByQrToken(request.tableQrToken())
-                        .filter(t -> t.getRestaurantId().equals(restaurant.getId()))
-                        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid table code for this restaurant"));
+                // The table comes only from the scanned session, never from the client.
+                DiningTable table = tableSessions.requireCurrentTable(request.tableSessionToken(), restaurant.getId());
                 order.setDineInTable(table.getId(), table.getLabel());
             }
             case DELIVERY -> {
                 if (address == null) {
                     throw new ApiException(HttpStatus.BAD_REQUEST, "deliveryAddress is required for DELIVERY orders");
                 }
-                rejectIf(hasTable, "tableQrToken is only allowed for DINE_IN orders");
+                rejectIf(hasTable, "tableSessionToken is only allowed for DINE_IN orders");
                 double distance = Geo.distanceKm(restaurant.getLatitude(), restaurant.getLongitude(),
                         address.latitude(), address.longitude());
                 if (distance > restaurant.getDeliveryRadiusKm()) {
@@ -166,7 +165,7 @@ public class OrderService {
                         Math.round(distance * 100) / 100.0);
             }
             case TAKEAWAY -> {
-                rejectIf(hasTable, "tableQrToken is only allowed for DINE_IN orders");
+                rejectIf(hasTable, "tableSessionToken is only allowed for DINE_IN orders");
                 rejectIf(address != null, "deliveryAddress is only allowed for DELIVERY orders");
             }
         }

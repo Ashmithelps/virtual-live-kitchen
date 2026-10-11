@@ -32,9 +32,13 @@ public class PasswordCredentialVerifier implements CredentialVerifier {
     public User verify(LoginCredentials credentials) {
         PasswordCredentials password = (PasswordCredentials) credentials;
         Optional<User> user = userRepository.findByPhone(password.phone());
-        String hash = user.map(User::getPasswordHash).orElse(dummyHash);
+        // Guests have no password yet; compare against the dummy so timing doesn't reveal them.
+        String hash = user.map(User::getPasswordHash).orElse(null);
+        if (hash == null) {
+            hash = dummyHash;
+        }
         boolean matches = passwordEncoder.matches(password.password(), hash);
-        if (user.isEmpty() || !matches) {
+        if (user.isEmpty() || !user.get().hasPassword() || !matches) {
             throw new InvalidCredentialsException(MESSAGE);
         }
         return user.get();

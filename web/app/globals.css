@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #fff7ed;
+  --color-brand-100: #ffedd5;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-700: #c2410c;
+
+  /* Kitchen display: a new order pulses for a few seconds so it's noticed across the room. */
+  --animate-kds-flash: kds-flash 1s ease-in-out 6;
+}
+
+@keyframes kds-flash {
+  0%,
+  100% {
+    background-color: var(--color-stone-800);
+  }
+  50% {
+    background-color: var(--color-brand-700);
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-stone-50 text-stone-900 antialiased;
+}
+
+/* Keep content clear of the iPhone home indicator under fixed bottom bars. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

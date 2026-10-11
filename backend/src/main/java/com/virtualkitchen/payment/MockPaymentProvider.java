@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Development stand-in for a real gateway. Every verification succeeds unless the payment id
- * starts with {@code "fail"}, so failures can be exercised too. It performs no real checks and
+ * Development stand-in for a real gateway. Every checkout succeeds unless the payment id starts
+ * with {@code "fail"}; refunds complete instantly; there are no webhooks. It verifies nothing and
  * must never be active in production.
  */
 @Component
@@ -30,27 +30,25 @@ public class MockPaymentProvider implements PaymentProvider {
     }
 
     @Override
-    public PaymentSession createPayment(UUID orderId, long amountPaise) {
-        String providerOrderId = "mock_order_" + SecureTokens.random(12);
-        return new PaymentSession(providerOrderId, Map.of(
-                "provider", "mock",
-                "providerOrderId", providerOrderId,
-                "amountPaise", amountPaise,
-                "currency", "INR",
-                "instructions", "POST /api/orders/" + orderId + "/payment/confirm with any providerPaymentId "
-                        + "(prefix it with 'fail' to simulate a failed payment)"));
+    public ProviderOrder createOrder(UUID orderId, long amountPaise, String receipt) {
+        return new ProviderOrder("mock_order_" + SecureTokens.random(12));
     }
 
     @Override
-    public PaymentVerification verify(String providerOrderId, String providerPaymentId, String signature, long amountPaise) {
+    public CheckoutResult verifyCheckout(String providerOrderId, String providerPaymentId, String signature, long expectedAmountPaise) {
         if (providerPaymentId.startsWith("fail")) {
-            return PaymentVerification.failed("Payment declined (simulated)");
+            return CheckoutResult.failed(providerPaymentId, "Payment declined (simulated)");
         }
-        return PaymentVerification.ok();
+        return CheckoutResult.captured(providerPaymentId, expectedAmountPaise);
     }
 
     @Override
-    public String refund(String providerPaymentId, long amountPaise) {
-        return "mock_refund_" + SecureTokens.random(12);
+    public Refund refund(String providerPaymentId, long amountPaise, String receipt) {
+        return new Refund("mock_refund_" + SecureTokens.random(12), true);
+    }
+
+    @Override
+    public Optional<Refund> findRefund(String providerPaymentId) {
+        return Optional.empty();
     }
 }

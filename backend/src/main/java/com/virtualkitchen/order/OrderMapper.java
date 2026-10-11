@@ -7,8 +7,9 @@ import com.virtualkitchen.kitchen.chef.ChefRepository;
 import com.virtualkitchen.order.dto.OrderItemResponse;
 import com.virtualkitchen.order.dto.OrderResponse;
 import com.virtualkitchen.order.dto.OrderTimeline;
-import com.virtualkitchen.order.dto.PaymentInfo;
-import com.virtualkitchen.payment.PaymentProvider;
+import com.virtualkitchen.order.dto.PaymentSummary;
+import com.virtualkitchen.payment.Payment;
+import com.virtualkitchen.payment.PaymentRepository;
 import com.virtualkitchen.restaurant.Restaurant;
 import com.virtualkitchen.restaurant.RestaurantRepository;
 import org.springframework.stereotype.Component;
@@ -28,39 +29,41 @@ class OrderMapper {
     private final RestaurantRepository restaurants;
     private final ChefRepository chefs;
     private final KitchenStationRepository stations;
+    private final PaymentRepository payments;
 
-    OrderMapper(RestaurantRepository restaurants, ChefRepository chefs, KitchenStationRepository stations) {
+    OrderMapper(RestaurantRepository restaurants, ChefRepository chefs, KitchenStationRepository stations,
+                PaymentRepository payments) {
         this.restaurants = restaurants;
         this.chefs = chefs;
         this.stations = stations;
+        this.payments = payments;
     }
 
     OrderResponse toResponse(Order order) {
         return toResponses(List.of(order)).get(0);
     }
 
-    OrderResponse toResponse(Order order, PaymentProvider.PaymentSession session) {
-        OrderResponse r = toResponse(order);
-        PaymentInfo payment = new PaymentInfo(order.getPaymentProvider(), order.getPaymentProviderOrderId(),
-                order.getTotalPaise(), session.clientData());
-        return new OrderResponse(r.id(), r.displayNumber(), r.businessDate(), r.restaurantId(), r.restaurantName(),
-                r.orderType(), r.tableLabel(), r.deliveryAddress(), r.deliveryDistanceKm(), r.status(), r.statusReason(),
-                r.paymentMethod(), r.paymentStatus(), payment, r.items(), r.subtotalPaise(), r.taxPaise(),
-                r.totalPaise(), r.notes(), r.preparation(), r.timeline());
-    }
-
     List<OrderResponse> toResponses(List<Order> orders) {
         Map<UUID, Restaurant> restaurantById = byId(restaurants.findAllById(ids(orders, Order::getRestaurantId)), Restaurant::getId);
         Map<UUID, Chef> chefById = byId(chefs.findAllById(ids(orders, Order::getPreparedByChefId)), Chef::getId);
         Map<UUID, KitchenStation> stationById = byId(stations.findAllById(ids(orders, Order::getStationId)), KitchenStation::getId);
+        Map<UUID, List<Payment>> paymentsByOrder = orders.isEmpty() ? Map.of()
+                : payments.findByOrderIdInOrderByCreatedAtDesc(ids(orders, Order::getId)).stream()
+                        .collect(Collectors.groupingBy(Payment::getOrderId));
         return orders.stream().map(o -> map(o, restaurantById.get(o.getRestaurantId()),
-                chefById.get(o.getPreparedByChefId()), stationById.get(o.getStationId()))).toList();
+                chefById.get(o.getPreparedByChefId()), stationById.get(o.getStationId()),
+                summary(paymentsByOrder.getOrDefault(o.getId(), List.of())))).toList();
     }
 
-    private OrderResponse map(Order o, Restaurant restaurant, Chef chef, KitchenStation station) {
-        PaymentInfo payment = o.getPaymentStatus() == PaymentStatus.PENDING || o.getPaymentStatus() == PaymentStatus.FAILED
-                ? new PaymentInfo(o.getPaymentProvider(), o.getPaymentProviderOrderId(), o.getTotalPaise(), null)
-                : null;
+    /** The settled attempt if there is one, otherwise the most recent attempt. */
+    private static PaymentSummary summary(List<Payment> attempts) {
+        return attempts.stream().filter(Payment::isSettled).findFirst()
+                .or(() -> attempts.stream().findFirst())
+                .map(p -> new PaymentSummary(p.getProvider(), p.getStatus(), p.getAmountPaise(), p.getCounterMethod(), p.getFailureReason()))
+                .orElse(null);
+    }
+
+    private OrderResponse map(Order o, Restaurant restaurant, Chef chef, KitchenStation station, PaymentSummary payment) {
         OrderResponse.Preparation preparation = o.getPreparedByChefId() == null ? null : new OrderResponse.Preparation(
                 o.getPreparedByChefId(), chef == null ? null : chef.getDisplayName(),
                 o.getStationId(), station == null ? null : station.getName());

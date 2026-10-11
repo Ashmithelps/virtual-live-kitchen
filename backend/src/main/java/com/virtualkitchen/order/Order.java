@@ -73,17 +73,7 @@ public class Order {
     @Column(name = "payment_status", nullable = false, length = 16)
     private PaymentStatus paymentStatus;
 
-    @Column(name = "payment_provider", length = 32)
-    private String paymentProvider;
-
-    @Column(name = "payment_provider_order_id", length = 100)
-    private String paymentProviderOrderId;
-
-    @Column(name = "payment_provider_payment_id", length = 100)
-    private String paymentProviderPaymentId;
-
-    @Column(name = "payment_provider_refund_id", length = 100)
-    private String paymentProviderRefundId;
+    // Gateway details (ids, attempts, raw webhooks) live in the payments table; see OrderPaymentService.
 
     @Column(name = "subtotal_paise", nullable = false, updatable = false)
     private long subtotalPaise;
@@ -178,27 +168,32 @@ public class Order {
 
     // ── payment ──────────────────────────────────────────────────────────────
 
-    void startPayment(String provider, String providerOrderId) {
-        this.paymentProvider = provider;
-        this.paymentProviderOrderId = providerOrderId;
-    }
+    // Only OrderPaymentService calls these; it keeps them consistent with the payments table.
 
-    void markPaid(String providerPaymentId, Instant now) {
+    void markPaid(Instant now) {
         this.paymentStatus = PaymentStatus.PAID;
-        this.paymentProviderPaymentId = providerPaymentId;
         this.paidAt = now;
         this.updatedAt = now;
     }
 
-    void markPaymentFailed(String providerPaymentId, Instant now) {
-        this.paymentStatus = PaymentStatus.FAILED;
-        this.paymentProviderPaymentId = providerPaymentId;
+    /**
+     * A failed attempt only matters for prepaid orders still waiting for payment. A pay-at-table
+     * order that tried to pay online and failed is still a valid pay-at-table order.
+     */
+    void markPaymentFailed(Instant now) {
+        if (paymentMethod == PaymentMethod.ONLINE && paymentStatus == PaymentStatus.PENDING) {
+            this.paymentStatus = PaymentStatus.FAILED;
+            this.updatedAt = now;
+        }
+    }
+
+    void markRefundPending(Instant now) {
+        this.paymentStatus = PaymentStatus.REFUND_PENDING;
         this.updatedAt = now;
     }
 
-    void markRefunded(String refundId, Instant now) {
+    void markRefunded(Instant now) {
         this.paymentStatus = PaymentStatus.REFUNDED;
-        this.paymentProviderRefundId = refundId;
         this.refundedAt = now;
         this.updatedAt = now;
     }
@@ -251,9 +246,6 @@ public class Order {
     public OrderStatus getStatus() { return status; }
     public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public PaymentStatus getPaymentStatus() { return paymentStatus; }
-    public String getPaymentProvider() { return paymentProvider; }
-    public String getPaymentProviderOrderId() { return paymentProviderOrderId; }
-    public String getPaymentProviderPaymentId() { return paymentProviderPaymentId; }
     public long getSubtotalPaise() { return subtotalPaise; }
     public long getTaxPaise() { return taxPaise; }
     public long getTotalPaise() { return totalPaise; }

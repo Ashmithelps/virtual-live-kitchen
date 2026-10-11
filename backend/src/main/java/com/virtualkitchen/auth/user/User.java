@@ -26,7 +26,8 @@ public class User {
     @Column(length = 254)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 100)
+    /** Null for guest customers who have only ever ordered with name + phone. */
+    @Column(name = "password_hash", length = 100)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
@@ -61,6 +62,20 @@ public class User {
 
     public boolean isDisabled() {
         return status == UserStatus.DISABLED;
+    }
+
+    public boolean hasPassword() {
+        return passwordHash != null;
+    }
+
+    /** A guest customer registering properly: takes over the passwordless account. */
+    public void claim(String name, String email, String passwordHash) {
+        if (hasPassword() || role != Role.CUSTOMER) {
+            throw new IllegalStateException("Only passwordless customer accounts can be claimed");
+        }
+        this.name = name;
+        this.email = email;
+        this.passwordHash = passwordHash;
     }
 
     public void activate() {

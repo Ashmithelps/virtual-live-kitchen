@@ -3,9 +3,6 @@ package com.virtualkitchen.restaurant.table;
 import java.time.Instant;
 import java.util.UUID;
 
-public record DiningTableResponse(UUID id, String label, String qrToken, Instant createdAt) {
-
-    static DiningTableResponse from(DiningTable table) {
-        return new DiningTableResponse(table.getId(), table.getLabel(), table.getQrToken(), table.getCreatedAt());
-    }
+/** {@code qrUrl} is exactly what the table's QR code encodes. */
+public record DiningTableResponse(UUID id, String label, String qrToken, String qrUrl, Instant createdAt) {
 }

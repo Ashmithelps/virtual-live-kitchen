@@ -1,6 +1,7 @@
 package com.virtualkitchen.order;
 
 import com.virtualkitchen.auth.security.AuthenticatedUser;
+import com.virtualkitchen.order.dto.CounterPaymentRequest;
 import com.virtualkitchen.order.dto.OrderResponse;
 import com.virtualkitchen.order.dto.OrderStatusChangeRequest;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,9 +25,11 @@ import java.util.UUID;
 public class OwnerOrderController {
 
     private final RestaurantOrderService service;
+    private final OrderPaymentService payments;
 
-    public OwnerOrderController(RestaurantOrderService service) {
+    public OwnerOrderController(RestaurantOrderService service, OrderPaymentService payments) {
         this.service = service;
+        this.payments = payments;
     }
 
     /** Active (non-terminal) orders, oldest first; {@code status} narrows to one status. */
@@ -39,6 +43,19 @@ public class OwnerOrderController {
     public OrderResponse get(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId,
                              @PathVariable UUID orderId) {
         return service.getForOwner(owner.id(), restaurantId, orderId);
+    }
+
+    /** Pay-at-table bills not settled yet, including served orders (they're off the active list). */
+    @GetMapping("/unpaid")
+    public List<OrderResponse> unpaid(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId) {
+        return payments.unpaidBills(owner.id(), restaurantId);
+    }
+
+    /** "Paid at counter": cash, UPI or card taken by staff. */
+    @PostMapping("/{orderId}/payment/counter")
+    public OrderResponse paidAtCounter(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId,
+                                       @PathVariable UUID orderId, @Valid @RequestBody CounterPaymentRequest request) {
+        return payments.markPaidAtCounter(owner.id(), restaurantId, orderId, request.method());
     }
 
     @PatchMapping("/{orderId}/status")

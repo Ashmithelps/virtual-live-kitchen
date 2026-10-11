@@ -1,5 +1,6 @@
 package com.virtualkitchen.kitchen.chef.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.virtualkitchen.kitchen.dto.StationRef;
 
 import java.util.List;
@@ -12,9 +13,9 @@ import java.util.UUID;
 public record ChefSelfResponse(
         UUID id,
         String displayName,
-        String photoUrl,
-        String bio,
-        String specialty,
+        @Schema(nullable = true) String photoUrl,
+        @Schema(nullable = true) String bio,
+        @Schema(nullable = true) String specialty,
         UUID restaurantId,
         String restaurantName,
         boolean consentRequired,

@@ -50,6 +50,15 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/health", "/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurants", "/api/restaurants/*", "/api/tables/*").permitAll()
+                        // Guest checkout: no login; guest endpoints check an order-scoped token themselves.
+                        .requestMatchers("/api/guest/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
+                        .permitAll()
+                        // SockJS handshake/transport. Authentication happens on the STOMP CONNECT frame
+                        // (see realtime/StompAuthInterceptor), not on these HTTP requests.
+                        .requestMatchers("/ws", "/ws/**").permitAll()
+                        // Payment gateway webhooks: authenticated by their HMAC signature, not a JWT.
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/webhook").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e

@@ -18,6 +18,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByIdAndRestaurantIdAndPaymentStatusIn(UUID id, UUID restaurantId,
                                                               Collection<PaymentStatus> paymentStatuses);
 
+    /** Pay-at-table bills not yet settled (served or not), for the counter. */
+    List<Order> findByRestaurantIdAndPaymentStatusAndStatusNotInOrderByPlacedAtAsc(
+            UUID restaurantId, PaymentStatus paymentStatus, Collection<OrderStatus> excludedStatuses);
+
     List<Order> findByRestaurantIdAndStatusInAndPaymentStatusInOrderByPlacedAtAsc(
             UUID restaurantId, Collection<OrderStatus> statuses, Collection<PaymentStatus> paymentStatuses);
 }

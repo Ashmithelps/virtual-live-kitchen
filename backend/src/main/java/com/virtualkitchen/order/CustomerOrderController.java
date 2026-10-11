@@ -5,6 +5,7 @@ import com.virtualkitchen.common.web.PageResponse;
 import com.virtualkitchen.order.dto.CancelOrderRequest;
 import com.virtualkitchen.order.dto.ConfirmPaymentRequest;
 import com.virtualkitchen.order.dto.OrderResponse;
+import com.virtualkitchen.order.dto.PaymentCheckoutResponse;
 import com.virtualkitchen.order.dto.PlaceOrderRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -34,7 +35,7 @@ public class CustomerOrderController {
         this.orderService = orderService;
     }
 
-    /** ONLINE orders come back with paymentStatus PENDING and a {@code payment} block for checkout. */
+    /** ONLINE orders come back with paymentStatus PENDING; then call POST .../payment to pay. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse place(@AuthenticationPrincipal AuthenticatedUser customer,
@@ -42,10 +43,20 @@ public class CustomerOrderController {
         return orderService.place(customer.id(), request);
     }
 
+    /**
+     * Starts (or resumes) paying: prepaid orders while PLACED, pay-at-table orders any time.
+     * Returns what the browser needs to open the gateway's checkout. Amount is computed server-side.
+     */
+    @PostMapping("/{orderId}/payment")
+    public PaymentCheckoutResponse startPayment(@AuthenticationPrincipal AuthenticatedUser customer, @PathVariable UUID orderId) {
+        return orderService.startPayment(customer.id(), orderId);
+    }
+
+    /** After checkout: verified with the gateway (signature + its own record) before the order is marked paid. */
     @PostMapping("/{orderId}/payment/confirm")
     public OrderResponse confirmPayment(@AuthenticationPrincipal AuthenticatedUser customer, @PathVariable UUID orderId,
                                         @Valid @RequestBody ConfirmPaymentRequest request) {
-        return orderService.confirmPayment(customer.id(), orderId, request.providerPaymentId(), request.signature());
+        return orderService.confirmPayment(customer.id(), orderId, request);
     }
 
     @PostMapping("/{orderId}/cancel")

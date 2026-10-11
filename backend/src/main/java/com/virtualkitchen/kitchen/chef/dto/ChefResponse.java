@@ -1,5 +1,6 @@
 package com.virtualkitchen.kitchen.chef.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -9,11 +10,11 @@ public record ChefResponse(
         UUID userId,
         String phone,
         String displayName,
-        String photoKey,
-        String photoUrl,
-        String bio,
-        String specialty,
+        @Schema(nullable = true) String photoKey,
+        @Schema(nullable = true) String photoUrl,
+        @Schema(nullable = true) String bio,
+        @Schema(nullable = true) String specialty,
         boolean recordingConsent,
-        Instant consentAcceptedAt,
+        @Schema(nullable = true) Instant consentAcceptedAt,
         Instant createdAt) {
 }

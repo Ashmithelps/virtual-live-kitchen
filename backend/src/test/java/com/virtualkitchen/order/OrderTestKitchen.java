@@ -31,6 +31,7 @@ class OrderTestKitchen {
     final String tikka;      // 24900, non-veg
     final String dal;        // 9900, veg
     final String tableQr;
+    final String tableSession;
     final OwnerFixtures.StaffedStation tandoor;
     final String customer;
 
@@ -47,6 +48,8 @@ class OrderTestKitchen {
         dal = fixtures.createItem(owner, restaurantId, itemBody(category, "Dal Makhani", 9900, true)).path("id").asText();
         tableQr = client.body(client.send(POST, "/api/owner/restaurants/" + restaurantId + "/tables", owner,
                 Map.of("label", "T4")).andExpect(status().isCreated())).path("qrToken").asText();
+        tableSession = client.body(client.send(org.springframework.http.HttpMethod.GET, "/api/tables/" + tableQr, null, null)
+                .andExpect(status().isOk())).path("tableSessionToken").asText();
         tandoor = fixtures.consentedChefOnStation(owner, restaurantId, "Tandoor");
         customer = client.registered("CUSTOMER").path("accessToken").asText();
     }
@@ -56,7 +59,7 @@ class OrderTestKitchen {
         body.put("restaurantId", restaurantId);
         body.put("orderType", type);
         body.put("items", List.of(Map.of("menuItemId", tikka, "quantity", 2), Map.of("menuItemId", dal, "quantity", 1)));
-        if (type.equals("DINE_IN")) body.put("tableQrToken", tableQr);
+        if (type.equals("DINE_IN")) body.put("tableSessionToken", tableSession);
         if (type.equals("DELIVERY")) body.put("deliveryAddress", Map.of("address", "4 Brigade Rd", "latitude", 12.9750, "longitude", 77.6060));
         return body;
     }
@@ -79,9 +82,19 @@ class OrderTestKitchen {
         return id;
     }
 
+    ResultActions startPayment(String orderId) throws Exception {
+        return client.send(POST, "/api/orders/" + orderId + "/payment", customer, null);
+    }
+
+    /** Opens checkout and confirms it with the (mock) gateway; payment ids starting "fail" are declined. */
     ResultActions pay(String orderId, String paymentId) throws Exception {
+        ResultActions start = startPayment(orderId);
+        if (start.andReturn().getResponse().getStatus() != 200) {
+            return start;
+        }
+        String providerOrderId = client.body(start).path("providerOrderId").asText();
         return client.send(POST, "/api/orders/" + orderId + "/payment/confirm", customer,
-                Map.of("providerPaymentId", paymentId, "signature", "sig"));
+                Map.of("providerOrderId", providerOrderId, "providerPaymentId", paymentId, "signature", "sig"));
     }
 
     ResultActions ownerSets(String orderId, String status) throws Exception {

@@ -1,5 +1,6 @@
 package com.virtualkitchen.restaurant.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.virtualkitchen.menu.dto.MenuCategoryResponse;
 import com.virtualkitchen.restaurant.OrderType;
 
@@ -19,7 +20,7 @@ public record RestaurantDetailResponse(
         List<String> cuisineTags,
         List<OpeningSlotDto> openingHours,
         Set<OrderType> orderTypes,
-        Double deliveryRadiusKm,
+        @Schema(nullable = true) Double deliveryRadiusKm,
         boolean openNow,
         List<MenuCategoryResponse> menu) {
 }

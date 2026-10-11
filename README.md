@@ -55,14 +55,47 @@ Flyway migrations run automatically on startup.
 
 ```bash
 cd web
-cp .env.example .env.local    # fill in API base URL, etc.
+cp .env.example .env.local    # NEXT_PUBLIC_API_URL / API_URL point at the backend
 npm install
 npm run dev
 ```
 
 - Customer site: `http://localhost:3000`
-- Restaurant dashboard: `http://localhost:3000/restaurant`
-- Kitchen screen: `http://localhost:3000/kitchen`
+- Kitchen display (chefs and owners, tablet/landscape): `http://localhost:3000/kitchen`. To install it as an app
+  the site must be served over HTTPS (or opened on the same machine via localhost).
+- Swagger UI for the backend: `http://localhost:8080/swagger-ui.html`
+
+After changing backend endpoints or DTOs, regenerate the typed API client:
+
+```bash
+cd web
+npm run api:update   # pulls /v3/api-docs from the running backend (or backend/target/openapi.json) and regenerates lib/api/schema.ts
+```
+
+### Payments (Razorpay test mode)
+
+The backend uses a mock gateway by default (`PAYMENT_PROVIDER=mock`). To take real test-mode payments:
+
+1. In the Razorpay Dashboard, switch to **Test Mode** → *Account & Settings* → *API Keys* → generate a key.
+2. Start a public tunnel to the backend so Razorpay can reach the webhook (pick one):
+   ```bash
+   cloudflared tunnel --url http://localhost:8080     # prints https://<random>.trycloudflare.com
+   # or
+   ngrok http 8080                                    # prints https://<random>.ngrok-free.app
+   ```
+3. Dashboard (Test Mode) → *Account & Settings* → *Webhooks* → *Add New Webhook*:
+   URL `https://<tunnel-host>/api/payments/razorpay/webhook`, a secret of your choice, and the events
+   `payment.captured`, `payment.failed`, `refund.processed`.
+4. Run the backend with:
+   ```bash
+   export PAYMENT_PROVIDER=razorpay RAZORPAY_KEY_ID=rzp_test_... RAZORPAY_KEY_SECRET=... RAZORPAY_WEBHOOK_SECRET=<the secret from step 3>
+   ```
+   The web app needs no Razorpay settings: the backend hands the browser the public key id with each checkout.
+5. Pay with Razorpay's test instruments, e.g. card `4111 1111 1111 1111` (any future expiry, any CVV) or UPI
+   `success@razorpay` / `failure@razorpay`.
+
+Tunnel URLs change on every restart (unless you reserve one), so update the webhook URL when they do.
+Webhook deliveries and retries are listed in the Dashboard under the webhook's details.
 
 ### 4. AI Service (later milestone)
 
@@ -85,8 +118,8 @@ API docs at `http://localhost:8001/docs`.
 # Docker must be running.
 cd backend && ./mvnw verify
 
-# Web
-cd web && npm test
+# Web: unit tests, typecheck, lint, production build
+cd web && npm test && npm run typecheck && npm run lint && npm run build
 
 # AI service
 cd ai-service && pytest
