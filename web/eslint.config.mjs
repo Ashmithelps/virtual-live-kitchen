@@ -11,7 +11,7 @@ const config = [
       "@next/next/no-img-element": "off",
     },
   },
-  { ignores: [".next/**", "node_modules/**", "lib/api/schema.ts", "next-env.d.ts"] },
+  { ignores: [".next/**", "node_modules/**", "playwright-report/**", "test-results/**", "lib/api/schema.ts", "next-env.d.ts"] },
 ];
 
 export default config;

@@ -2,6 +2,8 @@ package com.virtualkitchen.realtime;
 
 import com.virtualkitchen.auth.token.InvalidTokenException;
 import com.virtualkitchen.auth.token.JwtService;
+import com.virtualkitchen.kitchen.device.StationDeviceAuthenticationFilter;
+import com.virtualkitchen.kitchen.device.StationDeviceService;
 import com.virtualkitchen.order.guest.GuestOrderService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -15,8 +17,9 @@ import org.springframework.stereotype.Component;
 /**
  * Security for every inbound STOMP frame:
  * <ul>
- *   <li>CONNECT must carry {@code Authorization: Bearer <access token>} or a guest's
- *       {@code X-Guest-Order-Token}; the resulting principal is fixed for the connection.</li>
+ *   <li>CONNECT must carry {@code Authorization: Bearer <access token>}, a station phone's
+ *       {@code X-Device-Token}, or a guest's {@code X-Guest-Order-Token}; the resulting principal
+ *       is fixed for the connection.</li>
  *   <li>SUBSCRIBE is allowed only to destinations {@link RealtimeAccess} approves.</li>
  *   <li>SEND is always refused: clients never publish, the server does (otherwise anyone could
  *       broadcast fake order events to a topic through the simple broker).</li>
@@ -32,11 +35,14 @@ public class StompAuthInterceptor implements ChannelInterceptor {
     private final JwtService jwtService;
     private final GuestOrderService guestOrders;
     private final RealtimeAccess access;
+    private final StationDeviceService devices;
 
-    public StompAuthInterceptor(JwtService jwtService, GuestOrderService guestOrders, RealtimeAccess access) {
+    public StompAuthInterceptor(JwtService jwtService, GuestOrderService guestOrders, RealtimeAccess access,
+                                StationDeviceService devices) {
         this.jwtService = jwtService;
         this.guestOrders = guestOrders;
         this.access = access;
+        this.devices = devices;
     }
 
     @Override
@@ -70,6 +76,12 @@ public class StompAuthInterceptor implements ChannelInterceptor {
             } catch (InvalidTokenException e) {
                 throw new MessageDeliveryException("Unauthorized: " + e.getMessage());
             }
+        }
+        String deviceToken = stomp.getFirstNativeHeader(StationDeviceAuthenticationFilter.HEADER);
+        if (deviceToken != null) {
+            return devices.authenticate(deviceToken.strip())
+                    .map(d -> (RealtimePrincipal) new RealtimePrincipal.Station(d.stationId(), d.restaurantId()))
+                    .orElseThrow(() -> new MessageDeliveryException("Unauthorized: device token is invalid"));
         }
         String guestToken = stomp.getFirstNativeHeader(GUEST_TOKEN_HEADER);
         if (guestToken != null) {

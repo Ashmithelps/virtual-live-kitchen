@@ -1,6 +1,6 @@
 // Refreshes openapi/openapi.json, the source of the generated API types (npm run api:gen).
 // Prefers a running backend; falls back to the file written by the backend's OpenApiDocsIT.
-import { copyFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 
 const target = new URL("../openapi/openapi.json", import.meta.url);
 const backendUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -14,5 +14,7 @@ try {
 } catch (error) {
   const fallback = new URL("../../backend/target/openapi.json", import.meta.url);
   console.warn(`Backend not reachable (${error.message}); copying ${fallback.pathname}`);
-  await copyFile(fallback, target);
+  // Same pretty-printing as the live fetch, so diffs stay readable whichever source was used.
+  const spec = JSON.parse(await readFile(fallback, "utf8"));
+  await writeFile(target, JSON.stringify(spec, null, 2) + "\n");
 }

@@ -625,6 +625,36 @@
         }
       }
     },
+    "/api/station-device/pair": {
+      "post": {
+        "tags": [
+          "station-device-controller"
+        ],
+        "operationId": "pair",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PairRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairedDevice"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants": {
       "get": {
         "tags": [
@@ -903,6 +933,46 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/stations/{stationId}/pairing": {
+      "post": {
+        "tags": [
+          "owner-kitchen-station-controller"
+        ],
+        "operationId": "startPairing",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PairingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants/{restaurantId}/stations/{stationId}/device-token": {
       "post": {
         "tags": [
@@ -1068,6 +1138,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/MenuCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/owner/restaurants/{restaurantId}/clips/{orderId}/retry": {
+      "post": {
+        "tags": [
+          "owner-clip-controller"
+        ],
+        "operationId": "retry",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerClipResponse"
                 }
               }
             }
@@ -1499,6 +1609,91 @@
         }
       }
     },
+    "/api/clips/{orderId}/upload-urls": {
+      "post": {
+        "tags": [
+          "clip-controller"
+        ],
+        "operationId": "uploadUrls",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChunkUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChunkUploadUrl"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/clips/{orderId}/chunks-uploaded": {
+      "post": {
+        "tags": [
+          "clip-controller"
+        ],
+        "operationId": "chunksUploaded",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChunksUploadedRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chef/consent": {
       "get": {
         "tags": [
@@ -1914,6 +2109,26 @@
         }
       }
     },
+    "/api/time": {
+      "get": {
+        "tags": [
+          "time-controller"
+        ],
+        "operationId": "now",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerTime"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/tables/{qrToken}": {
       "get": {
         "tags": [
@@ -1937,6 +2152,49 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/TableLookupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/station-device/me": {
+      "get": {
+        "tags": [
+          "station-device-controller"
+        ],
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StationInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/station-device/clip-requests": {
+      "get": {
+        "tags": [
+          "station-device-controller"
+        ],
+        "operationId": "pending",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClipWindowResponse"
+                  }
                 }
               }
             }
@@ -2261,6 +2519,76 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/clips": {
+      "get": {
+        "tags": [
+          "owner-clip-controller"
+        ],
+        "operationId": "list_7",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PROCESSING",
+                "READY",
+                "FAILED",
+                "NOT_AVAILABLE",
+                "EXPIRED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseOwnerClipResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/orders/{orderId}": {
       "get": {
         "tags": [
@@ -2297,7 +2625,7 @@
         "tags": [
           "me-controller"
         ],
-        "operationId": "me",
+        "operationId": "me_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -2376,7 +2704,7 @@
         "tags": [
           "chef-order-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "status",
@@ -2421,7 +2749,7 @@
         "tags": [
           "chef-self-controller"
         ],
-        "operationId": "me_1",
+        "operationId": "me_2",
         "responses": {
           "200": {
             "description": "OK",
@@ -2436,12 +2764,71 @@
         }
       }
     },
+    "/api/admin/users": {
+      "get": {
+        "tags": [
+          "admin-user-list-controller"
+        ],
+        "operationId": "list_9",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CUSTOMER",
+                "RESTAURANT_OWNER",
+                "CHEF",
+                "ADMIN"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/restaurants": {
       "get": {
         "tags": [
           "admin-restaurant-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "list_10",
         "parameters": [
           {
             "name": "status",
@@ -2616,6 +3003,11 @@
             "exclusiveMinimum": true,
             "type": "number",
             "format": "double"
+          },
+          "logoKey": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
           }
         }
       },
@@ -2628,6 +3020,7 @@
           "deliveryRadiusKm",
           "id",
           "latitude",
+          "logoKey",
           "longitude",
           "name",
           "openingHours",
@@ -2703,6 +3096,10 @@
               "ACTIVE",
               "SUSPENDED"
             ]
+          },
+          "logoKey": {
+            "type": "string",
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -2790,6 +3187,8 @@
         "required": [
           "chefs",
           "createdAt",
+          "deviceLastSeenAt",
+          "devicePairedAt",
           "deviceTokenIssued",
           "id",
           "name"
@@ -2805,6 +3204,17 @@
           },
           "deviceTokenIssued": {
             "type": "boolean"
+          },
+          "devicePairedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deviceLastSeenAt": {
+            "type": "string",
+            "description": "Last API call from the paired phone; it heartbeats every 30 s",
+            "format": "date-time",
+            "nullable": true
           },
           "chefs": {
             "type": "array",
@@ -3064,6 +3474,59 @@
           }
         }
       },
+      "PairRequest": {
+        "required": [
+          "pairingCode"
+        ],
+        "type": "object",
+        "properties": {
+          "pairingCode": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PairedDevice": {
+        "required": [
+          "deviceToken",
+          "station"
+        ],
+        "type": "object",
+        "properties": {
+          "deviceToken": {
+            "type": "string"
+          },
+          "station": {
+            "$ref": "#/components/schemas/StationInfo"
+          }
+        }
+      },
+      "StationInfo": {
+        "required": [
+          "restaurantId",
+          "restaurantName",
+          "stationId",
+          "stationName"
+        ],
+        "type": "object",
+        "properties": {
+          "stationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "restaurantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "restaurantName": {
+            "type": "string"
+          }
+        }
+      },
       "UploadRequest": {
         "required": [
           "contentType",
@@ -3075,7 +3538,8 @@
             "type": "string",
             "enum": [
               "MENU_ITEM_IMAGE",
-              "CHEF_PHOTO"
+              "CHEF_PHOTO",
+              "RESTAURANT_LOGO"
             ]
           },
           "contentType": {
@@ -3115,6 +3579,35 @@
           }
         }
       },
+      "PairingResponse": {
+        "required": [
+          "expiresAt",
+          "pairingUrl",
+          "qrSvgDataUri",
+          "stationId",
+          "stationName"
+        ],
+        "type": "object",
+        "properties": {
+          "stationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stationName": {
+            "type": "string"
+          },
+          "pairingUrl": {
+            "type": "string"
+          },
+          "qrSvgDataUri": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "DeviceTokenResponse": {
         "required": [
           "deviceToken",
@@ -3146,6 +3639,32 @@
             ]
           }
         }
+      },
+      "ClipView": {
+        "required": [
+          "durationSeconds",
+          "expiresAt",
+          "thumbnailUrl",
+          "videoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "durationSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "videoUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
       },
       "OrderItemResponse": {
         "required": [
@@ -3191,6 +3710,8 @@
       "OrderResponse": {
         "required": [
           "businessDate",
+          "clip",
+          "clipStatus",
           "deliveryAddress",
           "deliveryDistanceKm",
           "displayNumber",
@@ -3326,6 +3847,27 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/Preparation"
+              }
+            ]
+          },
+          "clipStatus": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PENDING",
+              "UPLOADED",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "NOT_AVAILABLE",
+              "EXPIRED"
+            ]
+          },
+          "clip": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClipView"
               }
             ]
           },
@@ -3483,6 +4025,93 @@
           }
         },
         "nullable": true
+      },
+      "OwnerClipResponse": {
+        "required": [
+          "businessDate",
+          "chefName",
+          "createdAt",
+          "displayNumber",
+          "durationSeconds",
+          "expiresAt",
+          "failureReason",
+          "orderId",
+          "readyAt",
+          "retryable",
+          "stationName",
+          "status",
+          "thumbnailUrl",
+          "videoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "NOT_AVAILABLE",
+              "EXPIRED"
+            ]
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "videoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "chefName": {
+            "type": "string",
+            "nullable": true
+          },
+          "stationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "retryable": {
+            "type": "boolean",
+            "description": "FAILED with raw footage still stored, so it can be rendered again"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
       },
       "CreateChefRequest": {
         "required": [
@@ -3781,6 +4410,146 @@
           }
         }
       },
+      "Chunk": {
+        "required": [
+          "chunkId",
+          "contentType",
+          "endedAt",
+          "sizeBytes",
+          "startedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "chunkId": {
+            "maxLength": 64,
+            "minLength": 0,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ChunkUploadRequest": {
+        "required": [
+          "chunks"
+        ],
+        "type": "object",
+        "properties": {
+          "chunks": {
+            "maxItems": 90,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            }
+          }
+        }
+      },
+      "ChunkUploadUrl": {
+        "required": [
+          "chunkId",
+          "expiresAt",
+          "headers",
+          "method",
+          "objectKey",
+          "uploadUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "chunkId": {
+            "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "uploadUrl": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChunksUploadedRequest": {
+        "required": [
+          "objectKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "objectKeys": {
+            "maxItems": 90,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 300,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ClipRequestResponse": {
+        "required": [
+          "chunkCount",
+          "orderId",
+          "reason",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING_UPLOAD",
+              "UPLOADED",
+              "NOT_AVAILABLE"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "NO_CONSENT",
+              "NO_DEVICE",
+              "NO_FOOTAGE",
+              "UPLOAD_TIMEOUT"
+            ]
+          },
+          "chunkCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "AcceptConsentRequest": {
         "required": [
           "consentTextHash",
@@ -4029,6 +4798,18 @@
           }
         }
       },
+      "ServerTime": {
+        "required": [
+          "epochMillis"
+        ],
+        "type": "object",
+        "properties": {
+          "epochMillis": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "TableLookupResponse": {
         "required": [
           "menu",
@@ -4066,6 +4847,38 @@
             "items": {
               "$ref": "#/components/schemas/MenuCategoryResponse"
             }
+          }
+        }
+      },
+      "ClipWindowResponse": {
+        "required": [
+          "clipRequestId",
+          "displayNumber",
+          "orderId",
+          "windowEnd",
+          "windowStart"
+        ],
+        "type": "object",
+        "properties": {
+          "clipRequestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4252,6 +5065,40 @@
           }
         }
       },
+      "PageResponseOwnerClipResponse": {
+        "required": [
+          "items",
+          "page",
+          "size",
+          "totalItems",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnerClipResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PageResponseOrderResponse": {
         "required": [
           "items",
@@ -4366,6 +5213,40 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "PageResponseUserResponse": {
+        "required": [
+          "items",
+          "page",
+          "size",
+          "totalItems",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }

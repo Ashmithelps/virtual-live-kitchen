@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { kitchenApi } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { errorMessage, unwrap } from "@/lib/api/errors";
 import type { Order } from "@/lib/api/types";
 import { formatPaise, formatTime } from "@/lib/format";
@@ -16,7 +16,7 @@ export function useUnpaidBills(restaurantId: string, enabled: boolean) {
   return useQuery({
     queryKey: unpaidBillsKey(restaurantId),
     enabled,
-    queryFn: () => unwrap(kitchenApi.GET("/api/owner/restaurants/{restaurantId}/orders/unpaid", { params: { path: { restaurantId } } })),
+    queryFn: () => unwrap(api.GET("/api/owner/restaurants/{restaurantId}/orders/unpaid", { params: { path: { restaurantId } } })),
   });
 }
 
@@ -27,7 +27,7 @@ export function BillsDrawer({ restaurantId, onClose }: { restaurantId: string; o
   const settle = useMutation({
     mutationFn: ({ order, method }: { order: Order; method: Method }) =>
       unwrap(
-        kitchenApi.POST("/api/owner/restaurants/{restaurantId}/orders/{orderId}/payment/counter", {
+        api.POST("/api/owner/restaurants/{restaurantId}/orders/{orderId}/payment/counter", {
           params: { path: { restaurantId, orderId: order.id } },
           body: { method },
         }),

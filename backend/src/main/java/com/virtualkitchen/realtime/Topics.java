@@ -10,6 +10,7 @@ public final class Topics {
 
     private static final Pattern RESTAURANT_ORDERS = Pattern.compile("^/topic/restaurant/([0-9a-fA-F-]{36})/orders$");
     private static final Pattern ORDER = Pattern.compile("^/topic/order/([0-9a-fA-F-]{36})$");
+    private static final Pattern STATION = Pattern.compile("^/topic/station/([0-9a-fA-F-]{36})$");
 
     private Topics() {
     }
@@ -22,6 +23,15 @@ public final class Topics {
     /** That order's customer only. */
     public static String order(UUID orderId) {
         return "/topic/order/" + orderId;
+    }
+
+    /** That station's recording phone only: footage windows to upload. */
+    public static String station(UUID stationId) {
+        return "/topic/station/" + stationId;
+    }
+
+    static Optional<UUID> stationIdOf(String destination) {
+        return match(STATION, destination);
     }
 
     static Optional<UUID> restaurantIdOf(String destination) {

@@ -67,6 +67,10 @@ public class Restaurant {
     @Column(name = "delivery_radius_km")
     private Double deliveryRadiusKm;
 
+    /** Media-bucket key of the logo (upload purpose RESTAURANT_LOGO); optional. */
+    @Column(name = "logo_key", length = 300)
+    private String logoKey;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private RestaurantStatus status;
@@ -109,6 +113,10 @@ public class Restaurant {
         this.updatedAt = now;
     }
 
+    public void changeLogo(String logoKey) {
+        this.logoKey = logoKey;
+    }
+
     public void changeStatus(RestaurantStatus status, Instant now) {
         this.status = status;
         this.updatedAt = now;
@@ -133,6 +141,7 @@ public class Restaurant {
     public List<String> getCuisineTags() { return List.of(cuisineTags); }
     public List<OpeningSlot> getOpeningHours() { return openingHours; }
     public Double getDeliveryRadiusKm() { return deliveryRadiusKm; }
+    public String getLogoKey() { return logoKey; }
     public RestaurantStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

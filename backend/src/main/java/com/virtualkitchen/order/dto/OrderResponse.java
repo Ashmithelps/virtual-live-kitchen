@@ -1,6 +1,7 @@
 package com.virtualkitchen.order.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.virtualkitchen.order.ClipStatus;
 import com.virtualkitchen.order.OrderStatus;
 import com.virtualkitchen.order.PaymentMethod;
 import com.virtualkitchen.order.PaymentStatus;
@@ -31,6 +32,8 @@ public record OrderResponse(
         long totalPaise,
         @Schema(nullable = true) String notes,
         @Schema(nullable = true) Preparation preparation,
+        @Schema(nullable = true) ClipStatus clipStatus,
+        @Schema(nullable = true) ClipView clip,
         OrderTimeline timeline) {
 
     /** Who cooked it and where; set when the order moved to PREPARING. */

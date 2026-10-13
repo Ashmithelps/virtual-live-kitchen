@@ -9,7 +9,11 @@ app:
   storage:
     # endpoint/keys come from the MinIO Testcontainer (IntegrationTest)
     media-bucket: media-test
+    clips-bucket: clips-test
     create-buckets: true
+  jobs:
+    # No background workers in tests; ClipPipelineIT drives JobWorker.runOnce by hand.
+    worker-threads: 0
   admin:
     name: Test Admin
     phone: "+910000000001"

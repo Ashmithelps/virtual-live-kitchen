@@ -27,6 +27,10 @@ public class RealtimeAccess {
 
     @Transactional(readOnly = true)
     public boolean canSubscribe(RealtimePrincipal principal, String destination) {
+        var stationId = Topics.stationIdOf(destination);
+        if (stationId.isPresent()) {
+            return principal instanceof RealtimePrincipal.Station s && s.stationId().equals(stationId.get());
+        }
         var restaurantId = Topics.restaurantIdOf(destination);
         if (restaurantId.isPresent()) {
             return principal instanceof RealtimePrincipal.User u && canSeeRestaurant(u.user(), restaurantId.get());
@@ -35,6 +39,7 @@ public class RealtimeAccess {
         if (orderId.isPresent()) {
             return switch (principal) {
                 case RealtimePrincipal.Guest g -> g.orderId().equals(orderId.get());
+                case RealtimePrincipal.Station s -> false;
                 case RealtimePrincipal.User u -> u.user().role() == Role.CUSTOMER
                         && orders.findByIdAndCustomerId(orderId.get(), u.user().id()).isPresent();
             };

@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { errorMessage } from "@/lib/api/errors";
 import { useAuth } from "@/lib/auth/auth-context";
+import { homeFor } from "@/lib/auth/roles";
 import { isValidPhone, normalizePhone, safeNextPath } from "@/lib/format";
 import { Button, Card, Field, InlineError, PageLoading, inputClass } from "@/components/ui";
 
@@ -18,15 +20,18 @@ export default function LoginPage() {
 function LoginForm() {
   const auth = useAuth();
   const router = useRouter();
-  const next = safeNextPath(useSearchParams().get("next"), "/orders");
+  const requested = useSearchParams().get("next");
   const [mode, setMode] = useState<"login" | "register">("login");
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Back to the page that sent you here, else your role's home (owners awaiting approval: /pending).
   useEffect(() => {
-    if (auth.status === "authenticated") router.replace(next);
-  }, [auth.status, next, router]);
+    if (auth.status !== "authenticated") return;
+    const home = homeFor(auth.user);
+    router.replace(requested && home !== "/pending" ? safeNextPath(requested, home) : home);
+  }, [auth.status, auth.user, requested, router]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -97,6 +102,13 @@ function LoginForm() {
         </form>
       </Card>
       {mode === "register" && <p className="text-center text-xs text-stone-500">Ordered at a table before? Use the same mobile number and your past orders will appear.</p>}
+      <p className="text-center text-sm text-stone-600">
+        Own a restaurant?{" "}
+        <Link href="/register/owner" className="font-medium text-brand-700 underline">
+          List it with us
+        </Link>
+        . Chefs: log in with the number and password your manager gave you.
+      </p>
     </div>
   );
 }

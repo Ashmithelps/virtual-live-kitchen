@@ -7,6 +7,7 @@ import com.virtualkitchen.kitchen.chef.ChefRepository;
 import com.virtualkitchen.order.dto.OrderItemResponse;
 import com.virtualkitchen.order.dto.OrderResponse;
 import com.virtualkitchen.order.dto.OrderTimeline;
+import com.virtualkitchen.order.dto.ClipView;
 import com.virtualkitchen.order.dto.PaymentSummary;
 import com.virtualkitchen.payment.Payment;
 import com.virtualkitchen.payment.PaymentRepository;
@@ -30,9 +31,11 @@ class OrderMapper {
     private final ChefRepository chefs;
     private final KitchenStationRepository stations;
     private final PaymentRepository payments;
+    private final OrderClipLinks clipLinks;
 
     OrderMapper(RestaurantRepository restaurants, ChefRepository chefs, KitchenStationRepository stations,
-                PaymentRepository payments) {
+                PaymentRepository payments, OrderClipLinks clipLinks) {
+        this.clipLinks = clipLinks;
         this.restaurants = restaurants;
         this.chefs = chefs;
         this.stations = stations;
@@ -50,9 +53,11 @@ class OrderMapper {
         Map<UUID, List<Payment>> paymentsByOrder = orders.isEmpty() ? Map.of()
                 : payments.findByOrderIdInOrderByCreatedAtDesc(ids(orders, Order::getId)).stream()
                         .collect(Collectors.groupingBy(Payment::getOrderId));
+        Map<UUID, ClipView> clipsByOrder = clipLinks.forOrders(orders.stream()
+                .filter(o -> o.getClipStatus() == ClipStatus.READY).map(Order::getId).toList());
         return orders.stream().map(o -> map(o, restaurantById.get(o.getRestaurantId()),
                 chefById.get(o.getPreparedByChefId()), stationById.get(o.getStationId()),
-                summary(paymentsByOrder.getOrDefault(o.getId(), List.of())))).toList();
+                summary(paymentsByOrder.getOrDefault(o.getId(), List.of())), clipsByOrder.get(o.getId()))).toList();
     }
 
     /** The settled attempt if there is one, otherwise the most recent attempt. */
@@ -63,7 +68,7 @@ class OrderMapper {
                 .orElse(null);
     }
 
-    private OrderResponse map(Order o, Restaurant restaurant, Chef chef, KitchenStation station, PaymentSummary payment) {
+    private OrderResponse map(Order o, Restaurant restaurant, Chef chef, KitchenStation station, PaymentSummary payment, ClipView clip) {
         OrderResponse.Preparation preparation = o.getPreparedByChefId() == null ? null : new OrderResponse.Preparation(
                 o.getPreparedByChefId(), chef == null ? null : chef.getDisplayName(),
                 o.getStationId(), station == null ? null : station.getName());
@@ -73,7 +78,7 @@ class OrderMapper {
                 o.getPaymentMethod(), o.getPaymentStatus(), payment,
                 o.getItems().stream().map(i -> new OrderItemResponse(i.getMenuItemId(), i.getItemName(),
                         i.getUnitPricePaise(), i.isVeg(), i.getQuantity(), i.getLineTotalPaise(), i.getNotes())).toList(),
-                o.getSubtotalPaise(), o.getTaxPaise(), o.getTotalPaise(), o.getNotes(), preparation,
+                o.getSubtotalPaise(), o.getTaxPaise(), o.getTotalPaise(), o.getNotes(), preparation, o.getClipStatus(), clip,
                 new OrderTimeline(o.getPlacedAt(), o.getPaidAt(), o.getAcceptedAt(), o.getRejectedAt(),
                         o.getPreparingAt(), o.getReadyAt(), o.getServedAt(), o.getPickedUpAt(),
                         o.getOutForDeliveryAt(), o.getDeliveredAt(), o.getCancelledAt(), o.getRefundedAt()));

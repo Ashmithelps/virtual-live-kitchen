@@ -25,6 +25,20 @@ public class KitchenStation {
     @Column(name = "device_token_hash", unique = true, length = 64)
     private String deviceTokenHash;
 
+    /** SHA-256 of the one-time pairing code shown as a QR; cleared once used. */
+    @Column(name = "pairing_code_hash", unique = true, length = 64)
+    private String pairingCodeHash;
+
+    @Column(name = "pairing_expires_at")
+    private Instant pairingExpiresAt;
+
+    @Column(name = "device_paired_at")
+    private Instant devicePairedAt;
+
+    /** Written by {@link KitchenStationRepository#touchDevice} (a bulk update), never through the entity. */
+    @Column(name = "device_last_seen_at", insertable = false, updatable = false)
+    private Instant deviceLastSeenAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -47,9 +61,29 @@ public class KitchenStation {
         this.deviceTokenHash = deviceTokenHash;
     }
 
+    public void startPairing(String codeHash, Instant expiresAt) {
+        this.pairingCodeHash = codeHash;
+        this.pairingExpiresAt = expiresAt;
+    }
+
+    /** Consumes the pairing code and installs the new device's token (unpairing any previous phone). */
+    public void completePairing(String deviceTokenHash, Instant now) {
+        this.deviceTokenHash = deviceTokenHash;
+        this.devicePairedAt = now;
+        this.pairingCodeHash = null;
+        this.pairingExpiresAt = null;
+    }
+
+    public boolean hasDevice() {
+        return deviceTokenHash != null;
+    }
+
     public UUID getId() { return id; }
     public UUID getRestaurantId() { return restaurantId; }
     public String getName() { return name; }
     public String getDeviceTokenHash() { return deviceTokenHash; }
     public Instant getCreatedAt() { return createdAt; }
+    public Instant getPairingExpiresAt() { return pairingExpiresAt; }
+    public Instant getDevicePairedAt() { return devicePairedAt; }
+    public Instant getDeviceLastSeenAt() { return deviceLastSeenAt; }
 }

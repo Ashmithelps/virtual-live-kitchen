@@ -2,15 +2,19 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { kitchenApi } from "@/lib/api/client";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api/client";
 import { errorMessage, unwrap } from "@/lib/api/errors";
 import type { Order } from "@/lib/api/types";
-import { kitchenSession } from "@/lib/auth/token-store";
+import { session } from "@/lib/auth/token-store";
 import { COLUMNS, groupByColumn, newArrivals, upsertOrder, type Action, type KdsRole } from "@/lib/kds/board";
 import { playChime, soundReady, unlockSound } from "@/lib/kds/chime";
 import { useStomp, type SocketStatus } from "@/lib/realtime/use-stomp";
+import { useInstallPrompt } from "@/lib/use-install-prompt";
+import { useWakeLock } from "@/lib/use-wake-lock";
 import { BillsDrawer, unpaidBillsKey, useUnpaidBills } from "./bills-drawer";
 import { OrderCard } from "./order-card";
+import { StationsDrawer } from "./stations-drawer";
 
 const FLASH_MS = 8_000;
 /** Safety net while the socket is down; live pushes make it unnecessary otherwise. */
@@ -34,7 +38,7 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
   const socket = useStomp({
     destination: `/topic/restaurant/${restaurantId}/orders`,
     connectHeaders: async (): Promise<Record<string, string> | null> => {
-      const token = await kitchenSession.freshAccessToken();
+      const token = await session.freshAccessToken();
       return token ? { Authorization: `Bearer ${token}` } : null;
     },
     onMessage: (body) => {
@@ -52,8 +56,8 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
     queryKey,
     queryFn: () =>
       role === "CHEF"
-        ? unwrap(kitchenApi.GET("/api/chef/orders"))
-        : unwrap(kitchenApi.GET("/api/owner/restaurants/{restaurantId}/orders", { params: { path: { restaurantId } } })),
+        ? unwrap(api.GET("/api/chef/orders"))
+        : unwrap(api.GET("/api/owner/restaurants/{restaurantId}/orders", { params: { path: { restaurantId } } })),
     refetchInterval: socket === "connected" ? false : OFFLINE_POLL_MS,
   });
 
@@ -89,8 +93,8 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
     mutationFn: ({ order, action, reason }: { order: Order; action: Action; reason?: string }) => {
       const body = { status: action.status, stationId: action.status === "PREPARING" ? station?.id : undefined, reason };
       return role === "CHEF"
-        ? unwrap(kitchenApi.PATCH("/api/chef/orders/{orderId}/status", { params: { path: { orderId: order.id } }, body }))
-        : unwrap(kitchenApi.PATCH("/api/owner/restaurants/{restaurantId}/orders/{orderId}/status", { params: { path: { restaurantId, orderId: order.id } }, body }));
+        ? unwrap(api.PATCH("/api/chef/orders/{orderId}/status", { params: { path: { orderId: order.id } }, body }))
+        : unwrap(api.PATCH("/api/owner/restaurants/{restaurantId}/orders/{orderId}/status", { params: { path: { restaurantId, orderId: order.id } }, body }));
     },
     onSuccess: (updated) => queryClient.setQueryData<Order[]>(queryKey, (list) => upsertOrder(list, updated)),
     onError: (error, { order }) => {
@@ -102,7 +106,10 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
   const columns = groupByColumn(orders.data ?? []);
   const [soundOn, setSoundOn] = useState(soundReady);
   const [billsOpen, setBillsOpen] = useState(false);
+  const [stationsOpen, setStationsOpen] = useState(false);
   const unpaid = useUnpaidBills(restaurantId, role === "OWNER");
+  const install = useInstallPrompt();
+  const router = useRouter();
 
   return (
     <div className="flex h-dvh flex-col">
@@ -120,6 +127,7 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
             🔇 Tap for sound
           </button>
         )}
+        {role === "OWNER" && <HeaderButton onClick={() => setStationsOpen(true)}>Stations</HeaderButton>}
         {role === "OWNER" && (
           <HeaderButton onClick={() => setBillsOpen(true)}>
             Bills{unpaid.data && unpaid.data.length > 0 ? ` (${unpaid.data.length})` : ""}
@@ -127,6 +135,8 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
         )}
         <Clock now={now} />
         <HeaderButton onClick={toggleFullscreen}>⛶</HeaderButton>
+        {install && <HeaderButton onClick={install}>Install app</HeaderButton>}
+        <HeaderButton onClick={() => router.push(role === "CHEF" ? "/chef/settings" : `/dashboard/${restaurantId}`)}>{role === "CHEF" ? "Settings" : "Dashboard"}</HeaderButton>
         <HeaderButton onClick={onSwitch}>{role === "CHEF" ? "Station" : "Restaurant"}</HeaderButton>
         <HeaderButton onClick={onLogout}>Log out</HeaderButton>
       </header>
@@ -176,6 +186,7 @@ export function Board({ role, restaurantId, restaurantName, station, userName, o
         </div>
       )}
 
+      {stationsOpen && <StationsDrawer restaurantId={restaurantId} onClose={() => setStationsOpen(false)} />}
       {billsOpen && <BillsDrawer restaurantId={restaurantId} onClose={() => setBillsOpen(false)} />}
 
       {toast && (
@@ -220,21 +231,3 @@ function useNow(intervalMs: number): number {
   return now;
 }
 
-/** Keeps the tablet screen on while the board is open (re-acquired when the tab becomes visible). */
-function useWakeLock() {
-  useEffect(() => {
-    if (!("wakeLock" in navigator)) return;
-    let lock: WakeLockSentinel | null = null;
-    const acquire = () => {
-      if (document.visibilityState === "visible") {
-        navigator.wakeLock.request("screen").then((l) => (lock = l)).catch(() => undefined);
-      }
-    };
-    acquire();
-    document.addEventListener("visibilitychange", acquire);
-    return () => {
-      document.removeEventListener("visibilitychange", acquire);
-      void lock?.release();
-    };
-  }, []);
-}

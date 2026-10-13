@@ -28,5 +28,7 @@ public record RestaurantRequest(
         @Size(max = 10) List<@NotBlank @Size(max = 30) String> cuisineTags,
         @NotNull @Size(max = 28) List<@NotNull @Valid OpeningSlotDto> openingHours,
         @NotEmpty Set<@NotNull OrderType> orderTypes,
-        @DecimalMin(value = "0", inclusive = false) @DecimalMax("50") Double deliveryRadiusKm) {
+        @DecimalMin(value = "0", inclusive = false) @DecimalMax("50") Double deliveryRadiusKm,
+        /** From POST .../uploads with purpose RESTAURANT_LOGO; omit or null for none. */
+        @Size(max = 300) String logoKey) {
 }

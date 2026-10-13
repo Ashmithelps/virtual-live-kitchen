@@ -16,6 +16,14 @@ public sealed interface RealtimePrincipal extends Principal {
         }
     }
 
+    /** A paired station recording phone (X-Device-Token). */
+    record Station(UUID stationId, UUID restaurantId) implements RealtimePrincipal {
+        @Override
+        public String getName() {
+            return "station:" + stationId;
+        }
+    }
+
     /** A guest who connected with the order-scoped token from guest checkout. */
     record Guest(UUID orderId, UUID customerId) implements RealtimePrincipal {
         @Override

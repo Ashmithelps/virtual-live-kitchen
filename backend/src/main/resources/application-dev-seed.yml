@@ -1,0 +1,4 @@
+# Profile dev-seed: demo data for local browser testing (see devseed/DevSeeder). Never enable in production.
+app:
+  dev-seed:
+    password: ${DEV_SEED_PASSWORD:}

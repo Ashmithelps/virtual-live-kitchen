@@ -3,6 +3,8 @@ package com.virtualkitchen.restaurant;
 import com.virtualkitchen.common.error.ApiException;
 import com.virtualkitchen.menu.MenuService;
 import com.virtualkitchen.restaurant.dto.OpeningSlotDto;
+import com.virtualkitchen.restaurant.media.MediaKeys;
+import com.virtualkitchen.restaurant.media.UploadPurpose;
 import com.virtualkitchen.restaurant.dto.RestaurantDetailResponse;
 import com.virtualkitchen.restaurant.dto.RestaurantRequest;
 import com.virtualkitchen.restaurant.dto.RestaurantResponse;
@@ -119,6 +121,11 @@ public class RestaurantService {
                 .filter(t -> !t.isEmpty())
                 .distinct()
                 .toList();
+        String logoKey = request.logoKey() == null || request.logoKey().isBlank() ? null : request.logoKey().strip();
+        if (logoKey != null) {
+            MediaKeys.requireValid(logoKey, restaurant.getId(), UploadPurpose.RESTAURANT_LOGO);
+        }
+        restaurant.changeLogo(logoKey);
         restaurant.updateDetails(request.name().strip(), slug, request.address().strip(), request.city().strip(),
                 request.latitude(), request.longitude(), tags,
                 request.openingHours().stream().map(OpeningSlotDto::toSlot).toList(),

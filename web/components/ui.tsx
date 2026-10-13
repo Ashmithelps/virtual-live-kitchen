@@ -127,5 +127,8 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   );
 }
 
-export const inputClass =
-  "w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
+/** Input styling without a width, for inputs that set their own (e.g. `${inputBaseClass} w-40`). */
+export const inputBaseClass =
+  "rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
+
+export const inputClass = `w-full ${inputBaseClass}`;

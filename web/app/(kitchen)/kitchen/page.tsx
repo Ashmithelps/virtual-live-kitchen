@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { kitchenApi } from "@/lib/api/client";
+import { api } from "@/lib/api/client";
 import { errorMessage, unwrap } from "@/lib/api/errors";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useStoredJson, writeJson } from "@/lib/storage";
@@ -16,13 +16,20 @@ export default function KitchenPage() {
   const auth = useAuth();
   if (auth.status === "loading") return <KdsMessage title="Loading…" />;
   if (auth.status === "anonymous") return <KitchenLogin />;
-  return auth.user.role === "CHEF" ? <ChefKitchen userId={auth.user.id} onLogout={auth.logout} /> : <OwnerKitchen userId={auth.user.id} userName={auth.user.name} onLogout={auth.logout} />;
+  if (auth.user.role === "CHEF") return <ChefKitchen userId={auth.user.id} onLogout={auth.logout} />;
+  if (auth.user.role !== "RESTAURANT_OWNER") {
+    return <KdsMessage title="The kitchen display is for chefs and owners" body={`You're signed in as ${auth.user.name}.`} action={{ label: "Log out", onClick: auth.logout }} />;
+  }
+  if (auth.user.status === "PENDING_APPROVAL") {
+    return <KdsMessage title="Your owner account is pending approval" body="You can use the kitchen display once an admin approves you." action={{ label: "Log out", onClick: auth.logout }} />;
+  }
+  return <OwnerKitchen userId={auth.user.id} userName={auth.user.name} onLogout={auth.logout} />;
 }
 
 function ChefKitchen({ userId, onLogout }: { userId: string; onLogout: () => void }) {
   const stationKey = `vk.kds.station.${userId}`;
   const chosenStationId = useStoredJson<string>(stationKey);
-  const me = useQuery({ queryKey: ["kds-chef-me"], queryFn: () => unwrap(kitchenApi.GET("/api/chef/me")) });
+  const me = useQuery({ queryKey: ["kds-chef-me"], queryFn: () => unwrap(api.GET("/api/chef/me")) });
 
   if (me.isPending) return <KdsMessage title="Loading…" />;
   if (me.isError) return <KdsMessage title="Couldn't load your profile" body={errorMessage(me.error)} action={{ label: "Try again", onClick: () => me.refetch() }} />;
@@ -59,7 +66,7 @@ function ChefKitchen({ userId, onLogout }: { userId: string; onLogout: () => voi
 function OwnerKitchen({ userId, userName, onLogout }: { userId: string; userName: string; onLogout: () => void }) {
   const restaurantKey = `vk.kds.restaurant.${userId}`;
   const chosenRestaurantId = useStoredJson<string>(restaurantKey);
-  const restaurants = useQuery({ queryKey: ["kds-owner-restaurants"], queryFn: () => unwrap(kitchenApi.GET("/api/owner/restaurants")) });
+  const restaurants = useQuery({ queryKey: ["kds-owner-restaurants"], queryFn: () => unwrap(api.GET("/api/owner/restaurants")) });
 
   if (restaurants.isPending) return <KdsMessage title="Loading…" />;
   if (restaurants.isError) {

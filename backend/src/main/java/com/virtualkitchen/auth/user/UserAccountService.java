@@ -73,6 +73,11 @@ public class UserAccountService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<User> listUsers(Role role, int page, int size) {
+        return userRepository.search(role, org.springframework.data.domain.PageRequest.of(page, size));
+    }
+
+    @Transactional(readOnly = true)
     public List<User> findPendingOwners() {
         return userRepository.findByRoleAndStatusOrderByCreatedAtAsc(Role.RESTAURANT_OWNER, UserStatus.PENDING_APPROVAL);
     }

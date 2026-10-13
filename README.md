@@ -13,6 +13,7 @@ order being prepared in the kitchen.
 | Maven | 3.9+ |
 | Node.js | 20+ (LTS) |
 | Docker + Docker Compose | v2+ |
+| FFmpeg (with ffprobe, libx264, libvpx) | 6+ (`brew install ffmpeg`); bundled in the backend Docker image |
 | Python | 3.11+ (ai-service, later milestone) |
 
 ---
@@ -61,9 +62,40 @@ npm run dev
 ```
 
 - Customer site: `http://localhost:3000`
+- Owner dashboard: `http://localhost:3000/dashboard`. Owners sign up at `/register/owner` and see "Pending approval"
+  until an admin approves them.
+- Admin: `http://localhost:3000/admin`. Chef settings (recording consent): `http://localhost:3000/chef/settings`.
 - Kitchen display (chefs and owners, tablet/landscape): `http://localhost:3000/kitchen`. To install it as an app
   the site must be served over HTTPS (or opened on the same machine via localhost).
 - Swagger UI for the backend: `http://localhost:8080/swagger-ui.html`
+
+### Trying the whole product (dev seed)
+
+The `dev-seed` profile creates a ready-made demo the first time it starts (and nothing on later starts): an admin, an
+owner with the approved restaurant **Dev Spice Kitchen** (2 categories, 8 dishes, tables T1–T3, stations Tandoor and
+Curry), two chefs who have accepted recording consent, and a customer. All of them use one password,
+`DEV_SEED_PASSWORD`. **Never enable this profile on a shared or production database.** It refuses to start next to a
+`prod`, `production` or `staging` profile.
+
+```bash
+# backend/.env: set DEV_SEED_PASSWORD (12+ characters)
+cd backend && set -a; source .env; set +a
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local,dev-seed   # the log prints every login and the table QR links
+
+# web/.env.local: the same DEV_SEED_PASSWORD, for the header's role switcher
+cd web && npm run dev
+```
+
+| Role | Phone |
+|------|-------|
+| Admin | +919000000001 |
+| Owner | +919000000002 |
+| Chef (Tandoor) | +919000000003 |
+| Chef (Curry) | +919000000004 |
+| Customer | +919000000005 |
+
+With `npm run dev`, the header shows a **DEV · Log in as…** menu for one-click switching between these accounts.
+Production builds don't have it.
 
 After changing backend endpoints or DTOs, regenerate the typed API client:
 
@@ -97,6 +129,48 @@ The backend uses a mock gateway by default (`PAYMENT_PROVIDER=mock`). To take re
 Tunnel URLs change on every restart (unless you reserve one), so update the webhook URL when they do.
 Webhook deliveries and retries are listed in the Dashboard under the webhook's details.
 
+### Station recorder phones (`/station`)
+
+Each prep station has a cheap Android phone running `https://<web host>/station` (Chrome, installable PWA).
+
+1. Owner: kitchen display (`/kitchen`, log in as the owner) → **Stations** → **Pair phone** → a QR appears
+   (one-time, valid 10 minutes).
+2. Station phone: scan the QR with the camera app → it opens `/station` and pairs (no login on the phone).
+3. Tap **Start recording**, allow the camera, then mount the phone on the charger. It records the rear
+   camera (no audio) in 60-second chunks and keeps the last 45 minutes on the phone.
+4. When an order prepared at that station is marked READY, the phone uploads only the footage from
+   "Start" − 10 s to "Ready" + 5 s.
+
+Camera access needs a secure origin: `http://localhost` works on the dev machine itself; a phone on the
+LAN needs HTTPS (a tunnel such as `cloudflared tunnel --url http://localhost:3000`, or a deployment). The
+backend must also be reachable from the phone (set `NEXT_PUBLIC_API_URL` and `CORS_ALLOWED_ORIGINS`).
+The backend sets a CORS rule on the storage buckets at startup so phones can upload directly; on real S3
+without `S3_CREATE_BUCKETS`, configure that rule yourself.
+
+### Kitchen clips (processing)
+
+After the phone uploads, a background job renders the customer's clip with FFmpeg:
+
+1. Joins the raw chunks and cuts exactly the order's window.
+2. If the window is longer than 50 s, it becomes a 45 s timelapse: everything but the last 5 s (plating) is sped up to 40 s.
+3. Burns in the restaurant name and logo, "Order #N", the chef's display name and the date, plus a platform watermark.
+4. Encodes 720p H.264 MP4 (faststart) and a JPG thumbnail.
+5. Uploads to `clips/{restaurantId}/{orderId}.mp4` in the clips bucket.
+
+The raw chunks are then deleted. The order page shows the video when it's READY (pushed live). Jobs live
+in the Postgres `jobs` table and retry with backoff (`JOB_MAX_ATTEMPTS`). `JOB_WORKER_THREADS` sets how many
+run in this instance; set it to `0` on API nodes once workers run separately. Clips are deleted after
+`CLIP_RETENTION` (default `30d`). Unprocessed raw footage is deleted after `CLIP_RAW_RETENTION` (`24h`).
+
+Running from source needs `ffmpeg` and `ffprobe` on `PATH` (or `FFMPEG_PATH` / `FFPROBE_PATH`). The Docker image
+includes them:
+
+```bash
+cd backend
+docker build -t virtual-kitchen-backend .
+docker run --rm --env-file .env -p 8080:8080 virtual-kitchen-backend
+```
+
 ### 4. AI Service (later milestone)
 
 ```bash
@@ -120,6 +194,10 @@ cd backend && ./mvnw verify
 
 # Web: unit tests, typecheck, lint, production build
 cd web && npm test && npm run typecheck && npm run lint && npm run build
+
+# Web end-to-end (Playwright, uses your installed Google Chrome). Needs the stack running with the dev-seed
+# profile; E2E_BASE_URL / E2E_API_URL default to http://localhost:3000 / http://localhost:8080.
+cd web && DEV_SEED_PASSWORD=... npm run test:e2e
 
 # AI service
 cd ai-service && pytest

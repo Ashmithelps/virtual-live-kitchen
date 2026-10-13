@@ -25,7 +25,8 @@ import java.util.List;
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    static final String AUTH_ERROR_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".error";
+    /** Why authentication failed, for the 401 body (also set by the station device filter). */
+    public static final String AUTH_ERROR_ATTRIBUTE = JwtAuthenticationFilter.class.getName() + ".error";
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;

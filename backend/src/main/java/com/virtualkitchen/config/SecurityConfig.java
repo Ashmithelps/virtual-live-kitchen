@@ -4,6 +4,8 @@ import com.virtualkitchen.auth.security.JwtAuthenticationFilter;
 import com.virtualkitchen.auth.security.RestAccessDeniedHandler;
 import com.virtualkitchen.auth.security.RestAuthenticationEntryPoint;
 import com.virtualkitchen.auth.token.JwtService;
+import com.virtualkitchen.kitchen.device.StationDeviceAuthenticationFilter;
+import com.virtualkitchen.kitchen.device.StationDeviceService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +37,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtService jwtService,
+                                                   StationDeviceService stationDevices,
                                                    RestAuthenticationEntryPoint authenticationEntryPoint,
                                                    RestAccessDeniedHandler accessDeniedHandler) throws Exception {
         return http
@@ -59,12 +62,16 @@ public class SecurityConfig {
                         .requestMatchers("/ws", "/ws/**").permitAll()
                         // Payment gateway webhooks: authenticated by their HMAC signature, not a JWT.
                         .requestMatchers(HttpMethod.POST, "/api/payments/*/webhook").permitAll()
+                        // Station phone pairing (the one-time code is the credential) and clock sync.
+                        .requestMatchers(HttpMethod.POST, "/api/station-device/pair").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/time").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new StationDeviceAuthenticationFilter(stationDevices), JwtAuthenticationFilter.class)
                 .build();
     }
 

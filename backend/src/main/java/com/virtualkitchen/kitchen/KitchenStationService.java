@@ -1,5 +1,7 @@
 package com.virtualkitchen.kitchen;
 
+import com.virtualkitchen.clip.ClipProperties;
+import com.virtualkitchen.common.config.WebProperties;
 import com.virtualkitchen.common.crypto.SecureTokens;
 import com.virtualkitchen.common.error.ApiException;
 import com.virtualkitchen.kitchen.chef.Chef;
@@ -7,14 +9,17 @@ import com.virtualkitchen.kitchen.chef.ChefRepository;
 import com.virtualkitchen.kitchen.consent.ChefConsentService;
 import com.virtualkitchen.kitchen.dto.AssignedChef;
 import com.virtualkitchen.kitchen.dto.DeviceTokenResponse;
+import com.virtualkitchen.kitchen.dto.PairingResponse;
 import com.virtualkitchen.kitchen.dto.StationRequest;
 import com.virtualkitchen.kitchen.dto.StationResponse;
 import com.virtualkitchen.restaurant.RestaurantAccess;
+import com.virtualkitchen.restaurant.table.QrCodes;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,16 +38,21 @@ public class KitchenStationService {
     private final ChefConsentService consentService;
     private final RestaurantAccess restaurantAccess;
     private final Clock clock;
+    private final WebProperties web;
+    private final ClipProperties clipProperties;
 
     public KitchenStationService(KitchenStationRepository stations, StationAssignmentRepository assignments,
                                  ChefRepository chefs, ChefConsentService consentService,
-                                 RestaurantAccess restaurantAccess, Clock clock) {
+                                 RestaurantAccess restaurantAccess, Clock clock, WebProperties web,
+                                 ClipProperties clipProperties) {
         this.stations = stations;
         this.assignments = assignments;
         this.chefs = chefs;
         this.consentService = consentService;
         this.restaurantAccess = restaurantAccess;
         this.clock = clock;
+        this.web = web;
+        this.clipProperties = clipProperties;
     }
 
     @Transactional(readOnly = true)
@@ -77,6 +87,21 @@ public class KitchenStationService {
     @Transactional
     public void delete(UUID ownerId, UUID restaurantId, UUID stationId) {
         stations.delete(requireStation(ownerId, restaurantId, stationId));
+    }
+
+    /**
+     * One-time pairing code for the station phone, shown as a QR on the owner's screen. Using it
+     * issues a fresh device token and unpairs any previous phone. Expires after a few minutes.
+     */
+    @Transactional
+    public PairingResponse startPairing(UUID ownerId, UUID restaurantId, UUID stationId) {
+        KitchenStation station = requireStation(ownerId, restaurantId, stationId);
+        String code = SecureTokens.random(24);
+        Instant expiresAt = clock.instant().plus(clipProperties.pairingCodeTtl());
+        station.startPairing(SecureTokens.sha256Hex(code), expiresAt);
+        // The code travels in the URL fragment, which browsers never send to any server.
+        String url = web.base() + "/station#pair=" + code;
+        return new PairingResponse(station.getId(), station.getName(), url, QrCodes.svgDataUri(url), expiresAt);
     }
 
     @Transactional
@@ -142,6 +167,6 @@ public class KitchenStationService {
 
     private static StationResponse toResponse(KitchenStation station, List<AssignedChef> chefs) {
         return new StationResponse(station.getId(), station.getName(), station.getDeviceTokenHash() != null,
-                chefs, station.getCreatedAt());
+                station.getDevicePairedAt(), station.getDeviceLastSeenAt(), chefs, station.getCreatedAt());
     }
 }

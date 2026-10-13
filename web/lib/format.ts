@@ -8,6 +8,13 @@ export function formatPaise(paise: number): string {
   return paise % 100 === 0 ? wholeRupees.format(paise / 100) : rupeesAndPaise.format(paise / 100);
 }
 
+/** "249" → 24900, "249.5" → 24950, "₹1,249.50" → 124950; null if it isn't a rupee amount. Parsed as text (no float maths). */
+export function paiseFromRupees(input: string): number | null {
+  const match = /^(\d{1,7})(?:\.(\d{1,2}))?$/.exec(input.replace(/[₹,\s]/g, ""));
+  if (!match) return null;
+  return Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0"));
+}
+
 const istTime = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit" });
 const istDateTime = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata",

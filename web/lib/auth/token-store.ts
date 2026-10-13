@@ -1,7 +1,7 @@
 import type { User } from "@/lib/api/types";
 
 /**
- * One login session (customer app or kitchen app). The access token lives only in memory, never
+ * A login session. The access token lives only in memory, never
  * in localStorage. The 30-day refresh token is an httpOnly cookie owned by the matching
  * route handlers under `basePath`, so page scripts can't read it.
  */
@@ -69,8 +69,5 @@ export function createSessionStore(basePath: string, lockName: string): SessionS
   };
 }
 
-/** Customers on the ordering site. */
-export const customerSession = createSessionStore("/api/session", "vk-session-refresh");
-
-/** Chefs and owners on the kitchen display; a separate cookie, so both can be signed in on one device. */
-export const kitchenSession = createSessionStore("/api/kitchen/session", "vk-kitchen-session-refresh");
+/** The one login session for every role (customer, owner, chef, admin); cookie `vk_rt` on /api/session. */
+export const session = createSessionStore("/api/session", "vk-session-refresh");

@@ -6,6 +6,7 @@ import com.virtualkitchen.kitchen.chef.Chef;
 import com.virtualkitchen.order.dto.OrderResponse;
 import com.virtualkitchen.order.dto.OrderStatusChangeRequest;
 import com.virtualkitchen.restaurant.RestaurantAccess;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,17 +31,19 @@ public class RestaurantOrderService {
     private final OrderPaymentService payments;
     private final OrderMapper mapper;
     private final OrderEvents events;
+    private final ApplicationEventPublisher publisher;
     private final Clock clock;
 
     public RestaurantOrderService(OrderRepository orders, RestaurantAccess restaurantAccess,
                                   KitchenStaffing kitchenStaffing, OrderPaymentService payments, OrderMapper mapper,
-                                  OrderEvents events, Clock clock) {
+                                  OrderEvents events, ApplicationEventPublisher publisher, Clock clock) {
         this.orders = orders;
         this.restaurantAccess = restaurantAccess;
         this.kitchenStaffing = kitchenStaffing;
         this.payments = payments;
         this.mapper = mapper;
         this.events = events;
+        this.publisher = publisher;
         this.clock = clock;
     }
 
@@ -100,6 +103,11 @@ public class RestaurantOrderService {
             order.assignPreparation(chefId, request.stationId());
         }
         OrderStateMachine.transition(order, target, actor, now);
+        if (target == OrderStatus.READY) {
+            // Footage window is now known; the clip module requests it (or marks NOT_AVAILABLE).
+            publisher.publishEvent(new OrderReadyEvent(order.getId(), order.getRestaurantId(), order.getStationId(),
+                    order.getPreparedByChefId(), order.getDisplayNumber(), order.getPreparingAt(), order.getReadyAt()));
+        }
         if (target == OrderStatus.REJECTED || target == OrderStatus.CANCELLED) {
             order.setStatusReason(request.reason() == null || request.reason().isBlank()
                     ? (target == OrderStatus.REJECTED ? "Rejected by restaurant" : "Cancelled by restaurant")

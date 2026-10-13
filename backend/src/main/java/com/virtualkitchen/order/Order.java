@@ -91,6 +91,10 @@ public class Order {
     @Column(name = "status_reason", length = 300)
     private String statusReason;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "clip_status", length = 20)
+    private ClipStatus clipStatus;
+
     @Column(name = "prepared_by_chef_id")
     private UUID preparedByChefId;
 
@@ -209,6 +213,10 @@ public class Order {
         this.stationId = stationId;
     }
 
+    void setClipStatus(ClipStatus clipStatus) {
+        this.clipStatus = clipStatus;
+    }
+
     void setStatusReason(String reason) {
         this.statusReason = reason;
     }
@@ -252,6 +260,7 @@ public class Order {
     public String getNotes() { return notes; }
     public String getStatusReason() { return statusReason; }
     public UUID getPreparedByChefId() { return preparedByChefId; }
+    public ClipStatus getClipStatus() { return clipStatus; }
     public UUID getStationId() { return stationId; }
     public Instant getPlacedAt() { return placedAt; }
     public Instant getPaidAt() { return paidAt; }

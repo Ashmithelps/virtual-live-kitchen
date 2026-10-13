@@ -116,6 +116,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/station-device/pair": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants": {
         parameters: {
             query?: never;
@@ -196,6 +212,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/stations/{stationId}/pairing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["startPairing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants/{restaurantId}/stations/{stationId}/device-token": {
         parameters: {
             query?: never;
@@ -254,6 +286,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["createCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/owner/restaurants/{restaurantId}/clips/{orderId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["retry"];
         delete?: never;
         options?: never;
         head?: never;
@@ -398,6 +446,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["cancel_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clips/{orderId}/upload-urls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["uploadUrls"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clips/{orderId}/chunks-uploaded": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["chunksUploaded"];
         delete?: never;
         options?: never;
         head?: never;
@@ -596,6 +676,22 @@ export interface paths {
         patch: operations["changeStatus_1"];
         trace?: never;
     };
+    "/api/time": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["now"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tables/{qrToken}": {
         parameters: {
             query?: never;
@@ -604,6 +700,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["lookup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/station-device/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/station-device/clip-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["pending"];
         put?: never;
         post?: never;
         delete?: never;
@@ -724,6 +852,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/clips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_7"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders/{orderId}": {
         parameters: {
             query?: never;
@@ -747,7 +891,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["me"];
+        get: operations["me_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -795,7 +939,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_7"];
+        get: operations["list_8"];
         put?: never;
         post?: never;
         delete?: never;
@@ -811,7 +955,23 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["me_1"];
+        get: operations["me_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_9"];
         put?: never;
         post?: never;
         delete?: never;
@@ -827,7 +987,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["list_8"];
+        get: operations["list_10"];
         put?: never;
         post?: never;
         delete?: never;
@@ -876,6 +1036,7 @@ export interface components {
             orderTypes: ("DINE_IN" | "TAKEAWAY" | "DELIVERY")[];
             /** Format: double */
             deliveryRadiusKm?: number;
+            logoKey?: string;
         };
         RestaurantResponse: {
             /** Format: uuid */
@@ -897,6 +1058,7 @@ export interface components {
             deliveryRadiusKm: number | null;
             /** @enum {string} */
             status: "PENDING_APPROVAL" | "ACTIVE" | "SUSPENDED";
+            logoKey: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -927,6 +1089,13 @@ export interface components {
             id: string;
             name: string;
             deviceTokenIssued: boolean;
+            /** Format: date-time */
+            devicePairedAt: string | null;
+            /**
+             * Format: date-time
+             * @description Last API call from the paired phone; it heartbeats every 30 s
+             */
+            deviceLastSeenAt: string | null;
             chefs: components["schemas"]["AssignedChef"][];
             /** Format: date-time */
             createdAt: string;
@@ -998,9 +1167,24 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        PairRequest: {
+            pairingCode: string;
+        };
+        PairedDevice: {
+            deviceToken: string;
+            station: components["schemas"]["StationInfo"];
+        };
+        StationInfo: {
+            /** Format: uuid */
+            stationId: string;
+            stationName: string;
+            /** Format: uuid */
+            restaurantId: string;
+            restaurantName: string;
+        };
         UploadRequest: {
             /** @enum {string} */
-            purpose: "MENU_ITEM_IMAGE" | "CHEF_PHOTO";
+            purpose: "MENU_ITEM_IMAGE" | "CHEF_PHOTO" | "RESTAURANT_LOGO";
             contentType: string;
         };
         UploadResponse: {
@@ -1013,6 +1197,15 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
+        PairingResponse: {
+            /** Format: uuid */
+            stationId: string;
+            stationName: string;
+            pairingUrl: string;
+            qrSvgDataUri: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
         DeviceTokenResponse: {
             /** Format: uuid */
             stationId: string;
@@ -1022,6 +1215,14 @@ export interface components {
             /** @enum {string} */
             method: "CASH" | "UPI" | "CARD";
         };
+        ClipView: {
+            /** Format: double */
+            durationSeconds: number;
+            videoUrl: string;
+            thumbnailUrl: string;
+            /** Format: date-time */
+            expiresAt: string;
+        } | null;
         OrderItemResponse: {
             /** Format: uuid */
             menuItemId: string | null;
@@ -1068,6 +1269,9 @@ export interface components {
             totalPaise: number;
             notes: string | null;
             preparation: components["schemas"]["Preparation"] | null;
+            /** @enum {string|null} */
+            clipStatus: "PENDING" | "UPLOADED" | "PROCESSING" | "READY" | "FAILED" | "NOT_AVAILABLE" | "EXPIRED" | null;
+            clip: components["schemas"]["ClipView"] | null;
             timeline: components["schemas"]["OrderTimeline"];
         };
         OrderTimeline: {
@@ -1114,6 +1318,31 @@ export interface components {
             stationId: string;
             stationName: string | null;
         } | null;
+        OwnerClipResponse: {
+            /** Format: uuid */
+            orderId: string;
+            /** Format: int32 */
+            displayNumber: number;
+            /** Format: date */
+            businessDate: string;
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "READY" | "FAILED" | "NOT_AVAILABLE" | "EXPIRED";
+            failureReason: string | null;
+            /** Format: double */
+            durationSeconds: number | null;
+            videoUrl: string | null;
+            thumbnailUrl: string | null;
+            chefName: string | null;
+            stationName: string | null;
+            /** @description FAILED with raw footage still stored, so it can be rendered again */
+            retryable: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            readyAt: string | null;
+            /** Format: date-time */
+            expiresAt: string | null;
+        };
         CreateChefRequest: {
             name: string;
             phone: string;
@@ -1184,6 +1413,43 @@ export interface components {
             /** Format: date-time */
             guestTokenExpiresAt: string;
         };
+        Chunk: {
+            chunkId: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt: string;
+            contentType: string;
+            /** Format: int64 */
+            sizeBytes: number;
+        };
+        ChunkUploadRequest: {
+            chunks: components["schemas"]["Chunk"][];
+        };
+        ChunkUploadUrl: {
+            chunkId: string;
+            objectKey: string;
+            uploadUrl: string;
+            method: string;
+            headers: {
+                [key: string]: string;
+            };
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        ChunksUploadedRequest: {
+            objectKeys: string[];
+        };
+        ClipRequestResponse: {
+            /** Format: uuid */
+            orderId: string;
+            /** @enum {string} */
+            status: "PENDING_UPLOAD" | "UPLOADED" | "NOT_AVAILABLE";
+            /** @enum {string|null} */
+            reason: "NO_CONSENT" | "NO_DEVICE" | "NO_FOOTAGE" | "UPLOAD_TIMEOUT" | null;
+            /** Format: int32 */
+            chunkCount: number;
+        };
         AcceptConsentRequest: {
             consentVersion: string;
             consentTextHash: string;
@@ -1246,6 +1512,10 @@ export interface components {
         AvailabilityRequest: {
             available: boolean;
         };
+        ServerTime: {
+            /** Format: int64 */
+            epochMillis: number;
+        };
         TableLookupResponse: {
             /** Format: uuid */
             restaurantId: string;
@@ -1256,6 +1526,18 @@ export interface components {
             /** Format: date-time */
             tableSessionExpiresAt: string;
             menu: components["schemas"]["MenuCategoryResponse"][];
+        };
+        ClipWindowResponse: {
+            /** Format: uuid */
+            clipRequestId: string;
+            /** Format: uuid */
+            orderId: string;
+            /** Format: int32 */
+            displayNumber: number;
+            /** Format: date-time */
+            windowStart: string;
+            /** Format: date-time */
+            windowEnd: string;
         };
         PageResponseRestaurantSummaryResponse: {
             items: components["schemas"]["RestaurantSummaryResponse"][];
@@ -1303,6 +1585,17 @@ export interface components {
             openNow: boolean;
             menu: components["schemas"]["MenuCategoryResponse"][];
         };
+        PageResponseOwnerClipResponse: {
+            items: components["schemas"]["OwnerClipResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
         PageResponseOrderResponse: {
             items: components["schemas"]["OrderResponse"][];
             /** Format: int32 */
@@ -1336,6 +1629,17 @@ export interface components {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        PageResponseUserResponse: {
+            items: components["schemas"]["UserResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
         };
     };
     responses: never;
@@ -1705,6 +2009,30 @@ export interface operations {
             };
         };
     };
+    pair: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PairedDevice"];
+                };
+            };
+        };
+    };
     list: {
         parameters: {
             query?: never;
@@ -1894,6 +2222,29 @@ export interface operations {
             };
         };
     };
+    startPairing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PairingResponse"];
+                };
+            };
+        };
+    };
     issueDeviceToken: {
         parameters: {
             query?: never;
@@ -1992,6 +2343,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MenuCategoryResponse"];
+                };
+            };
+        };
+    };
+    retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OwnerClipResponse"];
                 };
             };
         };
@@ -2265,6 +2639,58 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["OrderResponse"];
+                };
+            };
+        };
+    };
+    uploadUrls: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChunkUploadRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChunkUploadUrl"][];
+                };
+            };
+        };
+    };
+    chunksUploaded: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChunksUploadedRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipRequestResponse"];
                 };
             };
         };
@@ -2573,6 +2999,26 @@ export interface operations {
             };
         };
     };
+    now: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ServerTime"];
+                };
+            };
+        };
+    };
     lookup: {
         parameters: {
             query?: never;
@@ -2591,6 +3037,46 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["TableLookupResponse"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StationInfo"];
+                };
+            };
+        };
+    };
+    pending: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipWindowResponse"][];
                 };
             };
         };
@@ -2758,6 +3244,32 @@ export interface operations {
             };
         };
     };
+    list_7: {
+        parameters: {
+            query?: {
+                status?: "PENDING" | "PROCESSING" | "READY" | "FAILED" | "NOT_AVAILABLE" | "EXPIRED";
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseOwnerClipResponse"];
+                };
+            };
+        };
+    };
     get_3: {
         parameters: {
             query?: never;
@@ -2780,7 +3292,7 @@ export interface operations {
             };
         };
     };
-    me: {
+    me_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2844,7 +3356,7 @@ export interface operations {
             };
         };
     };
-    list_7: {
+    list_8: {
         parameters: {
             query?: {
                 status?: "PLACED" | "ACCEPTED" | "REJECTED" | "PREPARING" | "READY" | "SERVED" | "PICKED_UP" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
@@ -2866,7 +3378,7 @@ export interface operations {
             };
         };
     };
-    me_1: {
+    me_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -2886,7 +3398,31 @@ export interface operations {
             };
         };
     };
-    list_8: {
+    list_9: {
+        parameters: {
+            query?: {
+                role?: "CUSTOMER" | "RESTAURANT_OWNER" | "CHEF" | "ADMIN";
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseUserResponse"];
+                };
+            };
+        };
+    };
+    list_10: {
         parameters: {
             query?: {
                 status?: "PENDING_APPROVAL" | "ACTIVE" | "SUSPENDED";

@@ -14,21 +14,15 @@ const BACKEND = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http:
 
 type Role = AuthResponse["user"]["role"];
 
-/** Which accounts an app accepts and where its refresh cookie lives. */
+/** Which accounts a session accepts and where its refresh cookie lives. */
 export type SessionPolicy = { cookie: string; path: string; roles: readonly Role[]; refusal: string };
 
-export const CUSTOMER_POLICY: SessionPolicy = {
+/** One session for every role; pages decide what each role may see. */
+export const SESSION_POLICY: SessionPolicy = {
   cookie: "vk_rt",
   path: "/api/session",
-  roles: ["CUSTOMER"],
-  refusal: "This app is for customers. Staff should use the kitchen display.",
-};
-
-export const KITCHEN_POLICY: SessionPolicy = {
-  cookie: "vk_kitchen_rt",
-  path: "/api/kitchen/session",
-  roles: ["CHEF", "RESTAURANT_OWNER"],
-  refusal: "The kitchen display is for chefs and restaurant owners.",
+  roles: ["CUSTOMER", "RESTAURANT_OWNER", "CHEF", "ADMIN"],
+  refusal: "This account can't sign in here.",
 };
 
 export async function callBackend(path: string, body: unknown): Promise<Response> {
@@ -76,7 +70,7 @@ export async function clearRefreshCookie(policy: SessionPolicy): Promise<void> {
 
 type Auth = AuthResponse;
 
-/** Route handlers shared by both apps: log in, log out, refresh. */
+/** Route handlers: log in, log out, refresh. */
 export function sessionHandlers(policy: SessionPolicy) {
   return {
     async login(request: Request) {

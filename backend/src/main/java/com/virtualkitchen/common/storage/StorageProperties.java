@@ -16,12 +16,13 @@ public record StorageProperties(
         @NotBlank String accessKey,
         @NotBlank String secretKey,
         @NotBlank String mediaBucket,
+        @NotBlank String clipsBucket,
         @NotNull Duration uploadUrlTtl,
         @NotNull Duration downloadUrlTtl,
         boolean createBuckets) {
 
     @Override
     public String toString() {
-        return "StorageProperties[endpoint=" + endpoint + ", mediaBucket=" + mediaBucket + ", secretKey=***]";
+        return "StorageProperties[endpoint=" + endpoint + ", mediaBucket=" + mediaBucket + ", clipsBucket=" + clipsBucket + ", secretKey=***]";
     }
 }

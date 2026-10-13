@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { customerSession } from "@/lib/auth/token-store";
+import { session } from "@/lib/auth/token-store";
 import { useStomp } from "@/lib/realtime/use-stomp";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -46,7 +46,7 @@ export default function OrderPage() {
     destination: hydrated && access && !finished ? `/topic/order/${id}` : null,
     connectHeaders: async (): Promise<Record<string, string> | null> => {
       if (access?.kind === "guest") return { "X-Guest-Order-Token": access.token };
-      const token = await customerSession.freshAccessToken();
+      const token = await session.freshAccessToken();
       return token ? { Authorization: `Bearer ${token}` } : null;
     },
     onMessage: (body) => {
@@ -93,6 +93,11 @@ type OrderEvent = { type: string; order: Order };
 function OrderDetails({ order, access, live, autoPay }: { order: Order; access: OrderAccess; live: boolean; autoPay: boolean }) {
   const queryClient = useQueryClient();
   const update = (o: Order) => queryClient.setQueryData(["order", o.id, access.kind], o);
+  const [paymentResult, setPaymentResult] = useState<"paid" | "failed" | null>(null);
+  const afterPayment = (o: Order) => {
+    update(o);
+    setPaymentResult(o.paymentStatus === "PAID" ? "paid" : o.paymentStatus === "FAILED" ? "failed" : null);
+  };
 
   const awaitingPayment = order.paymentMethod === "ONLINE" && order.status === "PLACED" && (order.paymentStatus === "PENDING" || order.paymentStatus === "FAILED");
   const openBill = order.paymentStatus === "PAY_LATER" && order.status !== "REJECTED" && order.status !== "CANCELLED";
@@ -116,8 +121,29 @@ function OrderDetails({ order, access, live, autoPay }: { order: Order; access: 
         {order.paymentStatus === "REFUNDED" && <p className="mt-1 text-sm text-green-700">Your payment has been refunded.</p>}
       </Card>
 
+      {paymentResult === "paid" && order.paymentStatus === "PAID" && (
+        <Card className="border-green-300 bg-green-50 text-center" >
+          <p className="text-3xl" aria-hidden>
+            ✅
+          </p>
+          <p className="text-lg font-semibold text-green-800">Payment successful</p>
+          <p className="text-sm text-green-800">
+            {formatPaise(order.totalPaise)} received{order.status === "PLACED" ? ". The restaurant has your order now." : "."}
+          </p>
+        </Card>
+      )}
+      {paymentResult === "failed" && order.paymentStatus === "FAILED" && (
+        <Card className="border-red-300 bg-red-50 text-center">
+          <p className="text-3xl" aria-hidden>
+            ❌
+          </p>
+          <p className="text-lg font-semibold text-red-800">Payment failed</p>
+          <p className="text-sm text-red-800">No money was taken. Try again below, or use another payment method.</p>
+        </Card>
+      )}
+
       {(awaitingPayment || openBill) && (
-        <PaymentPanel order={order} access={access} onPaid={update} autoStart={autoPay && awaitingPayment} payLater={openBill} />
+        <PaymentPanel order={order} access={access} onPaid={afterPayment} autoStart={autoPay && awaitingPayment} payLater={openBill} />
       )}
 
       <Card>
@@ -135,17 +161,7 @@ function OrderDetails({ order, access, live, autoPay }: { order: Order; access: 
         )}
       </Card>
 
-      <Card className="border-dashed bg-stone-50 text-center">
-        <p className="text-2xl" aria-hidden>
-          🎥
-        </p>
-        <p className="font-semibold">Your kitchen clip will appear here</p>
-        <p className="mt-1 text-sm text-stone-500">
-          {order.preparation
-            ? `${order.preparation.chefDisplayName ?? "Your chef"} is cooking at the ${order.preparation.stationName ?? "kitchen"} station.`
-            : "Once the kitchen starts cooking, you'll get a short video of your food being made."}
-        </p>
-      </Card>
+      <ClipCard order={order} />
 
       <Card>
         <h2 className="mb-2 font-semibold">Items</h2>
@@ -173,6 +189,52 @@ function OrderDetails({ order, access, live, autoPay }: { order: Order; access: 
 
       {canCustomerCancel(order.status) && <CancelPanel order={order} access={access} onCancelled={update} />}
     </div>
+  );
+}
+
+/**
+ * Kitchen clip status. When READY the customer sees the thumbnail; the player and sharing arrive in
+ * Milestone 11.
+ */
+function ClipCard({ order }: { order: Order }) {
+  const status = order.clipStatus;
+  if (status === "READY" && order.clip) {
+    return (
+      <Card className="overflow-hidden p-0!">
+        { }
+        <img src={order.clip.thumbnailUrl} alt={`Kitchen clip of order #${order.displayNumber}`} className="aspect-video w-full bg-black object-cover" />
+        <div className="p-4">
+          <p className="font-semibold">Your kitchen clip is ready 🎬</p>
+          <p className="text-sm text-stone-500">
+            {Math.round(order.clip.durationSeconds)} s of your food being made · available until {formatDateTime(order.clip.expiresAt)}. Watching and sharing are coming soon.
+          </p>
+        </div>
+      </Card>
+    );
+  }
+  const cooking = order.preparation
+    ? `${order.preparation.chefDisplayName ?? "Your chef"} is cooking at the ${order.preparation.stationName ?? "kitchen"} station.`
+    : "Once the kitchen starts cooking, you'll get a short video of your food being made.";
+  const view: Record<NonNullable<Order["clipStatus"]>, { title: string; text: string }> = {
+    PENDING: { title: "Being prepared", text: "The kitchen camera is sending us the footage of your order." },
+    UPLOADED: { title: "Being prepared", text: "We've got the footage. Your clip is next in line." },
+    PROCESSING: { title: "Processing", text: "Your clip is being edited. It usually takes a minute or two." },
+    READY: { title: "Ready", text: "Your clip is ready." },
+    FAILED: { title: "Not available", text: "Sorry, we couldn't make a clip of this order." },
+    NOT_AVAILABLE: { title: "Not available", text: "There's no kitchen clip for this order." },
+    EXPIRED: { title: "Not available", text: "This order's kitchen clip has expired." },
+  };
+  const current = status ? view[status] : { title: "Kitchen clip", text: cooking };
+  return (
+    <Card className="border-dashed bg-stone-50 text-center">
+      <p className="text-2xl" aria-hidden>
+        🎥
+      </p>
+      <p className="font-semibold">
+        Kitchen clip: {current.title}
+      </p>
+      <p className="mt-1 text-sm text-stone-500">{current.text}</p>
+    </Card>
   );
 }
 

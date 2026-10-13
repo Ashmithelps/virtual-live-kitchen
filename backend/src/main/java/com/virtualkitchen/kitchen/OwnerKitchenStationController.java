@@ -2,6 +2,7 @@ package com.virtualkitchen.kitchen;
 
 import com.virtualkitchen.auth.security.AuthenticatedUser;
 import com.virtualkitchen.kitchen.dto.DeviceTokenResponse;
+import com.virtualkitchen.kitchen.dto.PairingResponse;
 import com.virtualkitchen.kitchen.dto.StationRequest;
 import com.virtualkitchen.kitchen.dto.StationResponse;
 import jakarta.validation.Valid;
@@ -55,6 +56,13 @@ public class OwnerKitchenStationController {
     public void delete(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId,
                        @PathVariable UUID stationId) {
         service.delete(owner.id(), restaurantId, stationId);
+    }
+
+    /** Pairing QR for the station's recording phone (one-time code, expires in minutes). */
+    @PostMapping("/{stationId}/pairing")
+    public PairingResponse startPairing(@AuthenticationPrincipal AuthenticatedUser owner,
+                                        @PathVariable UUID restaurantId, @PathVariable UUID stationId) {
+        return service.startPairing(owner.id(), restaurantId, stationId);
     }
 
     /** Returns a new device token once; the previous token stops working. */

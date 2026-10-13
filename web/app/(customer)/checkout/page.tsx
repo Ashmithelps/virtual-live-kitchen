@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { itemCount, subtotalPaise, type Cart } from "@/lib/cart/cart";
 import { useCart } from "@/lib/cart/use-cart";
 import { ORDER_TYPE_LABEL, formatPaise, isValidPhone, normalizePhone } from "@/lib/format";
+import { distanceKm } from "@/lib/geo";
 import { saveGuestOrder } from "@/lib/guest-orders";
 import { restaurantQuery } from "@/lib/queries";
 import { useTableSession, type TableSession } from "@/lib/table-session";
@@ -72,12 +73,23 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
 
   const submit = () => {
     setFormError(null);
-    const problem = validate({ orderType, address, guest, isGuest });
+    const problem = validate({ orderType, address, guest, isGuest, restaurant });
     if (problem) return setFormError(problem);
     place.mutate();
   };
 
   const subtotal = subtotalPaise(cart);
+
+  // Staff accounts can't place customer orders (the API refuses them); say so up front.
+  if (auth.status === "authenticated" && auth.user.role !== "CUSTOMER") {
+    return (
+      <EmptyState
+        title="Ordering needs a customer account"
+        message={`You're signed in as ${auth.user.name} (${auth.user.role.replace("_", " ").toLowerCase()}). Log out to order as a guest or customer.`}
+        action={<Button variant="secondary" onClick={() => auth.logout()}>Log out</Button>}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -129,7 +141,7 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
           <p className="text-xs text-stone-500">Eating in? Scan the QR code on your table to order for it.</p>
         )}
 
-        {orderType === "DELIVERY" && <DeliveryAddressFields value={address} onChange={setAddress} radiusKm={restaurant.deliveryRadiusKm} />}
+        {orderType === "DELIVERY" && <DeliveryAddressFields value={address} onChange={setAddress} restaurant={restaurant} />}
 
         {orderType === "DINE_IN" && (
           <fieldset className="space-y-2">
@@ -197,7 +209,9 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
   );
 }
 
-function DeliveryAddressFields({ value, onChange, radiusKm }: { value: Address; onChange: (a: Address) => void; radiusKm: number | null }) {
+function DeliveryAddressFields({ value, onChange, restaurant }: { value: Address; onChange: (a: Address) => void; restaurant: RestaurantDetail }) {
+  const radiusKm = restaurant.deliveryRadiusKm;
+  const away = deliveryDistance(value, restaurant);
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
@@ -236,13 +250,38 @@ function DeliveryAddressFields({ value, onChange, radiusKm }: { value: Address; 
             <input className={inputClass} inputMode="decimal" value={value.longitude} onChange={(e) => onChange({ ...value, longitude: e.target.value })} />
           </Field>
         </div>
-        {radiusKm !== null && <p className="text-xs text-stone-500">Delivers within {radiusKm} km.</p>}
+        {radiusKm !== null && (
+          <p className={`text-xs ${away !== null && away > radiusKm ? "font-semibold text-red-700" : "text-stone-500"}`}>
+            Delivers within {radiusKm} km
+            {away !== null && `; you're ${away.toFixed(1)} km away${away > radiusKm ? ", which is too far" : ""}`}.
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-function validate({ orderType, address, guest, isGuest }: { orderType?: OrderType; address: Address; guest: { name: string; phone: string }; isGuest: boolean }): string | null {
+/** Distance from the restaurant to the entered location, once both coordinates are valid. */
+function deliveryDistance(address: Address, restaurant: RestaurantDetail): number | null {
+  const lat = Number(address.latitude);
+  const lng = Number(address.longitude);
+  if (!address.latitude || !address.longitude || Number.isNaN(lat) || Number.isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return distanceKm(restaurant.latitude, restaurant.longitude, lat, lng);
+}
+
+function validate({
+  orderType,
+  address,
+  guest,
+  isGuest,
+  restaurant,
+}: {
+  orderType?: OrderType;
+  address: Address;
+  guest: { name: string; phone: string };
+  isGuest: boolean;
+  restaurant: RestaurantDetail;
+}): string | null {
   if (!orderType) return "Choose how you'd like your order.";
   if (orderType === "DELIVERY") {
     if (!address.address.trim()) return "Enter your delivery address.";
@@ -250,6 +289,10 @@ function validate({ orderType, address, guest, isGuest }: { orderType?: OrderTyp
     const lng = Number(address.longitude);
     if (!address.latitude || !address.longitude || Number.isNaN(lat) || Number.isNaN(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
       return "Add your location (use the button, or enter latitude and longitude).";
+    }
+    const away = deliveryDistance(address, restaurant);
+    if (restaurant.deliveryRadiusKm !== null && away !== null && away > restaurant.deliveryRadiusKm) {
+      return `You're ${away.toFixed(1)} km away; ${restaurant.name} delivers within ${restaurant.deliveryRadiusKm} km. Try takeaway instead.`;
     }
   }
   if (isGuest) {

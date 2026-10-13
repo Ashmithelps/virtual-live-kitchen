@@ -13,3 +13,16 @@ export type MenuCategory = Schemas["MenuCategoryResponse"];
 export type MenuItem = Schemas["MenuItemResponse"];
 export type TableLookup = Schemas["TableLookupResponse"];
 export type User = Schemas["UserResponse"];
+
+// Owner dashboard and admin
+export type Restaurant = Schemas["RestaurantResponse"];
+export type RestaurantRequest = Schemas["RestaurantRequest"];
+export type OpeningSlot = Schemas["OpeningSlotDto"];
+export type MenuItemRequest = Schemas["MenuItemRequest"];
+export type DiningTable = Schemas["DiningTableResponse"];
+export type Station = Schemas["StationResponse"];
+export type Chef = Schemas["ChefResponse"];
+export type OwnerClip = Schemas["OwnerClipResponse"];
+export type ClipState = OwnerClip["status"];
+export type UploadPurpose = Schemas["UploadRequest"]["purpose"];
+export type UserPage = Schemas["PageResponseUserResponse"];

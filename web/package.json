@@ -12,7 +12,8 @@
     "test": "vitest run",
     "api:sync": "node scripts/sync-openapi.mjs",
     "api:gen": "openapi-typescript openapi/openapi.json -o lib/api/schema.ts",
-    "api:update": "npm run api:sync && npm run api:gen"
+    "api:update": "npm run api:sync && npm run api:gen",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@stomp/stompjs": "7.3.0",
@@ -25,6 +26,7 @@
     "sockjs-client": "1.6.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/react": "16.3.3",
     "@types/node": "24.13.6",

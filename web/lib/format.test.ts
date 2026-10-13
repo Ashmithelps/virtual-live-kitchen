@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatPaise, formatTime, isValidPhone, normalizePhone, safeNextPath } from "./format";
+import { formatPaise, formatTime, isValidPhone, normalizePhone, paiseFromRupees, safeNextPath } from "./format";
 
 describe("format", () => {
   it("formats paise as rupees", () => {
@@ -26,5 +26,19 @@ describe("format", () => {
     expect(safeNextPath("//evil.example")).toBe("/");
     expect(safeNextPath("/\\evil.example")).toBe("/");
     expect(safeNextPath(null, "/orders")).toBe("/orders");
+  });
+});
+
+describe("paiseFromRupees", () => {
+  it("parses rupee amounts into integer paise without float error", () => {
+    expect(paiseFromRupees("249")).toBe(24900);
+    expect(paiseFromRupees("249.5")).toBe(24950);
+    expect(paiseFromRupees("0.29")).toBe(29);
+    expect(paiseFromRupees("₹1,249.50")).toBe(124950);
+    expect(paiseFromRupees(" 10.05 ")).toBe(1005);
+  });
+
+  it("rejects anything that isn't a rupee amount", () => {
+    for (const bad of ["", "abc", "1.234", "-5", "1e3", "12.", "."]) expect(paiseFromRupees(bad)).toBeNull();
   });
 });

@@ -100,6 +100,37 @@ app:
       webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
       api-base-url: ${RAZORPAY_API_BASE_URL:https://api.razorpay.com}
 
+  clips:
+    # Footage window around an order: PREPARING minus lead .. READY plus tail.
+    window-lead: 10s
+    window-tail: 5s
+    # Station phones keep 45 min of footage; a request not fulfilled in this time won't be.
+    upload-timeout: ${CLIP_UPLOAD_TIMEOUT:2h}
+    # Max size of one uploaded chunk (a 60 s chunk at ~1.2 Mbit/s is ~9 MB).
+    max-chunk-bytes: 52428800
+    pairing-code-ttl: 10m
+    # Processed clips are deleted after this long (configurable per deployment).
+    retention: ${CLIP_RETENTION:30d}
+    # Raw footage is deleted after a successful render, or after this long at the latest.
+    raw-retention: ${CLIP_RAW_RETENTION:24h}
+    ffmpeg-path: ${FFMPEG_PATH:ffmpeg}
+    ffprobe-path: ${FFPROBE_PATH:ffprobe}
+    # Kills a stuck FFmpeg run; the job is then retried.
+    ffmpeg-timeout: ${FFMPEG_TIMEOUT:10m}
+    # Watermark text in the corner of every clip.
+    watermark: ${CLIP_WATERMARK:Virtual Live Kitchen}
+
+  jobs:
+    # Background worker threads in this instance. 0 = don't process jobs here (e.g. API-only nodes
+    # once a dedicated worker instance exists). Each clip job runs FFmpeg, so keep this near CPU count.
+    worker-threads: ${JOB_WORKER_THREADS:1}
+    poll-interval: ${JOB_POLL_INTERVAL:2s}
+    # A RUNNING job not finished within this time is assumed dead (crashed worker) and re-queued.
+    lease: ${JOB_LEASE:20m}
+    max-attempts: ${JOB_MAX_ATTEMPTS:5}
+    # Retry delay: base × 2^(attempt−1).
+    retry-base-delay: ${JOB_RETRY_BASE_DELAY:30s}
+
   chef-consent:
     # Text lives in src/main/resources/consent/recording-consent-<version>.txt.
     # Bumping this forces every chef to re-accept before they can be assigned or recorded.
@@ -111,6 +142,8 @@ app:
     access-key: ${S3_ACCESS_KEY}
     secret-key: ${S3_SECRET_KEY}
     media-bucket: ${S3_BUCKET_MEDIA:media}
+    # Private bucket for kitchen footage (raw/{restaurantId}/{orderId}/… uploaded by station devices).
+    clips-bucket: ${S3_BUCKET_CLIPS:clips}
     upload-url-ttl: ${S3_UPLOAD_URL_TTL:10m}
     download-url-ttl: ${S3_DOWNLOAD_URL_TTL:1h}
     # Create the media bucket on startup if it does not exist (handy locally).
