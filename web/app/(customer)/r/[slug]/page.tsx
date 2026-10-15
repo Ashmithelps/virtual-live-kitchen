@@ -58,6 +58,11 @@ export default function RestaurantPage() {
         <p className="text-sm text-stone-500">{r.address}</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {r.openNow ? <Badge tone="green">Open now</Badge> : <Badge tone="red">Closed now</Badge>}
+          {r.hygiene && (
+            <span title={`Average AI hygiene score of ${r.hygiene.clipCount} kitchen clips in the last ${r.hygiene.windowDays} days`}>
+              <Badge tone={r.hygiene.score >= 85 ? "green" : r.hygiene.score >= 65 ? "amber" : "red"}>🧤 Hygiene {Math.round(r.hygiene.score)}/100</Badge>
+            </span>
+          )}
           {r.orderTypes.map((t) => (
             <Badge key={t}>{ORDER_TYPE_LABEL[t]}</Badge>
           ))}

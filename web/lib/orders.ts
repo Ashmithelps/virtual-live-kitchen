@@ -1,6 +1,6 @@
 import { api } from "@/lib/api/client";
 import { unwrap } from "@/lib/api/errors";
-import type { Order } from "@/lib/api/types";
+import type { ClipPlayback, ClipShare, Order } from "@/lib/api/types";
 import type { Checkout, CheckoutSuccess } from "@/lib/razorpay";
 
 /**
@@ -36,4 +36,28 @@ export function cancelOrder(id: string, access: OrderAccess, reason: string | un
   return access.kind === "guest"
     ? unwrap(api.POST("/api/guest/orders/{orderId}/cancel", { params: { path: { orderId: id }, header: guestHeader(access.token) }, body }))
     : unwrap(api.POST("/api/orders/{orderId}/cancel", { params: { path: { orderId: id } }, body }));
+}
+
+// ── kitchen clip ─────────────────────────────────────────────────────────────
+
+/** Fresh 10-minute watch/download links (READY clips only; 409 before that). */
+export function fetchClipPlayback(id: string, access: OrderAccess): Promise<ClipPlayback> {
+  return access.kind === "guest"
+    ? unwrap(api.GET("/api/guest/orders/{orderId}/clip", { params: { path: { orderId: id }, header: guestHeader(access.token) } }))
+    : unwrap(api.GET("/api/orders/{orderId}/clip", { params: { path: { orderId: id } } }));
+}
+
+/** The clip's public link: the active one, or a new one. */
+export function shareClip(id: string, access: OrderAccess): Promise<ClipShare> {
+  return access.kind === "guest"
+    ? unwrap(api.POST("/api/guest/orders/{orderId}/clip/share", { params: { path: { orderId: id }, header: guestHeader(access.token) } }))
+    : unwrap(api.POST("/api/orders/{orderId}/clip/share", { params: { path: { orderId: id } } }));
+}
+
+export async function revokeClipShare(id: string, access: OrderAccess): Promise<void> {
+  if (access.kind === "guest") {
+    await unwrap(api.DELETE("/api/guest/orders/{orderId}/clip/share", { params: { path: { orderId: id }, header: guestHeader(access.token) } }));
+  } else {
+    await unwrap(api.DELETE("/api/orders/{orderId}/clip/share", { params: { path: { orderId: id } } }));
+  }
 }

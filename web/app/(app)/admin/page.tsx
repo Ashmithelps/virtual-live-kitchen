@@ -1,129 +1,115 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api/client";
 import { errorMessage, unwrap } from "@/lib/api/errors";
-import type { Restaurant } from "@/lib/api/types";
-import { formatDateTime } from "@/lib/format";
-import { RESTAURANT_STATUS } from "@/lib/owner/status";
-import { ConfirmButton } from "@/components/dashboard/confirm-button";
-import { Badge, Button, Card, EmptyState, ErrorState, PageLoading } from "@/components/ui";
-import { useToast } from "@/components/toast";
+import type { components } from "@/lib/api/schema";
+import { SUBSCRIPTION_STATUS, type SubscriptionStatus } from "@/lib/billing";
+import { formatPaise } from "@/lib/format";
+import { Badge, Card, ErrorState, PageLoading, inputBaseClass } from "@/components/ui";
 
-type Status = Restaurant["status"];
-const TABS: Status[] = ["PENDING_APPROVAL", "ACTIVE", "SUSPENDED"];
+type Day = components["schemas"]["Day"];
+type Series = { key: Exclude<keyof Day, "date">; label: string; money?: boolean };
 
-/** Minimal admin: approve owners and restaurants, suspend restaurants. (Full admin panel: Milestone 14.) */
-export default function AdminRestaurantsPage() {
-  const queryClient = useQueryClient();
-  const toast = useToast();
-  const [tab, setTab] = useState<Status>("PENDING_APPROVAL");
+const SERIES: Series[] = [
+  { key: "orders", label: "Orders" },
+  { key: "gmvPaise", label: "GMV", money: true },
+  { key: "clips", label: "Clips generated" },
+  { key: "clipViews", label: "Clip views" },
+  { key: "shares", label: "Shares" },
+  { key: "tips", label: "Tips" },
+];
 
-  const restaurants = useQuery({
-    queryKey: ["admin", "restaurants", tab],
-    queryFn: () => unwrap(api.GET("/api/admin/restaurants", { params: { query: { status: tab } } })),
+/** Platform overview: daily activity, active restaurants and recurring revenue. */
+export default function AdminOverviewPage() {
+  const [days, setDays] = useState(30);
+  const metrics = useQuery({
+    queryKey: ["admin", "metrics", days],
+    queryFn: () => unwrap(api.GET("/api/admin/metrics", { params: { query: { days } } })),
+    placeholderData: keepPreviousData,
   });
-  const owners = useQuery({ queryKey: ["admin", "pending-owners"], queryFn: () => unwrap(api.GET("/api/admin/owners/pending")) });
 
-  const act = useMutation({
-    mutationFn: (task: { work: () => Promise<unknown>; done: string }) => task.work(),
-    onSuccess: (_, task) => toast.success(task.done),
-    onError: (error) => toast.error(errorMessage(error)),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ["admin"] }),
-  });
+  if (metrics.isPending) return <PageLoading />;
+  if (metrics.isError) return <ErrorState message={errorMessage(metrics.error)} onRetry={() => metrics.refetch()} />;
+  const m = metrics.data;
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-3">
-        <h1 className="text-2xl font-bold">Owners awaiting approval</h1>
-        {owners.isPending ? (
-          <PageLoading />
-        ) : owners.isError ? (
-          <ErrorState message={errorMessage(owners.error)} onRetry={() => owners.refetch()} />
-        ) : owners.data.length === 0 ? (
-          <p className="text-sm text-stone-500">No owners waiting.</p>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {owners.data.map((owner) => (
-              <Card key={owner.id} className="flex flex-wrap items-center gap-3">
-                <div className="mr-auto">
-                  <p className="font-semibold">{owner.name}</p>
-                  <p className="text-sm text-stone-500">
-                    {owner.phone} · signed up {formatDateTime(owner.createdAt)}
-                  </p>
-                </div>
-                <Button
-                  disabled={act.isPending}
-                  onClick={() => act.mutate({ work: () => unwrap(api.POST("/api/admin/owners/{userId}/approve", { params: { path: { userId: owner.id } } })), done: `${owner.name} approved` })}
-                >
-                  Approve owner
-                </Button>
-              </Card>
-            ))}
-          </div>
-        )}
-      </section>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="mr-auto text-2xl font-bold">Overview</h1>
+        <select className={`${inputBaseClass} w-40`} aria-label="Period" value={days} onChange={(e) => setDays(Number(e.target.value))}>
+          <option value={7}>Last 7 days</option>
+          <option value={30}>Last 30 days</option>
+          <option value={90}>Last 90 days</option>
+        </select>
+      </div>
 
-      <section className="space-y-3">
-        <h2 className="text-2xl font-bold">Restaurants</h2>
-        <div className="flex gap-1 border-b border-stone-200" role="tablist">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => setTab(t)}
-              className={`border-b-2 px-3 py-2 text-sm font-medium ${tab === t ? "border-brand-600 text-brand-700" : "border-transparent text-stone-600"}`}
-            >
-              {RESTAURANT_STATUS[t].label}
-            </button>
-          ))}
-        </div>
-        {restaurants.isPending ? (
-          <PageLoading />
-        ) : restaurants.isError ? (
-          <ErrorState message={errorMessage(restaurants.error)} onRetry={() => restaurants.refetch()} />
-        ) : restaurants.data.length === 0 ? (
-          <EmptyState title="Nothing here" message={`No ${RESTAURANT_STATUS[tab].label.toLowerCase()} restaurants.`} />
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {restaurants.data.map((r) => (
-              <Card key={r.id} className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-semibold">{r.name}</p>
-                    <p className="text-sm text-stone-500">
-                      {r.address}, {r.city}
-                    </p>
-                    <p className="text-xs text-stone-500">
-                      /r/{r.slug} · {r.orderTypes.join(", ").replaceAll("_", "-").toLowerCase()} · created {formatDateTime(r.createdAt)}
-                    </p>
-                  </div>
-                  <Badge tone={RESTAURANT_STATUS[r.status].tone}>{RESTAURANT_STATUS[r.status].label}</Badge>
-                </div>
-                <div className="flex gap-2">
-                  {r.status !== "ACTIVE" && (
-                    <Button
-                      disabled={act.isPending}
-                      onClick={() => act.mutate({ work: () => unwrap(api.POST("/api/admin/restaurants/{restaurantId}/approve", { params: { path: { restaurantId: r.id } } })), done: `${r.name} is live` })}
-                    >
-                      {r.status === "SUSPENDED" ? "Reinstate" : "Approve"}
-                    </Button>
-                  )}
-                  {r.status !== "SUSPENDED" && (
-                    <ConfirmButton
-                      label="Suspend"
-                      confirmLabel="Hide from customers?"
-                      onConfirm={() => act.mutate({ work: () => unwrap(api.POST("/api/admin/restaurants/{restaurantId}/suspend", { params: { path: { restaurantId: r.id } } })), done: `${r.name} suspended` })}
-                    />
-                  )}
-                </div>
-              </Card>
-            ))}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <Card>
+          <p className="text-sm text-stone-500">Active restaurants</p>
+          <p className="text-3xl font-black">{m.activeRestaurants}</p>
+          <Link href="/admin/restaurants" className="text-sm text-brand-700 underline">
+            Manage restaurants
+          </Link>
+        </Card>
+        <Card>
+          <p className="text-sm text-stone-500">MRR (excl. GST)</p>
+          <p className="text-3xl font-black">{formatPaise(m.mrrPaise)}</p>
+          <p className="text-xs text-stone-500">Plan prices of active subscriptions</p>
+        </Card>
+        <Card className="space-y-1">
+          <p className="text-sm text-stone-500">Subscriptions</p>
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(m.subscriptionsByStatus).length === 0 && <span className="text-sm text-stone-500">None yet</span>}
+            {Object.entries(m.subscriptionsByStatus).map(([status, count]) => {
+              const s = SUBSCRIPTION_STATUS[status as SubscriptionStatus];
+              return (
+                <Badge key={status} tone={s?.tone ?? "stone"}>
+                  {s?.label ?? status}: {count}
+                </Badge>
+              );
+            })}
           </div>
-        )}
-      </section>
+          <Link href="/admin/billing" className="text-sm text-brand-700 underline">
+            Billing
+          </Link>
+        </Card>
+      </div>
+
+      <div className={`grid gap-3 md:grid-cols-2 ${metrics.isFetching ? "opacity-70" : ""}`}>
+        {SERIES.map((s) => (
+          <SeriesCard key={s.key} series={s} days={m.series} total={m.totals[s.key]} />
+        ))}
+      </div>
     </div>
+  );
+}
+
+function SeriesCard({ series, days, total }: { series: Series; days: Day[]; total: number }) {
+  const show = (v: number) => (series.money ? formatPaise(v) : v.toLocaleString("en-IN"));
+  const max = Math.max(1, ...days.map((d) => d[series.key]));
+  return (
+    <Card className="space-y-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="font-semibold">{series.label}</h2>
+        <span className="text-lg font-bold">{show(total)}</span>
+      </div>
+      <div className="flex h-24 items-end gap-px" role="img" aria-label={`${series.label} per day`}>
+        {days.map((d) => (
+          <div
+            key={d.date}
+            title={`${d.date}: ${show(d[series.key])}`}
+            className="flex-1 rounded-t bg-brand-500"
+            style={{ height: `${(d[series.key] / max) * 100}%`, minHeight: d[series.key] > 0 ? 2 : 0 }}
+          />
+        ))}
+      </div>
+      <div className="flex justify-between text-xs text-stone-500">
+        <span>{days[0]?.date}</span>
+        <span>{days.at(-1)?.date}</span>
+      </div>
+    </Card>
   );
 }

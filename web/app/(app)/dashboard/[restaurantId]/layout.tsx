@@ -16,6 +16,8 @@ const TABS = [
   { href: "/stations", label: "Stations" },
   { href: "/chefs", label: "Chefs" },
   { href: "/clips", label: "Clips" },
+  { href: "/hygiene", label: "Hygiene" },
+  { href: "/billing", label: "Billing" },
   { href: "/profile", label: "Profile" },
 ];
 

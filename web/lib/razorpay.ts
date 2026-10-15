@@ -71,3 +71,34 @@ export async function openRazorpayCheckout(checkout: Checkout): Promise<Checkout
     instance.open();
   });
 }
+
+// ── Subscriptions (restaurant billing) ──────────────────────────────────────
+
+export type SubscriptionCheckout = components["schemas"]["SubscriptionCheckoutResponse"];
+export type SubscriptionAuthorised = { subscriptionId: string; paymentId: string; signature: string };
+export type SubscriptionOutcome = { kind: "authorised"; result: SubscriptionAuthorised } | { kind: "dismissed"; lastError: string | null };
+
+type RazorpaySubscriptionResponse = { razorpay_subscription_id: string; razorpay_payment_id: string; razorpay_signature: string };
+
+/** Razorpay Checkout in subscription mode: the owner authorises the recurring mandate (UPI Autopay, card, eMandate). */
+export async function openRazorpaySubscription(checkout: SubscriptionCheckout): Promise<SubscriptionOutcome> {
+  const Razorpay = await loadRazorpay();
+  return new Promise((resolve) => {
+    let lastError: string | null = null;
+    const instance = new Razorpay({
+      key: checkout.keyId,
+      subscription_id: checkout.subscriptionId,
+      name: checkout.merchantName,
+      description: checkout.description,
+      prefill: { name: checkout.prefillName ?? undefined, contact: checkout.prefillContact ?? undefined },
+      theme: { color: "#ea580c" },
+      handler: (r: RazorpaySubscriptionResponse) =>
+        resolve({ kind: "authorised", result: { subscriptionId: r.razorpay_subscription_id, paymentId: r.razorpay_payment_id, signature: r.razorpay_signature } }),
+      modal: { ondismiss: () => resolve({ kind: "dismissed", lastError }), confirm_close: true },
+    });
+    instance.on("payment.failed", (r) => {
+      lastError = r.error?.description ?? "The payment failed.";
+    });
+    instance.open();
+  });
+}

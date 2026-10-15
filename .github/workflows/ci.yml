@@ -1,0 +1,99 @@
+# Tests for every pull request; deploy.yml also calls this before building images on main.
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend (unit + Testcontainers integration tests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Install FFmpeg (clip rendering tests)
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+      - name: mvn verify
+        working-directory: backend
+        run: ./mvnw -B -ntp verify
+      - name: API contract is in sync with the web app's generated types
+        run: |
+          if ! diff <(jq -S . backend/target/openapi.json) <(jq -S . web/openapi/openapi.json) > /tmp/openapi.diff; then
+            head -50 /tmp/openapi.diff
+            echo "::error::web/openapi/openapi.json is stale. Run 'npm run api:update' in web/ and commit."
+            exit 1
+          fi
+      - name: Test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            backend/target/surefire-reports
+            backend/target/failsafe-reports
+          retention-days: 7
+
+  web:
+    name: Web (unit tests, typecheck, lint, build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+
+  ai-service:
+    name: AI service (pytest in the image)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: docker build --target test
+        uses: docker/build-push-action@v6
+        with:
+          context: ai-service
+          target: test
+          push: false
+          cache-from: type=gha,scope=ai-service
+          cache-to: type=gha,scope=ai-service,mode=max
+
+  infra:
+    name: Infra (backup roundtrip, compose + Caddy config, shellcheck)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck infra/backup/*.sh infra/backup/test/*.sh infra/deploy/*.sh
+      - name: Production compose file and Caddyfile are valid
+        run: infra/deploy/validate.sh
+      - name: Backup → restore roundtrip (plain, encrypted, retention)
+        run: infra/backup/test/roundtrip.sh

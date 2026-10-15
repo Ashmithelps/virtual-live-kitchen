@@ -9,6 +9,24 @@
 
   /* Kitchen display: a new order pulses for a few seconds so it's noticed across the room. */
   --animate-kds-flash: kds-flash 1s ease-in-out 6;
+  --animate-clip-progress: clip-progress 1.4s ease-in-out infinite;
+}
+
+/* Indeterminate progress bar on the order page while a clip is being made. */
+@keyframes clip-progress {
+  0% {
+    left: -33%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-clip-progress {
+    animation: none;
+    left: 33%;
+  }
 }
 
 @keyframes kds-flash {

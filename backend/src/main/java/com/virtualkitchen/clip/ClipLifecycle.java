@@ -7,6 +7,7 @@ import com.virtualkitchen.order.OrderClips;
 import com.virtualkitchen.order.OrderRepository;
 import com.virtualkitchen.restaurant.RestaurantProperties;
 import com.virtualkitchen.restaurant.RestaurantRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -43,12 +44,16 @@ public class ClipLifecycle {
     private final ClipProperties properties;
     private final RestaurantProperties restaurantProperties;
     private final TransactionTemplate tx;
+    private final ApplicationEventPublisher events;
+    private final com.virtualkitchen.common.billing.PlanLimits planLimits;
     private final Clock clock;
 
     public ClipLifecycle(ClipRepository clips, ClipRequestRepository requests, OrderRepository orders,
                          RestaurantRepository restaurants, ChefRepository chefs, OrderClips orderClips,
                          ClipProperties properties, RestaurantProperties restaurantProperties,
-                         PlatformTransactionManager transactionManager, Clock clock) {
+                         PlatformTransactionManager transactionManager, Clock clock, ApplicationEventPublisher events, com.virtualkitchen.common.billing.PlanLimits planLimits) {
+        this.planLimits = planLimits;
+        this.events = events;
         this.clips = clips;
         this.requests = requests;
         this.orders = orders;
@@ -108,8 +113,11 @@ public class ClipLifecycle {
         tx.executeWithoutResult(status -> {
             Instant now = clock.instant();
             Clip clip = clips.lockByOrderId(orderId).orElseThrow();
-            clip.markReady(videoKey, thumbKey, durationS, now.plus(properties.retention()), now);
+            // The restaurant's plan decides how long clips are kept (platform default without a plan).
+            Duration keep = planLimits.clipRetention(clip.getRestaurantId()).orElse(properties.retention());
+            clip.markReady(videoKey, thumbKey, durationS, now.plus(keep), now);
             orderClips.setClipStatus(orderId, ClipStatus.READY, true);
+            events.publishEvent(new ClipReadyEvent(clip.getId()));
         });
     }
 

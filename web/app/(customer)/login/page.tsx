@@ -99,6 +99,12 @@ function LoginForm() {
           <Button type="submit" className="w-full" busy={busy}>
             {mode === "login" ? "Log in" : "Create account"}
           </Button>
+          {mode === "register" && (
+            <p className="text-xs text-stone-500">
+              By creating an account you agree to the{" "}
+              <Link href="/terms" className="underline">terms</Link> and <Link href="/privacy" className="underline">privacy policy</Link>.
+            </p>
+          )}
         </form>
       </Card>
       {mode === "register" && <p className="text-center text-xs text-stone-500">Ordered at a table before? Use the same mobile number and your past orders will appear.</p>}

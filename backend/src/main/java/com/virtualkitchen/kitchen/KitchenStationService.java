@@ -41,10 +41,13 @@ public class KitchenStationService {
     private final WebProperties web;
     private final ClipProperties clipProperties;
 
+    private final com.virtualkitchen.common.billing.PlanLimits planLimits;
+
     public KitchenStationService(KitchenStationRepository stations, StationAssignmentRepository assignments,
                                  ChefRepository chefs, ChefConsentService consentService,
                                  RestaurantAccess restaurantAccess, Clock clock, WebProperties web,
-                                 ClipProperties clipProperties) {
+                                 ClipProperties clipProperties, com.virtualkitchen.common.billing.PlanLimits planLimits) {
+        this.planLimits = planLimits;
         this.stations = stations;
         this.assignments = assignments;
         this.chefs = chefs;
@@ -69,6 +72,10 @@ public class KitchenStationService {
         restaurantAccess.requireOwned(restaurantId, ownerId);
         String name = request.name().strip();
         requireFreeName(restaurantId, name);
+        java.util.OptionalInt max = planLimits.maxStations(restaurantId);
+        if (max.isPresent() && stations.findByRestaurantIdOrderByNameAsc(restaurantId).size() >= max.getAsInt()) {
+            throw new ApiException(HttpStatus.CONFLICT, "Your plan allows " + max.getAsInt() + " stations. Upgrade in Billing to add more.");
+        }
         return toResponse(stations.saveAndFlush(new KitchenStation(restaurantId, name, clock.instant())), List.of());
     }
 

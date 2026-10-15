@@ -51,10 +51,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/health", "/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/health", "/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/restaurants", "/api/restaurants/*", "/api/tables/*").permitAll()
                         // Guest checkout: no login; guest endpoints check an order-scoped token themselves.
                         .requestMatchers("/api/guest/**").permitAll()
+                        // Share links and public chef profiles (/c/{token}, /chefs/{id} in the web app).
+                        .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/public/clips/*/views").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
                         .permitAll()
                         // SockJS handshake/transport. Authentication happens on the STOMP CONNECT frame

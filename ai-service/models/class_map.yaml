@@ -1,0 +1,24 @@
+# Maps the detector's class names (case-insensitive) onto the labels the service understands:
+#   person, gloves, no_gloves, head_cover, no_head_cover, mask, no_mask
+# Classes not listed are ignored. Edit this when you swap in a model whose dataset names classes differently.
+classes:
+  person: person
+  # Typical names in public PPE / kitchen-hygiene datasets (Roboflow Universe etc.):
+  gloves: gloves
+  glove: gloves
+  no-gloves: no_gloves
+  no_gloves: no_gloves
+  no-glove: no_gloves
+  hairnet: head_cover
+  hair-net: head_cover
+  cap: head_cover
+  chef-hat: head_cover
+  hat: head_cover
+  head_cover: head_cover
+  no-hairnet: no_head_cover
+  no-cap: no_head_cover
+  no_head_cover: no_head_cover
+  mask: mask
+  face-mask: mask
+  no-mask: no_mask
+  no_mask: no_mask

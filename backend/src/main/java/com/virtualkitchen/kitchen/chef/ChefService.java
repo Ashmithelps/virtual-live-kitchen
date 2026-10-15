@@ -1,5 +1,6 @@
 package com.virtualkitchen.kitchen.chef;
 
+import com.virtualkitchen.common.hygiene.PublicHygieneScores;
 import com.virtualkitchen.auth.user.User;
 import com.virtualkitchen.auth.user.UserAccountService;
 import com.virtualkitchen.common.error.ApiException;
@@ -22,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.virtualkitchen.kitchen.chef.dto.PublicChefResponse;
+import com.virtualkitchen.restaurant.RestaurantStatus;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
@@ -39,12 +42,17 @@ public class ChefService {
     private final RestaurantAccess restaurantAccess;
     private final RestaurantRepository restaurants;
     private final ObjectStorage objectStorage;
+    private final ChefStats stats;
+    private final PublicHygieneScores hygieneScores;
     private final Clock clock;
 
     public ChefService(ChefRepository chefs, StationAssignmentRepository assignments, KitchenStationRepository stations,
                        ChefConsentService consentService, UserAccountService userAccountService,
                        RestaurantAccess restaurantAccess, RestaurantRepository restaurants,
-                       ObjectStorage objectStorage, Clock clock) {
+                       ObjectStorage objectStorage, ChefStats stats,
+                       PublicHygieneScores hygieneScores, Clock clock) {
+        this.stats = stats;
+        this.hygieneScores = hygieneScores;
         this.chefs = chefs;
         this.assignments = assignments;
         this.stations = stations;
@@ -54,6 +62,23 @@ public class ChefService {
         this.restaurants = restaurants;
         this.objectStorage = objectStorage;
         this.clock = clock;
+    }
+
+    // ── public ───────────────────────────────────────────────────────────────
+
+    /** Active chefs of live restaurants only; anyone else is "not found". */
+    @Transactional(readOnly = true)
+    public PublicChefResponse publicProfile(UUID chefId) {
+        Chef chef = chefs.findById(chefId).filter(c -> c.getRemovedAt() == null)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Chef not found"));
+        Restaurant restaurant = restaurants.findById(chef.getRestaurantId())
+                .filter(r -> r.getStatus() == RestaurantStatus.ACTIVE)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Chef not found"));
+        ChefStats.Public counts = stats.forPublic(chef.getId());
+        return new PublicChefResponse(chef.getId(), chef.getDisplayName(), objectStorage.downloadUrl(chef.getPhotoKey()),
+                chef.getBio(), chef.getSpecialty(), restaurant.getName(), restaurant.getSlug(), restaurant.getCity(),
+                counts.clipCount(), counts.totalViews(), counts.tipCount(), counts.followerCount(), counts.tippable(),
+                hygieneScores.forChef(chef.getId()).orElse(null));
     }
 
     // ── owner ────────────────────────────────────────────────────────────────
@@ -132,9 +157,10 @@ public class ChefService {
 
     private ChefResponse toResponse(Chef chef, ChefConsent consent) {
         User user = userAccountService.getById(chef.getUserId());
+        ChefStats.ForOwner owner = stats.forOwner(List.of(chef.getId())).getOrDefault(chef.getId(), new ChefStats.ForOwner(0, "NOT_SET_UP"));
         return new ChefResponse(chef.getId(), chef.getUserId(), user.getPhone(), chef.getDisplayName(),
                 chef.getPhotoKey(), objectStorage.downloadUrl(chef.getPhotoKey()), chef.getBio(), chef.getSpecialty(),
-                consent != null, consent == null ? null : consent.getAcceptedAt(), chef.getCreatedAt());
+                consent != null, consent == null ? null : consent.getAcceptedAt(), chef.getCreatedAt(), owner.tipCount(), owner.payoutStatus());
     }
 
     private static String blankToNull(String value) {

@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { errorMessage, unwrap } from "@/lib/api/errors";
 import { ownerKeys, restaurantQuery } from "@/lib/owner/queries";
+import { ComplianceCard } from "@/components/dashboard/compliance-card";
 import { RestaurantForm } from "@/components/dashboard/restaurant-form";
 import { ErrorState, PageLoading } from "@/components/ui";
 import { useToast } from "@/components/toast";
@@ -19,7 +20,8 @@ export default function RestaurantProfilePage() {
   if (restaurant.isError) return <ErrorState message={errorMessage(restaurant.error)} onRetry={() => restaurant.refetch()} />;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-3xl space-y-4">
+      <ComplianceCard restaurantId={restaurantId} />
       <RestaurantForm
         key={restaurant.data.updatedAt}
         restaurant={restaurant.data}

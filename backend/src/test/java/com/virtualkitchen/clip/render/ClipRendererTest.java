@@ -42,7 +42,8 @@ class ClipRendererTest {
     @BeforeEach
     void setUp() throws Exception {
         ClipProperties properties = new ClipProperties(Duration.ofSeconds(10), Duration.ofSeconds(5), Duration.ofHours(2), 50_000_000,
-                Duration.ofMinutes(10), Duration.ofDays(30), Duration.ofHours(24), "ffmpeg", "ffprobe", Duration.ofMinutes(2), "Virtual Live Kitchen");
+                Duration.ofMinutes(10), Duration.ofDays(30), Duration.ofHours(24), "ffmpeg", "ffprobe", Duration.ofMinutes(2), "Virtual Live Kitchen",
+                Duration.ofMinutes(10));
         ffmpeg = new FfmpegRunner(properties);
         renderer = new ClipRenderer(ffmpeg);
         chunks = List.of(resource("chunk-1.webm"), resource("chunk-2.webm"));

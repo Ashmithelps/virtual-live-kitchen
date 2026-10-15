@@ -6,8 +6,9 @@ export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /** Image check before asking for an upload URL; returns a message, or null when the file is fine. */
-export function imageProblem(file: File): string | null {
-  if (!IMAGE_TYPES.includes(file.type)) return "Use a JPG, PNG or WebP image.";
+export function imageProblem(file: File, allowPdf = false): string | null {
+  if (allowPdf && file.type === "application/pdf") return file.size > MAX_IMAGE_BYTES ? "Files must be 5 MB or smaller." : null;
+  if (!IMAGE_TYPES.includes(file.type)) return allowPdf ? "Use a PDF, JPG, PNG or WebP file." : "Use a JPG, PNG or WebP image.";
   if (file.size > MAX_IMAGE_BYTES) return "Images must be 5 MB or smaller.";
   return null;
 }
@@ -17,7 +18,7 @@ export function imageProblem(file: File): string | null {
  * the restaurant / menu item / chef form then saves (the backend stores keys, never URLs).
  */
 export async function uploadImage(restaurantId: string, purpose: UploadPurpose, file: File): Promise<string> {
-  const problem = imageProblem(file);
+  const problem = imageProblem(file, purpose === "FSSAI_LICENCE");
   if (problem) throw new Error(problem);
   const upload = await unwrap(
     api.POST("/api/owner/restaurants/{restaurantId}/uploads", { params: { path: { restaurantId } }, body: { purpose, contentType: file.type } }),

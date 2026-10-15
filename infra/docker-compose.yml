@@ -32,3 +32,26 @@ services:
       - "9001:9001"
     volumes:
       - ./volumes/minio:/data
+
+  # Hygiene analysis (FastAPI + YOLO). Optional and heavy (~2 GB image): start with
+  #   docker compose --profile ai up -d --build ai-service
+  # Needs model weights in ai-service/models (see ai-service/README.md); without them it answers 503.
+  # The backend reaches it at http://localhost:8000 and must presign clip URLs for http://minio:9000
+  # (AI_VIDEO_S3_ENDPOINT), the storage address as seen from inside this network.
+  ai-service:
+    profiles: ["ai"]
+    build:
+      context: ../ai-service
+      target: runtime
+    restart: unless-stopped
+    env_file:
+      - path: ../ai-service/.env
+        required: false
+    environment:
+      ALLOWED_VIDEO_HOSTS: ${ALLOWED_VIDEO_HOSTS:-minio:9000}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../ai-service/models:/app/models:ro
+    depends_on:
+      - minio

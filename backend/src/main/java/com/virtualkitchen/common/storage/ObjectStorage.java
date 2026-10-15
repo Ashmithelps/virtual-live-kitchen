@@ -122,13 +122,50 @@ public class ObjectStorage {
     }
 
     /** Temporary GET URL for a processed clip or its thumbnail (private clips bucket). */
-    public String clipDownloadUrl(String key) {
+    public String clipUrl(String key, java.time.Duration ttl) {
         if (key == null) {
             return null;
         }
         return presigner.presignGetObject(b -> b
-                        .signatureDuration(properties.downloadUrlTtl())
+                        .signatureDuration(ttl)
                         .getObjectRequest(GetObjectRequest.builder().bucket(properties.clipsBucket()).key(key).build()))
+                .url().toString();
+    }
+
+    private final java.util.Map<String, S3Presigner> presignersByEndpoint = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Like {@link #clipUrl} but signed for another address of the same storage (e.g. {@code http://minio:9000} for a
+     * service inside docker-compose). SigV4 signs the host, so the URL must be presigned for the host the caller uses.
+     */
+    public String clipUrlVia(String endpoint, String key, java.time.Duration ttl) {
+        if (endpoint == null || endpoint.isBlank()) {
+            return clipUrl(key, ttl);
+        }
+        S3Presigner other = presignersByEndpoint.computeIfAbsent(endpoint.strip(), e -> S3Presigner.builder()
+                .endpointOverride(java.net.URI.create(e))
+                .region(software.amazon.awssdk.regions.Region.of(properties.region()))
+                .credentialsProvider(software.amazon.awssdk.auth.credentials.StaticCredentialsProvider.create(
+                        software.amazon.awssdk.auth.credentials.AwsBasicCredentials.create(properties.accessKey(), properties.secretKey())))
+                .serviceConfiguration(software.amazon.awssdk.services.s3.S3Configuration.builder().pathStyleAccessEnabled(true).build())
+                .build());
+        return other.presignGetObject(b -> b.signatureDuration(ttl)
+                        .getObjectRequest(GetObjectRequest.builder().bucket(properties.clipsBucket()).key(key).build()))
+                .url().toString();
+    }
+
+    /**
+     * Temporary GET URL that makes browsers save the clip as {@code filename} (the signed request carries
+     * {@code response-content-disposition: attachment}).
+     */
+    public String clipAttachmentUrl(String key, java.time.Duration ttl, String filename) {
+        String safe = filename.replaceAll("[^A-Za-z0-9._-]", "-");
+        return presigner.presignGetObject(b -> b
+                        .signatureDuration(ttl)
+                        .getObjectRequest(GetObjectRequest.builder().bucket(properties.clipsBucket()).key(key)
+                                .responseContentDisposition("attachment; filename=\"" + safe + "\"")
+                                .responseContentType("video/mp4")
+                                .build()))
                 .url().toString();
     }
 

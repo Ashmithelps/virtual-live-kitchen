@@ -26,3 +26,9 @@ export type OwnerClip = Schemas["OwnerClipResponse"];
 export type ClipState = OwnerClip["status"];
 export type UploadPurpose = Schemas["UploadRequest"]["purpose"];
 export type UserPage = Schemas["PageResponseUserResponse"];
+
+// Clips (M11)
+export type ClipPlayback = Schemas["ClipPlaybackResponse"];
+export type ClipShare = Schemas["ClipShareResponse"];
+export type PublicClip = Schemas["PublicClipResponse"];
+export type PublicChef = Schemas["PublicChefResponse"];

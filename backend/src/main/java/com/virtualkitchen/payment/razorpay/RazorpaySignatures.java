@@ -18,6 +18,11 @@ public final class RazorpaySignatures {
         return matches(hmacHex(keySecret, providerOrderId + "|" + providerPaymentId), signature);
     }
 
+    /** Subscription checkout: HMAC(key_secret, payment_id + "|" + subscription_id) == razorpay_signature. */
+    public static boolean subscriptionCheckoutValid(String subscriptionId, String paymentId, String signature, String keySecret) {
+        return matches(hmacHex(keySecret, paymentId + "|" + subscriptionId), signature);
+    }
+
     /** Webhooks: HMAC(webhook_secret, raw request body) == X-Razorpay-Signature. */
     public static boolean webhookValid(String rawBody, String signature, String webhookSecret) {
         return matches(hmacHex(webhookSecret, rawBody), signature);

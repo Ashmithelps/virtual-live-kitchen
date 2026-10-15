@@ -1,6 +1,7 @@
 package com.virtualkitchen.clip;
 
 import com.virtualkitchen.auth.security.AuthenticatedUser;
+import com.virtualkitchen.clip.dto.ClipPlaybackResponse;
 import com.virtualkitchen.clip.dto.OwnerClipResponse;
 import com.virtualkitchen.common.web.PageResponse;
 import jakarta.validation.constraints.Max;
@@ -22,9 +23,11 @@ import java.util.UUID;
 public class OwnerClipController {
 
     private final OwnerClipService service;
+    private final ClipPlaybackService playback;
 
-    public OwnerClipController(OwnerClipService service) {
+    public OwnerClipController(OwnerClipService service, ClipPlaybackService playback) {
         this.service = service;
+        this.playback = playback;
     }
 
     /** Newest first; {@code status} filters (e.g. FAILED). */
@@ -34,6 +37,13 @@ public class OwnerClipController {
                                                 @RequestParam(defaultValue = "0") @Min(0) int page,
                                                 @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return service.list(owner.id(), restaurantId, status, page, size);
+    }
+
+    /** 10-minute watch and download links for one READY clip. */
+    @GetMapping("/{orderId}/playback")
+    public ClipPlaybackResponse playback(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId,
+                                         @PathVariable UUID orderId) {
+        return playback.forOwner(owner.id(), restaurantId, orderId);
     }
 
     @PostMapping("/{orderId}/retry")

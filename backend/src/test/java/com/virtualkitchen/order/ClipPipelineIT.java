@@ -126,9 +126,10 @@ class ClipPipelineIT extends IntegrationTest {
         assertThat(worker.runOnce(WORKER)).isTrue();
         assertThat(jobStatus(id)).isEqualTo("SUCCEEDED");
 
-        // Pushed: PROCESSING first, then READY with the links.
+        // Pushed: PROCESSING first, then READY with the thumbnail (the video link comes from the playback endpoint).
         JsonNode pushed = customer.until(m -> "READY".equals(m.path("order").path("clipStatus").asText())).path("order");
-        assertThat(pushed.path("clip").path("videoUrl").asText()).isNotBlank();
+        assertThat(pushed.path("clip").path("thumbnailUrl").asText()).isNotBlank();
+        assertThat(pushed.path("clip").has("videoUrl")).isFalse();
 
         JsonNode order = client.body(client.send(GET, "/api/orders/" + id, k.customer, null).andExpect(status().isOk()));
         assertThat(order.path("clipStatus").asText()).isEqualTo("READY");
@@ -137,7 +138,8 @@ class ClipPipelineIT extends IntegrationTest {
         assertThat(clip.path("durationSeconds").asDouble()).isBetween(windowS - 1, windowS + 1);
         assertThat(Instant.parse(clip.path("expiresAt").asText())).isAfter(Instant.now().plus(Duration.ofDays(29)));
 
-        byte[] video = fetch(clip.path("videoUrl").asText());
+        JsonNode playback = client.body(client.send(GET, "/api/orders/" + id + "/clip", k.customer, null).andExpect(status().isOk()));
+        byte[] video = fetch(playback.path("videoUrl").asText());
         assertThat(new String(video, 4, 4, StandardCharsets.US_ASCII)).isEqualTo("ftyp"); // MP4
         byte[] thumb = fetch(clip.path("thumbnailUrl").asText());
         assertThat(thumb[0] & 0xff).isEqualTo(0xFF); // JPEG SOI
@@ -155,7 +157,7 @@ class ClipPipelineIT extends IntegrationTest {
         JsonNode row = find(owned.path("items"), id);
         assertThat(row.path("displayNumber").asInt()).isEqualTo(order.path("displayNumber").asInt());
         assertThat(row.path("thumbnailUrl").asText()).isNotBlank();
-        assertThat(row.path("videoUrl").asText()).isNotBlank();
+        assertThat(row.has("videoUrl")).isFalse();
         assertThat(row.path("stationName").asText()).isEqualTo("Tandoor");
         assertThat(row.path("chefName").asText()).isNotBlank();
         assertThat(row.path("retryable").asBoolean()).isFalse();

@@ -59,7 +59,7 @@ public class ClipOverlayRenderer {
             drawText(g, ellipsize(g, overlay.restaurantName(), maxText), x, HEIGHT - 92, Color.WHITE);
             g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 28));
             String details = "Order #" + overlay.displayNumber()
-                    + (overlay.chefName() == null || overlay.chefName().isBlank() ? "" : "  ·  Chef " + overlay.chefName())
+                    + (overlay.chefName() == null || overlay.chefName().isBlank() ? "" : "  ·  " + chefLabel(overlay.chefName()))
                     + "  ·  " + overlay.date();
             drawText(g, ellipsize(g, details, maxText), x, HEIGHT - 48, new Color(255, 255, 255, 235));
 
@@ -103,5 +103,11 @@ public class ClipOverlayRenderer {
             cut = cut.substring(0, cut.length() - 1);
         }
         return cut.strip() + "…";
+    }
+
+    /** "Ravi" → "Chef Ravi"; a display name that already says "Chef …" is kept as is. */
+    static String chefLabel(String displayName) {
+        String name = displayName.strip();
+        return name.regionMatches(true, 0, "chef ", 0, 5) ? name : "Chef " + name;
     }
 }

@@ -44,12 +44,19 @@ export function navFor(user: Pick<User, "role" | "status"> | null): NavLink[] {
     case "CHEF":
       return [
         { href: "/kitchen", label: "Kitchen" },
+        { href: "/chef/clips", label: "My clips" },
+        { href: "/chef/tips", label: "My tips" },
+        { href: "/chef/payouts", label: "Payouts" },
         { href: "/chef/settings", label: "Settings" },
       ];
     case "ADMIN":
       return [
-        { href: "/admin", label: "Restaurants" },
+        { href: "/admin", label: "Overview" },
+        { href: "/admin/restaurants", label: "Restaurants" },
         { href: "/admin/users", label: "Users" },
+        { href: "/admin/hygiene", label: "Hygiene" },
+        { href: "/admin/billing", label: "Billing" },
+        { href: "/admin/audit", label: "Audit log" },
       ];
   }
 }

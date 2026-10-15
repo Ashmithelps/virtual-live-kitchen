@@ -1,0 +1,74 @@
+# Production stack for one Linux VM (e.g. AWS ap-south-1 / GCP asia-south1 / DigitalOcean BLR1).
+# Postgres is managed (outside this file) and storage is Cloudflare R2. See PRODUCTION.md.
+#
+# On the server everything lives in /opt/vlk:
+#   docker-compose.prod.yml  Caddyfile  deploy.sh      (copied by CI on every deploy)
+#   .env                     compose variables: domain, image registry and tag   (infra/prod/compose.env.example)
+#   backend.env  ai.env  backup.env                     service secrets              (infra/prod/*.env.example)
+#   models/                  AI weights (hygiene.pt + class_map.yaml)
+# Run: docker compose -f docker-compose.prod.yml up -d
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - backend
+    logging: *logging
+
+  backend:
+    image: ${IMAGE_REGISTRY:?set IMAGE_REGISTRY in .env}/vlk-backend:${IMAGE_TAG:?set IMAGE_TAG in .env}
+    restart: unless-stopped
+    env_file: backend.env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      APP_VERSION: ${IMAGE_TAG}
+      AI_SERVICE_URL: http://ai-service:8000
+    # Clip rendering scratch space (FFmpeg); not kept between restarts.
+    volumes:
+      - clip-work:/tmp
+    mem_limit: ${BACKEND_MEM_LIMIT:-3g}
+    stop_grace_period: 40s
+    logging: *logging
+
+  ai-service:
+    image: ${IMAGE_REGISTRY}/vlk-ai:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file: ai.env
+    environment:
+      LOG_FORMAT: json
+    volumes:
+      - ./models:/app/models:ro
+    mem_limit: ${AI_MEM_LIMIT:-3g}
+    # Internal only: the backend calls it on the compose network; nothing is published.
+    logging: *logging
+
+  # Daily pg_dump of the managed database to R2 (infra/backup). Also: docker compose run --rm backup backup-now
+  backup:
+    image: ${IMAGE_REGISTRY}/vlk-backup:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file: backup.env
+    command: ["schedule"]
+    logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:
+  clip-work:

@@ -46,10 +46,13 @@ public class OwnerClipService {
     private final OrderClips orderClips;
     private final JobQueue jobs;
     private final ObjectStorage storage;
+    private final ClipProperties properties;
     private final Clock clock;
 
     public OwnerClipService(NamedParameterJdbcTemplate jdbc, RestaurantAccess access, ClipRepository clips,
-                            ClipRequestRepository requests, OrderClips orderClips, JobQueue jobs, ObjectStorage storage, Clock clock) {
+                            ClipRequestRepository requests, OrderClips orderClips, JobQueue jobs, ObjectStorage storage,
+                            ClipProperties properties, Clock clock) {
+        this.properties = properties;
         this.jdbc = jdbc;
         this.access = access;
         this.clips = clips;
@@ -73,6 +76,9 @@ public class OwnerClipService {
                 SELECT c.order_id, o.display_number, o.business_date, c.status, c.failure_reason, c.duration_s,
                        c.video_key, c.thumb_key, ch.display_name AS chef_name, s.name AS station_name,
                        (cardinality(r.chunk_keys) > 0 AND r.raw_deleted_at IS NULL) AS has_raw,
+                       (SELECT count(*) FROM clip_views v WHERE v.clip_id = c.id) AS view_count,
+                       (SELECT count(*) FROM clip_shares sh WHERE sh.clip_id = c.id) AS share_count,
+                       EXISTS (SELECT 1 FROM clip_shares sh WHERE sh.clip_id = c.id AND sh.revoked_at IS NULL) AS shared,
                        c.created_at, c.ready_at, c.expires_at
                 """ + FROM + " ORDER BY c.created_at DESC LIMIT :limit OFFSET :offset", params, this::row);
     }
@@ -111,7 +117,6 @@ public class OwnerClipService {
         ClipState status = ClipState.valueOf(rs.getString("status"));
         boolean ready = status == ClipState.READY;
         BigDecimal duration = rs.getBigDecimal("duration_s");
-        String videoKey = rs.getString("video_key");
         String thumbKey = rs.getString("thumb_key");
         return new OwnerClipResponse(
                 rs.getObject("order_id", UUID.class),
@@ -120,11 +125,13 @@ public class OwnerClipService {
                 status,
                 rs.getString("failure_reason"),
                 duration == null ? null : duration.doubleValue(),
-                ready && videoKey != null ? storage.clipDownloadUrl(videoKey) : null,
-                ready && thumbKey != null ? storage.clipDownloadUrl(thumbKey) : null,
+                ready && thumbKey != null ? storage.clipUrl(thumbKey, properties.watchUrlTtl()) : null,
                 rs.getString("chef_name"),
                 rs.getString("station_name"),
                 status == ClipState.FAILED && rs.getBoolean("has_raw"),
+                rs.getLong("view_count"),
+                rs.getLong("share_count"),
+                rs.getBoolean("shared"),
                 instant(rs, "created_at"),
                 instant(rs, "ready_at"),
                 instant(rs, "expires_at"));

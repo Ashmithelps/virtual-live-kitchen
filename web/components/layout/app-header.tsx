@@ -29,7 +29,9 @@ export function AppHeader({ wide = false }: { wide?: boolean }) {
           Virtual Live Kitchen
         </Link>
         {links.map((link) => {
-          const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+          // Longest matching link wins, so "/admin" isn't highlighted on "/admin/hygiene".
+          const matches = (href: string) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/"));
+          const active = matches(link.href) && !links.some((l) => l.href.length > link.href.length && l.href.startsWith(link.href) && matches(l.href));
           return (
             <Link
               key={link.href}

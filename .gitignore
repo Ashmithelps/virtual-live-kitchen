@@ -49,6 +49,9 @@ ai-service/.pytest_cache/
 ai-service/htmlcov/
 ai-service/.coverage
 ai-service/coverage.xml
+ai-service/runs/
+ai-service/models/*.pt
+ai-service/models/*.onnx
 .mypy_cache/
 .ruff_cache/
 

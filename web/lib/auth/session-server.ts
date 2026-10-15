@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { components } from "@/lib/api/schema";
+import { proxyHeaders } from "@/lib/server/proxy-headers";
 
 type AuthResponse = components["schemas"]["AuthResponse"];
 
@@ -28,7 +29,7 @@ export const SESSION_POLICY: SessionPolicy = {
 export async function callBackend(path: string, body: unknown): Promise<Response> {
   return fetch(`${BACKEND}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await proxyHeaders()) },
     body: JSON.stringify(body),
     cache: "no-store",
   });

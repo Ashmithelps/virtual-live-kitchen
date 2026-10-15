@@ -38,4 +38,11 @@ class ClipOverlayRendererTest {
     private static int alpha(int argb) {
         return (argb >>> 24) & 0xFF;
     }
+
+    @Test
+    void chefLabelDoesNotRepeatTheTitle() {
+        assertThat(ClipOverlayRenderer.chefLabel("Ravi")).isEqualTo("Chef Ravi");
+        assertThat(ClipOverlayRenderer.chefLabel("Chef Ravi")).isEqualTo("Chef Ravi");
+        assertThat(ClipOverlayRenderer.chefLabel(" chef meera ")).isEqualTo("chef meera");
+    }
 }

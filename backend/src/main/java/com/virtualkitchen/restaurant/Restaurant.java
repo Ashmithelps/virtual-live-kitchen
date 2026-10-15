@@ -75,6 +75,28 @@ public class Restaurant {
     @Column(nullable = false, length = 32)
     private RestaurantStatus status;
 
+    /** Why it's SUSPENDED: an admin decision, or unpaid billing (only the latter is lifted by a payment). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "suspended_reason", length = 20)
+    private SuspensionReason suspendedReason;
+
+    @Column(name = "fssai_number", length = 14)
+    private String fssaiNumber;
+
+    /** Media-bucket key of the FSSAI licence scan (upload purpose FSSAI_LICENCE). */
+    @Column(name = "fssai_doc_key", length = 300)
+    private String fssaiDocKey;
+
+    @Column(name = "legal_name", length = 160)
+    private String legalName;
+
+    @Column(length = 15)
+    private String gstin;
+
+    /** GST state code (2 digits) for the place of supply on invoices. */
+    @Column(name = "billing_state_code", length = 2)
+    private String billingStateCode;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -118,9 +140,30 @@ public class Restaurant {
     }
 
     public void changeStatus(RestaurantStatus status, Instant now) {
+        changeStatus(status, status == RestaurantStatus.SUSPENDED ? SuspensionReason.ADMIN : null, now);
+    }
+
+    public void changeStatus(RestaurantStatus status, SuspensionReason reason, Instant now) {
         this.status = status;
+        this.suspendedReason = status == RestaurantStatus.SUSPENDED ? reason : null;
         this.updatedAt = now;
     }
+
+    public void changeCompliance(String fssaiNumber, String fssaiDocKey, String legalName, String gstin, String billingStateCode, Instant now) {
+        this.fssaiNumber = fssaiNumber;
+        this.fssaiDocKey = fssaiDocKey;
+        this.legalName = legalName;
+        this.gstin = gstin;
+        this.billingStateCode = billingStateCode;
+        this.updatedAt = now;
+    }
+
+    public SuspensionReason getSuspendedReason() { return suspendedReason; }
+    public String getFssaiNumber() { return fssaiNumber; }
+    public String getFssaiDocKey() { return fssaiDocKey; }
+    public String getLegalName() { return legalName; }
+    public String getGstin() { return gstin; }
+    public String getBillingStateCode() { return billingStateCode; }
 
     public Set<OrderType> orderTypes() {
         Set<OrderType> types = EnumSet.noneOf(OrderType.class);

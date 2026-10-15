@@ -82,7 +82,6 @@ export default function StationsPage() {
           ) : (
             <>
               <p className="font-semibold">Scan with the {pairing.stationName} phone</p>
-              { }
               <img src={pairing.qrSvgDataUri} alt={`Pairing QR for ${pairing.stationName}`} className="size-64 rounded-xl bg-white p-2" />
               <a href={pairing.pairingUrl} target="_blank" rel="noreferrer" className="max-w-full truncate text-xs text-brand-700 underline">
                 {pairing.pairingUrl}

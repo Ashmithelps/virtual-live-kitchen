@@ -1,6 +1,8 @@
 package com.virtualkitchen.restaurant;
 
 import com.virtualkitchen.auth.security.AuthenticatedUser;
+import com.virtualkitchen.restaurant.dto.ComplianceRequest;
+import com.virtualkitchen.restaurant.dto.ComplianceResponse;
 import com.virtualkitchen.restaurant.dto.RestaurantRequest;
 import com.virtualkitchen.restaurant.dto.RestaurantResponse;
 import jakarta.validation.Valid;
@@ -53,5 +55,17 @@ public class OwnerRestaurantController {
                                      @PathVariable UUID restaurantId,
                                      @Valid @RequestBody RestaurantRequest request) {
         return restaurantService.update(owner.id(), restaurantId, request);
+    }
+
+    /** FSSAI licence and tax details (seen by admins; the GST details go on invoices). */
+    @GetMapping("/{restaurantId}/compliance")
+    public ComplianceResponse compliance(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId) {
+        return restaurantService.compliance(owner.id(), restaurantId);
+    }
+
+    @PutMapping("/{restaurantId}/compliance")
+    public ComplianceResponse updateCompliance(@AuthenticationPrincipal AuthenticatedUser owner, @PathVariable UUID restaurantId,
+                                               @Valid @RequestBody ComplianceRequest request) {
+        return restaurantService.updateCompliance(owner.id(), restaurantId, request);
     }
 }

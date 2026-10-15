@@ -23,9 +23,10 @@ public final class MediaKeys {
     }
 
     static String newKey(UUID restaurantId, UploadPurpose purpose, String contentType) {
-        String extension = EXTENSIONS.get(contentType);
+        String extension = purpose.allowsPdf() && "application/pdf".equals(contentType) ? "pdf" : EXTENSIONS.get(contentType);
         if (extension == null) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "contentType must be one of " + EXTENSIONS.keySet());
+            throw new ApiException(HttpStatus.BAD_REQUEST, "contentType must be one of " + EXTENSIONS.keySet()
+                    + (purpose.allowsPdf() ? " or application/pdf" : ""));
         }
         return "restaurants/" + restaurantId + "/" + purpose.folder() + "/" + UUID.randomUUID() + "." + extension;
     }
@@ -36,7 +37,7 @@ public final class MediaKeys {
             return null;
         }
         Pattern expected = Pattern.compile("^restaurants/" + restaurantId + "/" + purpose.folder()
-                + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|png|webp)$");
+                + "/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|png|webp" + (purpose.allowsPdf() ? "|pdf" : "") + ")$");
         if (!expected.matcher(key).matches()) {
             throw new ApiException(HttpStatus.BAD_REQUEST,
                     "Image key must come from POST /api/owner/restaurants/" + restaurantId + "/uploads with purpose " + purpose);

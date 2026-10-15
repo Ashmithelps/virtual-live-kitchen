@@ -12,6 +12,7 @@ import { useCart } from "@/lib/cart/use-cart";
 import { ORDER_TYPE_LABEL, formatPaise, isValidPhone, normalizePhone } from "@/lib/format";
 import { distanceKm } from "@/lib/geo";
 import { saveGuestOrder } from "@/lib/guest-orders";
+import { DEFAULT_TIP_PRESETS_PAISE } from "@/lib/tips";
 import { restaurantQuery } from "@/lib/queries";
 import { useTableSession, type TableSession } from "@/lib/table-session";
 import { useHydrated } from "@/lib/storage";
@@ -57,6 +58,7 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
   const [address, setAddress] = useState<Address>({ address: "", latitude: "", longitude: "" });
   const [guest, setGuest] = useState({ name: "", phone: "" });
   const [notes, setNotes] = useState("");
+  const [tip, setTip] = useState<{ chefId: string; amountPaise: number } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const isGuest = orderType === "DINE_IN" && auth.status === "anonymous";
@@ -67,7 +69,15 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
     onSuccess: (order) => {
       clear();
       // Prepaid orders go straight into payment on the order page.
-      router.push(order.paymentStatus === "PENDING" ? `/orders/${order.id}?pay=1` : `/orders/${order.id}`);
+      // A tip picked here is paid on the order page, as its own payment (it goes straight to the chef).
+      const params = new URLSearchParams();
+      if (order.paymentStatus === "PENDING") params.set("pay", "1");
+      if (tip) {
+        params.set("tipChef", tip.chefId);
+        params.set("tipAmount", String(tip.amountPaise));
+      }
+      const query = params.toString();
+      router.push(query ? `/orders/${order.id}?${query}` : `/orders/${order.id}`);
     },
   });
 
@@ -196,6 +206,10 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
         </Card>
       )}
 
+      {auth.status === "authenticated" && auth.user.role === "CUSTOMER" && (
+        <FollowedChefTip restaurantId={restaurant.id} value={tip} onChange={setTip} />
+      )}
+
       <InlineError message={formError ?? (place.isError ? errorMessage(place.error) : null)} />
 
       <div className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white px-4 pt-3">
@@ -206,6 +220,51 @@ function CheckoutForm({ restaurant, cart }: { restaurant: RestaurantDetail; cart
         </div>
       </div>
     </div>
+  );
+}
+
+/** Optional tip for a chef the customer follows here (the chef who'll cook isn't known yet). */
+function FollowedChefTip({
+  restaurantId,
+  value,
+  onChange,
+}: {
+  restaurantId: string;
+  value: { chefId: string; amountPaise: number } | null;
+  onChange: (tip: { chefId: string; amountPaise: number } | null) => void;
+}) {
+  const followed = useQuery({
+    queryKey: ["followed-chefs", restaurantId],
+    queryFn: () => unwrap(api.GET("/api/me/followed-chefs", { params: { query: { restaurantId } } })),
+  });
+  const tippable = (followed.data ?? []).filter((c) => c.tippable);
+  if (tippable.length === 0) return null;
+  return (
+    <Card className="space-y-3">
+      <div>
+        <h2 className="font-semibold">Tip a chef you follow (optional)</h2>
+        <p className="text-sm text-stone-600">You&apos;ll pay the tip separately after placing the order. All of it goes to the chef.</p>
+      </div>
+      {tippable.map((chef) => (
+        <div key={chef.chefId} className="flex flex-wrap items-center gap-2">
+          <span className="mr-auto text-sm font-medium">{chef.displayName}</span>
+          {DEFAULT_TIP_PRESETS_PAISE.map((paise) => {
+            const selected = value?.chefId === chef.chefId && value.amountPaise === paise;
+            return (
+              <button
+                key={paise}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => onChange(selected ? null : { chefId: chef.chefId, amountPaise: paise })}
+                className={`min-h-10 rounded-xl border px-3 text-sm font-semibold ${selected ? "border-brand-600 bg-brand-600 text-white" : "border-stone-300 bg-white"}`}
+              >
+                {formatPaise(paise)}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </Card>
   );
 }
 

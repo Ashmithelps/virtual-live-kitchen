@@ -21,5 +21,7 @@ public record ClipProperties(
         @NotBlank String ffmpegPath,
         @NotBlank String ffprobePath,
         @NotNull Duration ffmpegTimeout,
-        @NotBlank String watermark) {
+        @NotBlank String watermark,
+        /** Lifetime of watch / download / share-page links (short: they can't be revoked once issued). */
+        @NotNull Duration watchUrlTtl) {
 }

@@ -506,6 +506,76 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/compliance": {
+      "get": {
+        "tags": [
+          "owner-restaurant-controller"
+        ],
+        "operationId": "compliance",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "owner-restaurant-controller"
+        ],
+        "operationId": "updateCompliance",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComplianceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants/{restaurantId}/chefs/{chefId}": {
       "get": {
         "tags": [
@@ -625,6 +695,307 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/billing/plan": {
+      "put": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "changePlan",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoosePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chefs/{chefId}/follow": {
+      "get": {
+        "tags": [
+          "chef-follow-controller"
+        ],
+        "operationId": "status",
+        "parameters": [
+          {
+            "name": "chefId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "chef-follow-controller"
+        ],
+        "operationId": "follow",
+        "parameters": [
+          {
+            "name": "chefId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "chef-follow-controller"
+        ],
+        "operationId": "unfollow",
+        "parameters": [
+          {
+            "name": "chefId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/chef/payout-account": {
+      "get": {
+        "tags": [
+          "chef-payout-controller"
+        ],
+        "operationId": "get_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutAccountResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "chef-payout-controller"
+        ],
+        "operationId": "submit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayoutAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutAccountResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/hygiene/settings": {
+      "get": {
+        "tags": [
+          "admin-hygiene-controller"
+        ],
+        "operationId": "settings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HygieneSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin-hygiene-controller"
+        ],
+        "operationId": "update_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HygieneSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HygieneSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/settings": {
+      "get": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "settings_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "updateSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/plans/{planId}": {
+      "put": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "planId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/station-device/pair": {
       "post": {
         "tags": [
@@ -651,6 +1022,39 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/public/clips/{token}/views": {
+      "post": {
+        "tags": [
+          "public-clip-controller"
+        ],
+        "operationId": "view",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClipViewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -1145,6 +1549,56 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/hygiene/results/{resultId}/disputes": {
+      "post": {
+        "tags": [
+          "owner-hygiene-controller"
+        ],
+        "operationId": "dispute",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "resultId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HygieneDisputeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HygieneDisputeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants/{restaurantId}/clips/{orderId}/retry": {
       "post": {
         "tags": [
@@ -1258,6 +1712,119 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/billing/checkout": {
+      "post": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "checkout",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoosePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionCheckoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/owner/restaurants/{restaurantId}/billing/checkout/confirm": {
+      "post": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmSubscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/owner/restaurants/{restaurantId}/billing/cancel": {
+      "post": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/orders": {
       "get": {
         "tags": [
@@ -1324,6 +1891,126 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{orderId}/tips": {
+      "get": {
+        "tags": [
+          "customer-tip-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTipsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customer-tip-controller"
+        ],
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipCheckoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{orderId}/tips/{tipId}/confirm": {
+      "post": {
+        "tags": [
+          "customer-tip-controller"
+        ],
+        "operationId": "confirm_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipResponse"
                 }
               }
             }
@@ -1403,12 +2090,65 @@
         }
       }
     },
+    "/api/orders/{orderId}/clip/share": {
+      "post": {
+        "tags": [
+          "customer-clip-controller"
+        ],
+        "operationId": "share",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipShareResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "customer-clip-controller"
+        ],
+        "operationId": "revoke",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/orders/{orderId}/cancel": {
       "post": {
         "tags": [
           "customer-order-controller"
         ],
-        "operationId": "cancel",
+        "operationId": "cancel_1",
         "parameters": [
           {
             "name": "orderId",
@@ -1466,6 +2206,150 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/GuestOrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/orders/{orderId}/tips": {
+      "get": {
+        "tags": [
+          "guest-tip-controller"
+        ],
+        "operationId": "options_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTipsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "guest-tip-controller"
+        ],
+        "operationId": "start_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipCheckoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/orders/{orderId}/tips/{tipId}/confirm": {
+      "post": {
+        "tags": [
+          "guest-tip-controller"
+        ],
+        "operationId": "confirm_2",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TipResponse"
                 }
               }
             }
@@ -1561,12 +2445,81 @@
         }
       }
     },
+    "/api/guest/orders/{orderId}/clip/share": {
+      "post": {
+        "tags": [
+          "guest-clip-controller"
+        ],
+        "operationId": "share_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipShareResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "guest-clip-controller"
+        ],
+        "operationId": "revoke_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/guest/orders/{orderId}/cancel": {
       "post": {
         "tags": [
           "guest-order-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "cancel_2",
         "parameters": [
           {
             "name": "orderId",
@@ -1694,6 +2647,26 @@
         }
       }
     },
+    "/api/chef/payout-account/refresh": {
+      "post": {
+        "tags": [
+          "chef-payout-controller"
+        ],
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutAccountResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/chef/consent": {
       "get": {
         "tags": [
@@ -1797,7 +2770,7 @@
         "tags": [
           "auth-controller"
         ],
-        "operationId": "refresh",
+        "operationId": "refresh_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1961,6 +2934,139 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/hygiene/disputes/{disputeId}/resolve": {
+      "post": {
+        "tags": [
+          "admin-hygiene-controller"
+        ],
+        "operationId": "resolve",
+        "parameters": [
+          {
+            "name": "disputeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveDisputeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDisputeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/restaurants/{restaurantId}/simulate": {
+      "post": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "simulate",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSubscriptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/plans": {
+      "get": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "plans",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "create_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponse"
                 }
               }
             }
@@ -2325,6 +3431,87 @@
         }
       }
     },
+    "/api/public/legal/recording-consent": {
+      "get": {
+        "tags": [
+          "public-consent-controller"
+        ],
+        "operationId": "current_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicConsentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/clips/{token}": {
+      "get": {
+        "tags": [
+          "public-clip-controller"
+        ],
+        "operationId": "get_3",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicClipResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/chefs/{chefId}": {
+      "get": {
+        "tags": [
+          "public-chef-controller"
+        ],
+        "operationId": "get_4",
+        "parameters": [
+          {
+            "name": "chefId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicChefResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants/{restaurantId}/tables/qr-codes.pdf": {
       "get": {
         "tags": [
@@ -2416,7 +3603,7 @@
         "tags": [
           "owner-order-controller"
         ],
-        "operationId": "get_2",
+        "operationId": "get_5",
         "parameters": [
           {
             "name": "restaurantId",
@@ -2519,6 +3706,37 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/hygiene": {
+      "get": {
+        "tags": [
+          "owner-hygiene-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HygieneOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/owner/restaurants/{restaurantId}/clips": {
       "get": {
         "tags": [
@@ -2589,12 +3807,124 @@
         }
       }
     },
+    "/api/owner/restaurants/{restaurantId}/clips/{orderId}/playback": {
+      "get": {
+        "tags": [
+          "owner-clip-controller"
+        ],
+        "operationId": "playback",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipPlaybackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/owner/restaurants/{restaurantId}/billing": {
+      "get": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "overview_1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingOverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/owner/restaurants/{restaurantId}/billing/invoices/{invoiceId}.pdf": {
+      "get": {
+        "tags": [
+          "owner-billing-controller"
+        ],
+        "operationId": "invoice",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/orders/{orderId}": {
       "get": {
         "tags": [
           "customer-order-controller"
         ],
-        "operationId": "get_3",
+        "operationId": "get_6",
         "parameters": [
           {
             "name": "orderId",
@@ -2620,6 +3950,37 @@
         }
       }
     },
+    "/api/orders/{orderId}/clip": {
+      "get": {
+        "tags": [
+          "customer-clip-controller"
+        ],
+        "operationId": "playback_1",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipPlaybackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/me": {
       "get": {
         "tags": [
@@ -2633,6 +3994,40 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/followed-chefs": {
+      "get": {
+        "tags": [
+          "chef-follow-controller"
+        ],
+        "operationId": "followed",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FollowedChefResponse"
+                  }
                 }
               }
             }
@@ -2665,7 +4060,7 @@
         "tags": [
           "guest-order-controller"
         ],
-        "operationId": "get_4",
+        "operationId": "get_7",
         "parameters": [
           {
             "name": "orderId",
@@ -2692,6 +4087,90 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/orders/{orderId}/clip": {
+      "get": {
+        "tags": [
+          "guest-clip-controller"
+        ],
+        "operationId": "playback_2",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Guest-Order-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipPlaybackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chef/tips": {
+      "get": {
+        "tags": [
+          "chef-tip-controller"
+        ],
+        "operationId": "tips",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChefTipsPage"
                 }
               }
             }
@@ -2757,6 +4236,51 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ChefSelfResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chef/clips": {
+      "get": {
+        "tags": [
+          "chef-clip-controller"
+        ],
+        "operationId": "clips",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseChefClipResponse"
                 }
               }
             }
@@ -2862,6 +4386,37 @@
         }
       }
     },
+    "/api/admin/restaurants/{restaurantId}": {
+      "get": {
+        "tags": [
+          "admin-restaurant-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRestaurantDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/owners/pending": {
       "get": {
         "tags": [
@@ -2878,6 +4433,225 @@
                   "items": {
                     "$ref": "#/components/schemas/UserResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/metrics": {
+      "get": {
+        "tags": [
+          "admin-panel-controller"
+        ],
+        "operationId": "metrics",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 180,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/hygiene/disputes": {
+      "get": {
+        "tags": [
+          "admin-hygiene-controller"
+        ],
+        "operationId": "disputes",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "OPEN|UPHELD|REJECTED",
+              "type": "string",
+              "default": "OPEN"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminDisputeResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/clips/{orderId}/playback": {
+      "get": {
+        "tags": [
+          "admin-clip-controller"
+        ],
+        "operationId": "playback_3",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClipPlaybackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/subscriptions": {
+      "get": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "subscriptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSubscriptionResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/billing/restaurants/{restaurantId}/invoices/{invoiceId}.pdf": {
+      "get": {
+        "tags": [
+          "admin-billing-controller"
+        ],
+        "operationId": "invoice_1",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/audit": {
+      "get": {
+        "tags": [
+          "admin-panel-controller"
+        ],
+        "operationId": "audit",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 60,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseAuditEntryResponse"
                 }
               }
             }
@@ -3028,6 +4802,7 @@
           "ownerId",
           "slug",
           "status",
+          "suspendedReason",
           "updatedAt"
         ],
         "type": "object",
@@ -3095,6 +4870,15 @@
               "PENDING_APPROVAL",
               "ACTIVE",
               "SUSPENDED"
+            ]
+          },
+          "suspendedReason": {
+            "type": "string",
+            "description": "ADMIN or BILLING when SUSPENDED",
+            "nullable": true,
+            "enum": [
+              "ADMIN",
+              "BILLING"
             ]
           },
           "logoKey": {
@@ -3386,6 +5170,71 @@
           }
         }
       },
+      "ComplianceRequest": {
+        "type": "object",
+        "properties": {
+          "fssaiNumber": {
+            "pattern": "^[0-9]{14}$",
+            "type": "string"
+          },
+          "fssaiDocKey": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalName": {
+            "maxLength": 160,
+            "minLength": 2,
+            "type": "string"
+          },
+          "gstin": {
+            "pattern": "^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$",
+            "type": "string"
+          },
+          "billingStateCode": {
+            "pattern": "^[0-9]{2}$",
+            "type": "string"
+          }
+        }
+      },
+      "ComplianceResponse": {
+        "required": [
+          "billingStateCode",
+          "fssaiDocKey",
+          "fssaiDocUrl",
+          "fssaiNumber",
+          "gstin",
+          "legalName"
+        ],
+        "type": "object",
+        "properties": {
+          "fssaiNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "fssaiDocKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "fssaiDocUrl": {
+            "type": "string",
+            "description": "Short-lived link to the uploaded licence",
+            "nullable": true
+          },
+          "legalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "gstin": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingStateCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "UpdateChefRequest": {
         "required": [
           "displayName"
@@ -3421,11 +5270,13 @@
           "createdAt",
           "displayName",
           "id",
+          "payoutStatus",
           "phone",
           "photoKey",
           "photoUrl",
           "recordingConsent",
           "specialty",
+          "tipCount",
           "userId"
         ],
         "type": "object",
@@ -3471,6 +5322,483 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "tipCount": {
+            "type": "integer",
+            "description": "Tips received (count only; amounts are the chef's business)",
+            "format": "int64"
+          },
+          "payoutStatus": {
+            "type": "string",
+            "description": "NOT_SET_UP, PENDING_KYC or ACTIVE; tips are offered only when ACTIVE"
+          }
+        }
+      },
+      "ChoosePlanRequest": {
+        "required": [
+          "planId"
+        ],
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BillingOverviewResponse": {
+        "required": [
+          "billingDetailsComplete",
+          "cancelRequested",
+          "currentPeriodEnd",
+          "graceUntil",
+          "invoices",
+          "nextChargeAt",
+          "paymentMethodReady",
+          "pendingPlan",
+          "plan",
+          "plans",
+          "status",
+          "trialEndsAt"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "TRIALING",
+              "ACTIVE",
+              "PAST_DUE",
+              "SUSPENDED",
+              "CANCELLED"
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanResponse"
+          },
+          "pendingPlan": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlanResponse"
+              }
+            ]
+          },
+          "trialEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nextChargeAt": {
+            "type": "string",
+            "description": "When the next charge is due (null when no payment method is set up)",
+            "format": "date-time",
+            "nullable": true
+          },
+          "graceUntil": {
+            "type": "string",
+            "description": "Listing is hidden after this if still unpaid",
+            "format": "date-time",
+            "nullable": true
+          },
+          "paymentMethodReady": {
+            "type": "boolean"
+          },
+          "cancelRequested": {
+            "type": "boolean"
+          },
+          "billingDetailsComplete": {
+            "type": "boolean",
+            "description": "Legal name and GST state are set (needed for invoices)"
+          },
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanResponse"
+            }
+          },
+          "invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceResponse"
+            }
+          }
+        }
+      },
+      "InvoiceResponse": {
+        "required": [
+          "cgstPaise",
+          "id",
+          "igstPaise",
+          "issuedAt",
+          "number",
+          "periodEnd",
+          "periodStart",
+          "planName",
+          "sgstPaise",
+          "taxablePaise",
+          "totalPaise"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "taxablePaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cgstPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sgstPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "igstPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlanFeatures": {
+        "required": [
+          "analytics",
+          "clipRetentionDays",
+          "maxStations"
+        ],
+        "type": "object",
+        "properties": {
+          "maxStations": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "clipRetentionDays": {
+            "maximum": 3650,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "analytics": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlanResponse": {
+        "required": [
+          "active",
+          "code",
+          "features",
+          "gstPaise",
+          "id",
+          "name",
+          "pricePaise",
+          "sortOrder",
+          "totalPaise"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "pricePaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gstPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "features": {
+            "$ref": "#/components/schemas/PlanFeatures"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PayoutAccountRequest": {
+        "required": [
+          "bankAccountNumber",
+          "city",
+          "email",
+          "ifsc",
+          "legalName",
+          "pan",
+          "postalCode",
+          "state",
+          "street"
+        ],
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "maxLength": 120,
+            "minLength": 2,
+            "type": "string"
+          },
+          "email": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bankAccountNumber": {
+            "minLength": 1,
+            "pattern": "^[0-9]{9,18}$",
+            "type": "string"
+          },
+          "ifsc": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{4}0[A-Z0-9]{6}$",
+            "type": "string"
+          },
+          "pan": {
+            "minLength": 1,
+            "pattern": "^[A-Z]{3}P[A-Z][0-9]{4}[A-Z]$",
+            "type": "string"
+          },
+          "street": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "city": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string"
+          },
+          "postalCode": {
+            "minLength": 1,
+            "pattern": "^[1-9][0-9]{5}$",
+            "type": "string"
+          }
+        }
+      },
+      "PayoutAccountResponse": {
+        "required": [
+          "activatedAt",
+          "bankAccountMasked",
+          "legalName",
+          "panMasked",
+          "providerStatus",
+          "status",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_SET_UP",
+              "PENDING_KYC",
+              "ACTIVE"
+            ]
+          },
+          "legalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "bankAccountMasked": {
+            "type": "string",
+            "description": "e.g. HDFC ••••1234",
+            "nullable": true
+          },
+          "panMasked": {
+            "type": "string",
+            "description": "e.g. ••••••234F",
+            "nullable": true
+          },
+          "providerStatus": {
+            "type": "string",
+            "description": "Gateway's own status, e.g. under_review, needs_clarification",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "HygieneSettingsRequest": {
+        "required": [
+          "publicScoresEnabled"
+        ],
+        "type": "object",
+        "properties": {
+          "publicScoresEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HygieneSettingsResponse": {
+        "required": [
+          "analysisEnabled",
+          "minPublicClips",
+          "publicScoresEnabled",
+          "windowDays"
+        ],
+        "type": "object",
+        "properties": {
+          "publicScoresEnabled": {
+            "type": "boolean"
+          },
+          "minPublicClips": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "analysisEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BillingSettingsRequest": {
+        "required": [
+          "graceDays",
+          "trialDays"
+        ],
+        "type": "object",
+        "properties": {
+          "trialDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "graceDays": {
+            "maximum": 60,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BillingSettingsResponse": {
+        "required": [
+          "graceDays",
+          "gstRateBps",
+          "provider",
+          "simulationAvailable",
+          "trialDays"
+        ],
+        "type": "object",
+        "properties": {
+          "trialDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "graceDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gstRateBps": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "simulationAvailable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlanRequest": {
+        "required": [
+          "active",
+          "features",
+          "name",
+          "pricePaise",
+          "sortOrder"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "pattern": "^[a-z0-9-]{2,40}$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 0,
+            "type": "string"
+          },
+          "pricePaise": {
+            "maximum": 100000000,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          },
+          "features": {
+            "$ref": "#/components/schemas/PlanFeatures"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -3527,6 +5855,19 @@
           }
         }
       },
+      "ClipViewRequest": {
+        "required": [
+          "visitorId"
+        ],
+        "type": "object",
+        "properties": {
+          "visitorId": {
+            "maxLength": 100,
+            "minLength": 8,
+            "type": "string"
+          }
+        }
+      },
       "UploadRequest": {
         "required": [
           "contentType",
@@ -3539,7 +5880,8 @@
             "enum": [
               "MENU_ITEM_IMAGE",
               "CHEF_PHOTO",
-              "RESTAURANT_LOGO"
+              "RESTAURANT_LOGO",
+              "FSSAI_LICENCE"
             ]
           },
           "contentType": {
@@ -3644,17 +5986,13 @@
         "required": [
           "durationSeconds",
           "expiresAt",
-          "thumbnailUrl",
-          "videoUrl"
+          "thumbnailUrl"
         ],
         "type": "object",
         "properties": {
           "durationSeconds": {
             "type": "number",
             "format": "double"
-          },
-          "videoUrl": {
-            "type": "string"
           },
           "thumbnailUrl": {
             "type": "string"
@@ -3663,8 +6001,7 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "nullable": true
+        }
       },
       "OrderItemResponse": {
         "required": [
@@ -3995,8 +6332,7 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "nullable": true
+        }
       },
       "Preparation": {
         "required": [
@@ -4023,8 +6359,56 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "nullable": true
+        }
+      },
+      "HygieneDisputeRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 10,
+            "type": "string"
+          }
+        }
+      },
+      "HygieneDisputeResponse": {
+        "required": [
+          "adminNote",
+          "createdAt",
+          "id",
+          "reason",
+          "resolvedAt",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "adminNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
       },
       "OwnerClipResponse": {
         "required": [
@@ -4038,10 +6422,12 @@
           "orderId",
           "readyAt",
           "retryable",
+          "shareCount",
+          "shared",
           "stationName",
           "status",
           "thumbnailUrl",
-          "videoUrl"
+          "viewCount"
         ],
         "type": "object",
         "properties": {
@@ -4077,12 +6463,9 @@
             "format": "double",
             "nullable": true
           },
-          "videoUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "thumbnailUrl": {
             "type": "string",
+            "description": "READY clips only; play via GET …/clips/{orderId}/playback",
             "nullable": true
           },
           "chefName": {
@@ -4096,6 +6479,20 @@
           "retryable": {
             "type": "boolean",
             "description": "FAILED with raw footage still stored, so it can be rendered again"
+          },
+          "viewCount": {
+            "type": "integer",
+            "description": "Share-page views, one per visitor per day",
+            "format": "int64"
+          },
+          "shareCount": {
+            "type": "integer",
+            "description": "Share links the customer created (including revoked ones)",
+            "format": "int64"
+          },
+          "shared": {
+            "type": "boolean",
+            "description": "The customer has a live share link"
           },
           "createdAt": {
             "type": "string",
@@ -4153,6 +6550,79 @@
           },
           "specialty": {
             "maxLength": 80,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "SubscriptionCheckoutResponse": {
+        "required": [
+          "amountPaise",
+          "description",
+          "keyId",
+          "merchantName",
+          "prefillContact",
+          "prefillName",
+          "provider",
+          "shortUrl",
+          "subscriptionId"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "keyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "subscriptionId": {
+            "type": "string"
+          },
+          "shortUrl": {
+            "type": "string",
+            "description": "Hosted authorisation page, as an alternative",
+            "nullable": true
+          },
+          "merchantName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "amountPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "prefillName": {
+            "type": "string",
+            "nullable": true
+          },
+          "prefillContact": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ConfirmSubscriptionRequest": {
+        "required": [
+          "paymentId",
+          "subscriptionId"
+        ],
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "paymentId": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "signature": {
+            "maxLength": 512,
             "minLength": 0,
             "type": "string"
           }
@@ -4263,6 +6733,31 @@
           }
         }
       },
+      "TipRequest": {
+        "required": [
+          "amountPaise",
+          "chefId",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "chefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CLIP",
+              "CHECKOUT"
+            ]
+          }
+        }
+      },
       "PaymentCheckoutResponse": {
         "required": [
           "amountPaise",
@@ -4310,6 +6805,76 @@
           }
         }
       },
+      "TipCheckoutResponse": {
+        "required": [
+          "checkout",
+          "tip"
+        ],
+        "type": "object",
+        "properties": {
+          "tip": {
+            "$ref": "#/components/schemas/TipResponse"
+          },
+          "checkout": {
+            "$ref": "#/components/schemas/PaymentCheckoutResponse"
+          }
+        }
+      },
+      "TipResponse": {
+        "required": [
+          "amountPaise",
+          "chefId",
+          "chefName",
+          "createdAt",
+          "id",
+          "paidAt",
+          "source",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chefName": {
+            "type": "string"
+          },
+          "amountPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PAID",
+              "TRANSFERRED",
+              "FAILED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CLIP",
+              "CHECKOUT"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "ConfirmPaymentRequest": {
         "required": [
           "providerOrderId",
@@ -4331,6 +6896,31 @@
             "maxLength": 512,
             "minLength": 0,
             "type": "string"
+          }
+        }
+      },
+      "ClipShareResponse": {
+        "required": [
+          "createdAt",
+          "id",
+          "token",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4751,6 +7341,257 @@
           }
         }
       },
+      "ResolveDisputeRequest": {
+        "required": [
+          "decision"
+        ],
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "UPHOLD",
+              "REJECT"
+            ]
+          },
+          "overrideScore": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "format": "double"
+          },
+          "exclude": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "AdminDisputeResponse": {
+        "required": [
+          "dispute",
+          "restaurantId",
+          "restaurantName",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "dispute": {
+            "$ref": "#/components/schemas/HygieneDisputeResponse"
+          },
+          "restaurantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/HygieneResultResponse"
+          }
+        }
+      },
+      "HygieneResultResponse": {
+        "required": [
+          "chefName",
+          "dispute",
+          "effectiveScore",
+          "excluded",
+          "glovesPct",
+          "headCoverPct",
+          "id",
+          "maskPct",
+          "modelVersion",
+          "orderDisplayNumber",
+          "orderId",
+          "overrideNote",
+          "overrideScore",
+          "personFrames",
+          "readyAt",
+          "score",
+          "thumbnailUrl",
+          "violations"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderDisplayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chefName": {
+            "type": "string",
+            "nullable": true
+          },
+          "readyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "modelVersion": {
+            "type": "string"
+          },
+          "personFrames": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "glovesPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "headCoverPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maskPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "score": {
+            "type": "number",
+            "description": "As computed from the model",
+            "format": "double",
+            "nullable": true
+          },
+          "effectiveScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "overrideScore": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "overrideNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "violations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "description": "Up to 3 timestamps (seconds into the clip) per item: gloves, headCover, mask",
+              "items": {
+                "type": "number",
+                "description": "Up to 3 timestamps (seconds into the clip) per item: gloves, headCover, mask",
+                "format": "double"
+              }
+            },
+            "description": "Up to 3 timestamps (seconds into the clip) per item: gloves, headCover, mask"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispute": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HygieneDisputeResponse"
+              }
+            ]
+          }
+        }
+      },
+      "SimulateRequest": {
+        "required": [
+          "event"
+        ],
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": [
+              "ACTIVATED",
+              "CHARGED",
+              "PENDING",
+              "HALTED",
+              "CANCELLED"
+            ]
+          }
+        }
+      },
+      "AdminSubscriptionResponse": {
+        "required": [
+          "currentPeriodEnd",
+          "graceUntil",
+          "paymentMethodReady",
+          "planName",
+          "pricePaise",
+          "providerSubscriptionId",
+          "restaurantId",
+          "restaurantName",
+          "status",
+          "trialEndsAt"
+        ],
+        "type": "object",
+        "properties": {
+          "restaurantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TRIALING",
+              "ACTIVE",
+              "PAST_DUE",
+              "SUSPENDED",
+              "CANCELLED"
+            ]
+          },
+          "planName": {
+            "type": "string"
+          },
+          "pricePaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trialEndsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "graceUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "paymentMethodReady": {
+            "type": "boolean"
+          },
+          "providerSubscriptionId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "OrderStatusChangeRequest": {
         "required": [
           "status"
@@ -4983,12 +7824,38 @@
           }
         }
       },
+      "PublicHygieneScore": {
+        "required": [
+          "clipCount",
+          "score",
+          "windowDays"
+        ],
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "description": "Rolling average, 0–100",
+            "format": "double"
+          },
+          "clipCount": {
+            "type": "integer",
+            "description": "Scored clips in the window it's based on",
+            "format": "int64"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "Only when public hygiene scores are on and enough clips were scored"
+      },
       "RestaurantDetailResponse": {
         "required": [
           "address",
           "city",
           "cuisineTags",
           "deliveryRadiusKm",
+          "hygiene",
           "id",
           "latitude",
           "longitude",
@@ -5062,6 +7929,288 @@
             "items": {
               "$ref": "#/components/schemas/MenuCategoryResponse"
             }
+          },
+          "hygiene": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicHygieneScore"
+              }
+            ]
+          }
+        }
+      },
+      "PublicConsentResponse": {
+        "required": [
+          "text",
+          "textHash",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "textHash": {
+            "type": "string"
+          }
+        }
+      },
+      "PublicClipResponse": {
+        "required": [
+          "chefId",
+          "chefName",
+          "durationSeconds",
+          "linksExpireAt",
+          "recordedAt",
+          "restaurantCity",
+          "restaurantName",
+          "restaurantOrderable",
+          "restaurantSlug",
+          "thumbnailUrl",
+          "title",
+          "videoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "restaurantSlug": {
+            "type": "string"
+          },
+          "restaurantCity": {
+            "type": "string"
+          },
+          "restaurantOrderable": {
+            "type": "boolean",
+            "description": "False when the restaurant isn't taking orders on the platform"
+          },
+          "chefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "chefName": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "videoUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "linksExpireAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PublicChefResponse": {
+        "required": [
+          "bio",
+          "clipCount",
+          "displayName",
+          "followerCount",
+          "hygiene",
+          "id",
+          "photoUrl",
+          "restaurantCity",
+          "restaurantName",
+          "restaurantSlug",
+          "specialty",
+          "tipCount",
+          "tippable",
+          "totalViews"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "restaurantSlug": {
+            "type": "string"
+          },
+          "restaurantCity": {
+            "type": "string"
+          },
+          "clipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalViews": {
+            "type": "integer",
+            "description": "Share-page views across the chef's clips",
+            "format": "int64"
+          },
+          "tipCount": {
+            "type": "integer",
+            "description": "Number of tips received (never amounts)",
+            "format": "int64"
+          },
+          "followerCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tippable": {
+            "type": "boolean",
+            "description": "Payouts set up: customers can tip this chef"
+          },
+          "hygiene": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicHygieneScore"
+              }
+            ]
+          }
+        }
+      },
+      "ChefScore": {
+        "required": [
+          "chefId",
+          "clipCount",
+          "displayName",
+          "score",
+          "shownPublicly"
+        ],
+        "type": "object",
+        "properties": {
+          "chefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "clipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shownPublicly": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HygieneOverviewResponse": {
+        "required": [
+          "chefs",
+          "clipCount",
+          "minPublicClips",
+          "publicScoresEnabled",
+          "score",
+          "shownPublicly",
+          "trend",
+          "windowDays",
+          "worst"
+        ],
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "description": "Rolling average over windowDays; null = no scored clips",
+            "format": "double",
+            "nullable": true
+          },
+          "clipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minPublicClips": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "publicScoresEnabled": {
+            "type": "boolean",
+            "description": "An admin has turned public hygiene scores on for the platform"
+          },
+          "shownPublicly": {
+            "type": "boolean",
+            "description": "Customers currently see the score (enabled and at least minPublicClips)"
+          },
+          "trend": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrendPoint"
+            }
+          },
+          "chefs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChefScore"
+            }
+          },
+          "worst": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HygieneResultResponse"
+            }
+          }
+        }
+      },
+      "TrendPoint": {
+        "required": [
+          "clips",
+          "score",
+          "weekStart"
+        ],
+        "type": "object",
+        "properties": {
+          "weekStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "score": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "clips": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5099,6 +8248,80 @@
           }
         }
       },
+      "ClipPlaybackResponse": {
+        "required": [
+          "chefName",
+          "clipExpiresAt",
+          "displayNumber",
+          "downloadFilename",
+          "downloadUrl",
+          "durationSeconds",
+          "linksExpireAt",
+          "orderId",
+          "restaurantName",
+          "share",
+          "thumbnailUrl",
+          "videoUrl",
+          "viewCount"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "chefName": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "videoUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "description": "Saves the file as downloadFilename (Content-Disposition: attachment)"
+          },
+          "downloadFilename": {
+            "type": "string"
+          },
+          "linksExpireAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clipExpiresAt": {
+            "type": "string",
+            "description": "When the clip itself is deleted",
+            "format": "date-time"
+          },
+          "viewCount": {
+            "type": "integer",
+            "description": "Views of the public share page, one per visitor per day",
+            "format": "int64"
+          },
+          "share": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClipShareResponse"
+              }
+            ]
+          }
+        }
+      },
       "PageResponseOrderResponse": {
         "required": [
           "items",
@@ -5133,6 +8356,114 @@
           }
         }
       },
+      "OrderTipsResponse": {
+        "required": [
+          "chefs",
+          "maxPaise",
+          "minPaise",
+          "presetsPaise",
+          "tips"
+        ],
+        "type": "object",
+        "properties": {
+          "chefs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TippableChef"
+            }
+          },
+          "tips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TipResponse"
+            }
+          },
+          "presetsPaise": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "minPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxPaise": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TippableChef": {
+        "required": [
+          "chefId",
+          "cookedThisOrder",
+          "displayName",
+          "photoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "chefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "cookedThisOrder": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FollowedChefResponse": {
+        "required": [
+          "chefId",
+          "displayName",
+          "photoUrl",
+          "restaurantId",
+          "restaurantName",
+          "restaurantSlug",
+          "specialty",
+          "tippable"
+        ],
+        "type": "object",
+        "properties": {
+          "chefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          },
+          "restaurantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "restaurantName": {
+            "type": "string"
+          },
+          "restaurantSlug": {
+            "type": "string"
+          },
+          "tippable": {
+            "type": "boolean",
+            "description": "Payouts ACTIVE: tips can be offered"
+          }
+        }
+      },
       "HealthResponse": {
         "required": [
           "status",
@@ -5146,6 +8477,123 @@
           "time": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "FollowStatusResponse": {
+        "required": [
+          "following"
+        ],
+        "type": "object",
+        "properties": {
+          "following": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChefTipResponse": {
+        "required": [
+          "amountPaise",
+          "chefAmountPaise",
+          "createdAt",
+          "id",
+          "orderDisplayNumber",
+          "paidAt",
+          "source",
+          "status",
+          "transferredAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderDisplayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "chefAmountPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PAID",
+              "TRANSFERRED",
+              "FAILED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "CLIP",
+              "CHECKOUT"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ChefTipsPage": {
+        "required": [
+          "items",
+          "page",
+          "size",
+          "tipCount",
+          "totalChefAmountPaise",
+          "totalItems",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChefTipResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalChefAmountPaise": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -5216,6 +8664,96 @@
           }
         }
       },
+      "ChefClipResponse": {
+        "required": [
+          "businessDate",
+          "createdAt",
+          "durationSeconds",
+          "orderDisplayNumber",
+          "readyAt",
+          "status",
+          "thumbnailUrl",
+          "viewCount"
+        ],
+        "type": "object",
+        "properties": {
+          "orderDisplayNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "NOT_AVAILABLE",
+              "EXPIRED"
+            ]
+          },
+          "durationSeconds": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "viewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PageResponseChefClipResponse": {
+        "required": [
+          "items",
+          "page",
+          "size",
+          "totalItems",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChefClipResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PageResponseUserResponse": {
         "required": [
           "items",
@@ -5230,6 +8768,206 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdminRestaurantDetailResponse": {
+        "required": [
+          "compliance",
+          "invoices",
+          "owner",
+          "restaurant",
+          "subscription"
+        ],
+        "type": "object",
+        "properties": {
+          "restaurant": {
+            "$ref": "#/components/schemas/RestaurantResponse"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "compliance": {
+            "$ref": "#/components/schemas/ComplianceResponse"
+          },
+          "subscription": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AdminSubscriptionResponse"
+              }
+            ]
+          },
+          "invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceResponse"
+            }
+          }
+        }
+      },
+      "Day": {
+        "required": [
+          "clipViews",
+          "clips",
+          "date",
+          "gmvPaise",
+          "orders",
+          "shares",
+          "tips"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "orders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gmvPaise": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clips": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "clipViews": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shares": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tips": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MetricsResponse": {
+        "required": [
+          "activeRestaurants",
+          "days",
+          "mrrPaise",
+          "series",
+          "subscriptionsByStatus",
+          "totals"
+        ],
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Day"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/Day"
+          },
+          "activeRestaurants": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mrrPaise": {
+            "type": "integer",
+            "description": "Monthly recurring revenue: plan prices (excl. GST) of ACTIVE subscriptions",
+            "format": "int64"
+          },
+          "subscriptionsByStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "AuditEntryResponse": {
+        "required": [
+          "action",
+          "adminId",
+          "adminName",
+          "createdAt",
+          "details",
+          "id",
+          "targetId",
+          "targetType"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adminId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adminName": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "targetType": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string",
+            "nullable": true
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PageResponseAuditEntryResponse": {
+        "required": [
+          "items",
+          "page",
+          "size",
+          "totalItems",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntryResponse"
             }
           },
           "page": {

@@ -22,6 +22,7 @@
         <testcontainers.version>1.21.4</testcontainers.version>
         <jjwt.version>0.12.6</jjwt.version>
         <awssdk.version>2.39.6</awssdk.version>
+        <sentry.version>8.58.0</sentry.version>
         <zxing.version>3.5.3</zxing.version>
         <openpdf.version>3.0.5</openpdf.version>
         <springdoc.version>2.8.8</springdoc.version>
@@ -123,6 +124,17 @@
         </dependency>
 
         <!-- Actuator -->
+        <!-- Error reporting (inactive without SENTRY_DSN). -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-logback</artifactId>
+            <version>${sentry.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>

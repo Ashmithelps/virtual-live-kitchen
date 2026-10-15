@@ -15,26 +15,27 @@ streaming is deferred to a later milestone.
 
 ```
 /
-├── backend/        Spring Boot 3, Java 21, Maven — modular monolith, package-by-feature
+├── backend/        Spring Boot 3.4, Java 21, Maven — modular monolith, package-by-feature
 │   └── src/main/java/com/virtualkitchen/
-│       ├── auth/
-│       ├── restaurant/
-│       ├── menu/
-│       ├── order/
-│       ├── kitchen/
-│       ├── clip/
-│       ├── payment/
-│       ├── tip/
-│       ├── hygiene/
-│       ├── billing/
-│       └── admin/
-├── web/            Next.js App Router, TypeScript, Tailwind
+│       ├── auth/  restaurant/  menu/  order/  kitchen/  clip/  payment/  tip/  hygiene/  billing/  admin/
+│       ├── realtime/       STOMP/SockJS live updates
+│       ├── common/         error, jobs, storage, ratelimit, settings, openapi, … (shared infrastructure)
+│       ├── config/         SecurityConfig, ProductionGuard
+│       └── devseed/        demo data (profile dev-seed only)
+├── web/            Next.js 16 App Router, TypeScript, Tailwind 4 (deployed to Vercel)
 │   └── app/
-│       ├── (customer)/     customer-facing ordering site
-│       ├── (restaurant)/   restaurant owner dashboard
-│       └── (kitchen)/      kitchen screen (tablet UI for chefs)
-├── ai-service/     Python FastAPI — hygiene detection (added in a later milestone)
-└── infra/          docker-compose.yml (Postgres 16, MinIO as local S3)
+│       ├── (customer)/     customer site + public pages (share links, chef pages, legal pages)
+│       ├── (app)/          signed-in staff areas: /dashboard (owners), /admin, /chef/* (chef app)
+│       ├── (kitchen)/      /kitchen — kitchen display (KDS) PWA for tablets
+│       ├── (station)/      /station — station-phone recorder PWA
+│       ├── (restaurant)/   empty leftover of the original plan; the owner dashboard is (app)/dashboard
+│       └── api/            route handlers: session cookies (/api/session/*), dev login
+├── ai-service/     Python 3.11 FastAPI + YOLO — hygiene detection (M13)
+├── infra/          docker-compose.yml (local Postgres 16 + RustFS as S3), docker-compose.prod.yml, caddy/,
+│                   backup/, deploy/, prod/*.env.example (M15)
+├── .github/workflows/   ci.yml, deploy.yml (M15)
+├── PRODUCTION.md   deployment + go-live checklist
+└── README.md       local setup and per-milestone walkthroughs (the manual checks)
 ```
 
 ---
@@ -106,30 +107,104 @@ any application code.
 | 3 | Restaurant domain: restaurants, menu, tables, stations, chefs, recording consent, image uploads | Done | V3 |
 | 4 | Orders: state machine, daily display numbers, mock payments, chef/station on PREPARING | Done | V4 |
 | 5 | Table QR: printable PDF, table sessions, QR-locked dine-in, guest checkout | Done | V5 |
-| 6 | Customer web app (Next.js): browse, menu, QR dine-in, checkout, order tracking, login | Done | none |
-| 7 | Kitchen display (KDS) PWA + STOMP/SockJS live order updates | Done | none |
-| 8 | Real payments: Razorpay checkout + webhooks, payments table, auto refunds, pay-at-counter | Done | V6 |
+| 6 | Customer web app (Next.js): browse, menu, QR dine-in, checkout, order tracking, login | Committed; manual check pending | none |
+| 7 | Kitchen display (KDS) PWA + STOMP/SockJS live order updates | Committed; manual check pending | none |
+| 8 | Real payments: Razorpay checkout + webhooks, payments table, auto refunds, pay-at-counter | Committed; manual check pending | V6 |
 | 9 | Station recorder: phone pairing, device auth, 60 s chunk ring buffer, footage windows on READY, uploads | Built, awaiting user's manual check | V7 |
 | 10 | Clip pipeline: Postgres job queue, FFmpeg render (cut, timelapse, overlay, 720p H.264), clips table, retention, READY push | Built, awaiting user's manual check | V8 |
 | 10.5 | Complete frontend for M1–10 (role-aware app, owner dashboard, minimal admin, chef settings, station debug) + dev tooling (dev-seed profile, role switcher, Playwright) | Built, awaiting user's manual check | V9 |
-| 11 | Not yet defined (clip player + sharing per the M10.5 spec) | — | next: V10 |
+| 11 | Clip viewing & sharing: 10-min watch/download links, public share links /c/{token} with OG tags, revoke, per-visitor-per-day view counts, chef profile, dashboard views/shares | Built, awaiting user's manual check | V10 |
+| 12 | Chef profiles & tipping: Razorpay Route linked accounts (payout onboarding), tips as transfer orders, follows, public chef page /chef/[id], chef "My tips"/"My clips", owner tip counts | Built, awaiting user's manual check | V11 |
+| 13 | AI hygiene scoring: ai-service (FastAPI/YOLO/OpenCV), HYGIENE_ANALYZE job lane, hygiene_results, rolling scores, owner trend/worst clips/disputes, admin review + public switch | Built, awaiting user's manual check | V12 |
+| 14 | Restaurant billing & admin panel: plans (admin-priced), Razorpay Subscriptions + webhooks, trial/grace/suspension, GST invoice PDFs, owner Billing tab, FSSAI/GST details, admin overview metrics, restaurant detail, billing admin, audit log | Built, awaiting user's manual check | V13 |
+| 15 | Production deployment: prod Dockerfiles + compose (Caddy, backend, ai-service, backup) for one Indian-region VM, managed Postgres, R2, GitHub Actions CI/CD over SSH with auto-rollback, Vercel, prod profile (JSON logs, Flyway, health), Sentry, daily backups + restore drill, public rate limits, legal pages, PRODUCTION.md | Built, awaiting user's manual check | none |
+| 16 | Not yet defined | — | next: V14 |
 
-Note: the user's last commit message ("completed till milestone 8 and tests pending for 6,7,8") says the manual
-checks for milestones 6–8 are still pending; 9, 10 and 10.5 have not been checked either. Milestone 10's checks are in
-the README "Kitchen clips" section; 10.5's (dev-seed stack, role-by-role browser walkthrough, `npm run test:e2e`) are in
-the README "Trying the whole product" section. Next session: ask whether those checks passed before defining Milestone 11.
-Milestones announced so far: 11 = clip player and sharing on the order page, 14 = full admin panel.
+**Manual checks.** The user has not confirmed the manual checks of milestones 6–15. Their last commit message
+("completed till milestone 8 and tests pending for 6,7,8") says the checks for 6–8 are still pending, and each later
+milestone was followed straight away by the next one. Before defining the next milestone, ask which checks have
+passed. Where each milestone's checks live (README sections unless noted):
 
-`ai-service/` contains only `.env.example`. The owner dashboard lives at `web/app/(app)/dashboard` (the empty
-`(restaurant)` group from the original layout was never used).
+| Milestone | Checks |
+|---|---|
+| 6, 10.5 | "Trying the whole product (dev seed)" (role-by-role walkthrough, `npm run test:e2e`) |
+| 7 | "Trying the whole product" (KDS part) |
+| 8 | "Payments (Razorpay test mode)" |
+| 9 | "Station recorder phones (`/station`)" |
+| 10 | "Kitchen clips (processing)" |
+| 11 | "Watching and sharing clips" |
+| 12 | "Chef payouts and tips (Razorpay Route)" |
+| 13 | "4. AI hygiene scoring (ai-service)" |
+| 14 | "Restaurant billing and the admin panel" |
+| 15 | `PRODUCTION.md` (go-live checklist) and the README "Production" section |
+
+The git history has only three commits (up to M8 plus a "little frontend" commit). Everything from M9 to M15 is
+uncommitted in the working tree. Don't commit unless the user asks.
+
+`ai-service/` (M13): Python 3.11 FastAPI service, see its README. NO fine-tuned PPE weights are committed (none could
+be produced here); with the stock COCO `yolo11n.pt` only `person` is detected and every item is "not evaluated".
+
+### Database migrations (Flyway, `backend/src/main/resources/db/migration`)
+
+| Version | Adds |
+|---|---|
+| V1 | baseline (empty) |
+| V2 | `users`, `refresh_tokens` |
+| V3 | `restaurants`, `restaurant_opening_hours`, `menu_categories`, `menu_items`, `dining_tables`, `kitchen_stations`, `chefs`, `station_assignments`, `chef_consents` |
+| V4 | `orders`, `order_items`, `order_daily_counters` |
+| V5 | guests: `users.password_hash` nullable for CUSTOMER only |
+| V6 | `payments` (one row per attempt), `payment_webhook_events` (dedupe) |
+| V7 | station pairing columns on `kitchen_stations`, `orders.clip_status`, `clip_requests` |
+| V8 | `jobs` (queue), `clips`, `clip_requests.raw_deleted_at`, `restaurants.logo_key` |
+| V9 | `kitchen_stations.device_last_seen_at` |
+| V10 | `clip_shares`, `clip_views` |
+| V11 | `chef_payout_accounts`, `tips`, `chef_follows` |
+| V12 | `hygiene_results`, `hygiene_disputes`, `platform_settings` |
+| V13 | `plans`, `restaurant_subscriptions`, `invoice_counters`, `invoices`, `admin_audit_log`; compliance + `suspended_reason` columns on `restaurants`; trial backfill |
+
+The next migration is **V14**.
+
+### Domain states (enums)
+
+- `Role`: CUSTOMER, RESTAURANT_OWNER, CHEF, ADMIN. `UserStatus`: ACTIVE, PENDING_APPROVAL (new owners), DISABLED
+  (removed chefs). `RestaurantStatus`: PENDING_APPROVAL → ACTIVE ↔ SUSPENDED; `suspended_reason` is ADMIN or BILLING,
+  and only a BILLING suspension is lifted by a payment.
+- `OrderStatus` (`OrderStateMachine`):
+  - common moves: PLACED → ACCEPTED | REJECTED | CANCELLED, ACCEPTED → PREPARING | CANCELLED, PREPARING → READY;
+  - READY → SERVED (dine-in), PICKED_UP (takeaway) or OUT_FOR_DELIVERY → DELIVERED (delivery);
+  - customers may only cancel, chefs may only move to PREPARING/READY, owners may make any legal move.
+
+  Illegal moves → 409, moves not allowed for the actor → 403. `OrderType`: DINE_IN, TAKEAWAY, DELIVERY.
+- `PaymentStatus` (on the order): PENDING (online, not paid; hidden from the restaurant), PAID, FAILED, PAY_LATER,
+  REFUND_PENDING, REFUNDED. `PaymentAttemptStatus` (`payments` rows): CREATED, CAPTURED, FAILED, REFUND_REQUESTED,
+  REFUND_PENDING, REFUNDED.
+- `ClipStatus` (order/clip): PENDING → UPLOADED → PROCESSING → READY → EXPIRED, or FAILED / NOT_AVAILABLE.
+  `ClipRequestStatus`: PENDING_UPLOAD, UPLOADED, NOT_AVAILABLE.
+- `TipStatus`: CREATED → PAID → TRANSFERRED, or FAILED. `PayoutStatus`: NOT_SET_UP (no row), PENDING_KYC, ACTIVE.
+- `SubscriptionStatus`: TRIALING, ACTIVE, PAST_DUE, SUSPENDED, CANCELLED.
+
+### API surface (controller roots)
+
+- Public: `/api/auth/*`, `GET /api/restaurants[/{slug}]`, `GET /api/tables/{qrToken}`, `/api/guest/orders/**`
+  (order-scoped token), `/api/public/{clips,chefs,legal}/**`, `GET /api/time`, `/api/health`, `/actuator/health/**`,
+  `/ws` (STOMP authenticates on CONNECT), `POST /api/payments/razorpay/webhook`, `POST /api/station-device/pair`.
+- Any signed-in user: `GET /api/me`. Customer: `/api/orders/**` (incl. `/{id}/payment`, `/{id}/clip`, `/{id}/tips`), `/api/chefs/{id}/follow`,
+  `/api/me/followed-chefs`.
+- Owner: `/api/owner/restaurants/{id}/{menu,tables,stations,chefs,orders,clips,hygiene,billing,uploads,compliance}`.
+- Chef: `/api/chef/{orders,consent,payout-account,tips,clips,me}`.
+- Station phone (`X-Device-Token`): `/api/station-device/**`, `/api/clips/{orderId}/**`.
+- Admin: `/api/admin/{owners,restaurants,users,clips,hygiene,billing,metrics,audit}`.
 
 ### Backend map (`com.virtualkitchen`)
 
-- `config/SecurityConfig`: stateless JWT filter chain, CORS, `@EnableMethodSecurity`, public routes
-  (`/api/auth/*`, `GET /api/restaurants/**`, `GET /api/tables/*`, `/api/guest/**`, `/api/health`).
+- `config/SecurityConfig`: stateless JWT filter chain, CORS (`CORS_ALLOWED_ORIGINS`, also used for the `/ws` origin
+  check), `@EnableMethodSecurity`, and the public routes listed under "API surface" above. Everything else needs a JWT.
 - `common/`: `error/` (`ApiException`, `GlobalExceptionHandler`, `ErrorResponseWriter`), `crypto/SecureTokens`
   (random tokens, SHA-256), `storage/ObjectStorage` (presigned S3 PUT/GET), `geo/Geo` (haversine),
-  `web/PageResponse`, `config/` (`Clock` bean, `WebProperties`, scheduling).
+  `web/PageResponse`, `config/` (`Clock` bean, `WebProperties`, scheduling), `health/` (`/api/health`), `jobs/` (queue,
+  below), `settings/PlatformSettings` (runtime key/value settings in `platform_settings`: hygiene public switch, billing
+  trial/grace days), `billing/PlanLimits` and `hygiene/PublicHygieneScores` (interfaces other modules depend on, so
+  they don't import `billing`/`hygiene` directly), `ratelimit/` (M15).
 - `auth/`: `AuthService` (register / login / refresh / logout), `credential/CredentialVerifier` (OTP plugs in as
   a new verifier), `token/` (`JwtService`, `RefreshTokenService`, `ScopedTokens`), `user/` (`User`, `UserAccountService`,
   `AdminSeeder`), `ratelimit/LoginRateLimiter`, `security/` (JWT filter, 401/403 JSON handlers).
@@ -149,8 +224,30 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - `order/OrderPaymentService`: checkout start/confirm, idempotent `applyCaptured/applyFailed/applyRefundProcessed`,
   refunds sent after commit plus a 2-minute retry job that reconciles with the gateway first, counter
   settlement, and the unpaid-bills list.
-- `admin/`: approve owners (`/api/admin/owners`), approve or suspend restaurants (`/api/admin/restaurants`),
-  read-only paged user list (`GET /api/admin/users?role=&page=&size=`, `AdminUserListController`).
+- `admin/`: approve owners (`/api/admin/owners`), approve or suspend restaurants (`/api/admin/restaurants`, plus
+  `GET /{id}` detail: owner, compliance with a presigned FSSAI document URL, subscription, invoices), read-only paged
+  user list (`GET /api/admin/users?role=&page=&size=`, `AdminUserListController`). `AdminAudit.audited(adminId, action,
+  targetType, targetId, details, work)` runs the change and writes `admin_audit_log` in one transaction; every admin
+  mutation and every view of private material (restaurant detail/licence, clip playback) is recorded.
+  `AdminPanelController`: `GET /api/admin/metrics?days=` (`AdminMetricsService`, IST days: orders placed, GMV = totals of
+  orders not rejected/cancelled, clips READY, clip views, shares, paid tips; active restaurants; MRR = plan prices of ACTIVE subscriptions) and
+  `GET /api/admin/audit?action=&page=&size=`.
+- `billing/` (M14): `plans` (price_paise excl. GST, `PlanFeatures` jsonb: maxStations, clipRetentionDays, analytics;
+  the Razorpay plan id is cached per price in `provider_plan_id/provider_amount_paise`), `restaurant_subscriptions`
+  (one per restaurant; TRIALING → ACTIVE ↔ PAST_DUE → SUSPENDED, CANCELLED; `pending_plan_id` = scheduled downgrade).
+  `BillingService`: `RestaurantCreatedEvent` starts the trial (`PlatformSettings` `billing.trial_days`, default
+  `BILLING_TRIAL_DAYS`); checkout creates a gateway subscription starting at trial end (`SubscriptionProvider`: mock or
+  `RazorpaySubscriptionProvider`); upgrades apply now, downgrades at the next charge while ACTIVE; `apply*` methods are
+  idempotent and fed by `RazorpayWebhookService` (`subscription.*`) or `AdminBillingService.simulate` (mock only).
+  Hourly `enforce()`: unpaid trial end → PAST_DUE with grace (`billing.grace_days`), grace or paid-up cancellation over
+  → SUSPENDED + `RestaurantService.suspendForBilling` (`suspended_reason` BILLING; a charge reinstates only BILLING
+  suspensions). It implements `common/billing/PlanLimits` (station count on create, clip `expires_at` from retention).
+  `InvoiceService.issue` (per gateway payment id, inside the charge transaction): numbers `PREFIX/FY/00001` via the
+  `invoice_counters` upsert, `GstSplit.ofTotal` back-computes taxable + CGST/SGST (same state) or IGST, buyer snapshot;
+  `InvoicePdfRenderer` (OpenPDF). Owner `/api/owner/restaurants/{id}/billing` (GET, `checkout`, `checkout/confirm`,
+  `PUT plan`, `cancel`, `invoices/{id}.pdf`); admin `/api/admin/billing` (plans CRUD, settings, subscriptions,
+  `restaurants/{id}/simulate`, invoice PDF). Restaurant compliance: `GET|PUT /api/owner/restaurants/{id}/compliance`
+  (FSSAI 14 digits + document key `FSSAI_LICENCE` (PDF/image), legal name, GSTIN whose prefix must match the state).
 - `devseed/DevSeeder`: profile `dev-seed` only (refuses to start with `prod`/`production`/`staging`; needs
   `DEV_SEED_PASSWORD`). Idempotently creates admin `+919000000001`, owner `…02` with the approved restaurant
   "Dev Spice Kitchen" (`/r/dev-spice-kitchen`, 2 categories, 8 items, tables T1–T3, stations Tandoor/Curry),
@@ -195,9 +292,68 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - `clip/OwnerClipService` + `OwnerClipController`: `GET /api/owner/restaurants/{id}/clips?status=&page=&size=` (SQL join
   of clips/orders/chefs/stations, presigned links for READY) and `POST …/clips/{orderId}/retry` (FAILED only and only
   while raw footage still exists; clip → PENDING, order clipStatus → UPLOADED, re-enqueues `CLIP_PROCESS`).
+- `clip/ClipPlaybackService` (M11): watch + download links presigned for `app.clips.watch-url-ttl` (10m;
+  download uses `response-content-disposition: attachment; filename="{slug}-order-{n}.mp4"`), issued only via
+  `GET /api/orders/{id}/clip` (customer), `GET /api/guest/orders/{id}/clip` (guest token),
+  `GET /api/owner/restaurants/{rid}/clips/{orderId}/playback` and `GET /api/admin/clips/{orderId}/playback`.
+  `OrderResponse.clip` (`ClipView`) carries only duration, thumbnail and expiry, because chefs and the restaurant topic
+  see orders too. Share links: `POST|DELETE …/clip/share` (customer or guest; one active link per clip, token stored
+  as-is in `clip_shares` so it can be copied again; revoke sets `revoked_at`). Public: `GET /api/public/clips/{token}`
+  (404 revoked/unknown, 410 expired; no customer data) and `POST /api/public/clips/{token}/views {visitorId}`
+  (`clip_views` PK clip+IST date+sha256(visitorId) → one view per visitor per day). `GET /api/public/chefs/{id}`
+  (`PublicChefController`; active chefs of ACTIVE restaurants). `/api/public/**` is permitted in `SecurityConfig`.
+  `OwnerClipResponse` has `viewCount`, `shareCount`, `shared` and no video link.
+- `tip/` (M12): money never rests with the platform. `PayoutProvider` (payment pkg; `RazorpayPayoutProvider` /
+  `MockPayoutProvider`): Route linked account = `POST /v2/accounts` (type route, individual, PAN) → stakeholder → Route
+  product → `PATCH` settlements (bank). `RazorpayClient` uses the JDK `HttpClient` factory because `HttpURLConnection`
+  can't send PATCH. `chef_payout_accounts` stores only account/product ids, status (`PayoutStatus` NOT_SET_UP = no row,
+  PENDING_KYC, ACTIVE), legal name, bank code (IFSC first 4), last 4 of the account and PAN; request DTO `toString()`s
+  mask. Mock: new accounts are under_review and become activated on the next fetch (`POST /api/chef/payout-account/refresh`).
+  Endpoints: `GET|PUT /api/chef/payout-account`, `POST …/refresh`. Legal name/PAN can't change after set-up (409).
+  Tips: `TipService` creates a `tips` row (CREATED), then a gateway order with `transfers[{account, amount = amount −
+  platform fee (app.tips.platform-fee-bps, default 0), on_hold:false}]`; confirm (signature + fetch, like orders) or the
+  `payment.captured` webhook → PAID; `transfer.processed` → TRANSFERRED (mock: instantly); `transfer.failed` is logged
+  as an ERROR (money held at Razorpay; retry from Dashboard). Eligible chefs on an order: the one who cooked it, or
+  chefs the customer follows at that restaurant, and only with ACTIVE payouts. Customer `GET|POST /api/orders/{id}/tips`,
+  `POST …/tips/{tipId}/confirm`; guest equivalents under `/api/guest/orders/{id}/tips`; chef `GET /api/chef/tips`
+  (paged, totals; no customer data). Follows: `chef_follows`, `PUT|DELETE|GET /api/chefs/{id}/follow`,
+  `GET /api/me/followed-chefs?restaurantId=` (CUSTOMER). The Razorpay webhook now dispatches tips before food orders,
+  plus `transfer.*` and `product.route.*` (applied from the signed payload, no gateway call inside the transaction).
+- `kitchen/chef/ChefStats`: counts for `PublicChefResponse` (clips, views, tips count, followers, tippable,
+  `hygieneScore` null) and `ChefResponse.tipCount/payoutStatus` for owners (counts, never amounts).
+- `clip/ChefClipController`: `GET /api/chef/clips` ("My clips": thumbnails + view counts, no watch links).
+- `hygiene/` (M13): `ClipLifecycle.finish` publishes `ClipReadyEvent`; `HygieneScheduler` (AFTER_COMMIT, own
+  REQUIRES_NEW tx, swallowed errors) enqueues `HYGIENE_ANALYZE` when `app.hygiene.enabled`. `HygieneJob` runs in job
+  lane "hygiene" (`app.jobs.lanes.hygiene`, `JobHandler.lane()`, `JobWorker` starts threads per lane): presigns the
+  video via `ObjectStorage.clipUrlVia(AI_VIDEO_S3_ENDPOINT, …)` (SigV4 signs the host, so the URL must be signed for
+  the address the AI container uses), calls `HygieneClient` (X-Api-Key; 4xx other than 401/408/429 → permanent),
+  stores `hygiene_results` (one row per clip+model_version; newest row = the clip's result; per-item %, score = mean of
+  judged items via `HygieneScoring`, violations jsonb). `HygieneService`: effective score = override, or null if
+  excluded, else model score; rolling averages over clips READY within `app.hygiene.window`; implements
+  `common/hygiene/PublicHygieneScores` (used by `RestaurantDetailResponse.hygiene` and `PublicChefResponse.hygiene`):
+  only when `platform_settings['hygiene.public_scores_enabled']` is true and clips ≥ `min-public-clips`.
+  Endpoints: owner `GET /api/owner/restaurants/{id}/hygiene` (score, weekly trend, chefs, 10 worst), `POST
+  …/hygiene/results/{resultId}/disputes`; admin `GET /api/admin/hygiene/disputes?status=`, `POST
+  …/disputes/{id}/resolve` (UPHOLD + overrideScore | exclude, or REJECT), `GET|PUT /api/admin/hygiene/settings`.
 - `common/time/TimeController`: public `GET /api/time` for device clock sync.
+- `common/ratelimit/` (M15): `PublicRateLimitFilter` (servlet filter before security) + `PublicRateLimiter` (in-memory token
+  buckets per rule + client IP; rules in `app.rate-limit.rules`: `auth` POST login/register/refresh/pair 30/min,
+  `public-write` 60/min, `public-read` GET 300/min; first match wins; 429 + Retry-After in the standard error shape).
+  `ClientIp`: trusts `X-Client-IP` only with `X-Proxy-Secret` = `BACKEND_PROXY_SECRET` (the Vercel server sends both,
+  `web/lib/server/proxy-headers.ts`), else the peer address (Caddy's X-Forwarded-For via `forward-headers-strategy`).
+  Disabled in `application-test.yml`; `RateLimitIT` enables it.
+- `config/ProductionGuard` (profile `prod`): refuses to start with mock payments, Razorpay test keys, empty webhook
+  secret, non-https CORS/web/storage, short proxy secret, rate limiting off, or `dev-seed`; `PRODUCTION_GUARD_ALLOW`
+  waives named checks (not dev-seed) for staging rehearsals.
+- `application-prod.yml`: ECS JSON console logs, forward headers, graceful shutdown, health details only when
+  authorised, API docs off, `create-buckets` off. Always on: Hikari `connectTimeout` 10 s / `socketTimeout` 30 s
+  (`DB_SOCKET_TIMEOUT_SECONDS`), actuator liveness/readiness probes. Sentry (`sentry-spring-boot-starter-jakarta` +
+  `sentry-logback` 8.58.0; ERROR logs + unhandled exceptions, `send-default-pii: false`, off without `SENTRY_DSN`).
+- `kitchen/consent/PublicConsentController`: `GET /api/public/legal/recording-consent` (version, text, hash) for the
+  web's `/recording-consent` page.
 - `common/openapi/OpenApiConfig`: springdoc spec at `/v3/api-docs` (OpenAPI 3.0) and Swagger UI at `/swagger-ui.html`.
-  Every field of a response-only schema is marked required; nullable fields carry `@Schema(nullable = true)`.
+  Every field of a response-only schema is marked required; nullable fields carry `@Schema(nullable = true)`
+  (object fields become `allOf` + nullable; `nullable` is stripped from component schemas, where springdoc leaks it).
 
 ### Web map (`web/`, Next.js 16 App Router, TypeScript, Tailwind 4, TanStack Query 5)
 
@@ -206,8 +362,8 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - Customer pages: `/` (city + filters), `/r/[slug]` (menu, veg filter, cart bar), `/t/[qrToken]` (saves the table
   session, then opens `/r/[slug]` in dine-in mode), `/checkout?r=<slug>` (client-side delivery-radius check via
   `lib/geo.ts`; staff accounts are told to log out), `/orders/[id]` (live over STOMP with 5 s polling fallback,
-  Razorpay/mock payment panel with success/failure banners, cancel, refund notes, clip status card showing only the
-  thumbnail when READY; the player comes in M11), `/orders`, `/login` (log in + customer sign-up),
+  Razorpay/mock payment panel with success/failure banners, cancel, refund notes,
+  `components/clip/order-clip.tsx` clip card), `/orders`, `/login` (log in + customer sign-up),
   `/register/owner`, `/pending` (owners awaiting approval; "Check again" refreshes the session), `/forbidden`,
   root `app/not-found.tsx`.
 - Owner dashboard `/dashboard`: restaurant list → `/dashboard/new`, and per restaurant (`[restaurantId]/layout.tsx`
@@ -218,8 +374,40 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
   (filter, thumbnail → inline player, Retry, reason text), `profile` (`components/dashboard/restaurant-form.tsx`, also
   used by `new`). Shared: `lib/owner/{queries,uploads,status}.ts`, `components/dashboard/confirm-button.tsx`
   (two-click confirm instead of browser dialogs).
-- Admin `/admin` (pending owners → approve; restaurants by status → approve/reinstate/suspend) and `/admin/users`.
+- Clips (M11): `components/clip/order-clip.tsx` (Being prepared + progress animation, player with poster, Download via
+  a fresh link, Share = Web Share API else copy (`lib/share.ts`), public link box, "Turn off link"; the player's src is
+  kept stable and re-fetched only on error, since links last 10 min). Public share page `/c/[shareToken]` is a server
+  component (`lib/api/server.ts`, React `cache`) with `generateMetadata` (OG `video.other` + `summary_large_image`,
+  noindex) and `og.jpg/route.ts`, which proxies the thumbnail at a stable URL for crawlers; the client part
+  (`components/clip/shared-clip.tsx`) records a view with `lib/visitor.ts`. `/chefs/[chefId]` public chef page.
+  `metadataBase` = `SITE_URL` (must match the backend's `WEB_BASE_URL`). Next streams metadata but sends it blocking
+  to WhatsApp/facebookexternalhit/Twitterbot etc. (its default `htmlLimitedBots`).
+- Tips & chefs (M12): public chef page `/chef/[chefId]` (server component; stats, hygiene placeholder,
+  `components/tip/follow-button.tsx`); `/chefs/[id]` permanently redirects there. The chef app lives in
+  `app/(app)/chef/(me)/` (guarded layout; `payouts`, `tips`, `clips`, `settings`) so the public `/chef/[chefId]` in
+  `(customer)` isn't guarded. `components/tip/tip-panel.tsx` ("Loved watching Chef X make this?", presets + custom,
+  Razorpay or mock approve) appears under the clip once ≥ 80% has played, or at the top of the order page when checkout
+  passed `?tipChef=&tipAmount=` (checkout's "Tip a chef you follow" section; the tip is paid after the order). `lib/tips.ts`.
+- Hygiene (M13): dashboard tab `hygiene` (score card, CSS bar trend, chef table, `components/hygiene/result-card.tsx`
+  with violation chips that load a playback URL and seek), admin `/admin/hygiene` (switch + dispute queue), badges on
+  `/r/[slug]` and `/chef/[id]` when `hygiene` is present. Header nav: longest matching link is active.
+- Admin (M14): `/admin` overview (metrics cards + CSS bar charts, 7/30/90 days), `/admin/restaurants` (pending owners,
+  restaurants by status, Details) and `/admin/restaurants/[id]` (owner, licence document, subscription with mock
+  simulate buttons, invoices), `/admin/users`, `/admin/hygiene`, `/admin/billing` (trial/grace, plan editor,
+  subscriptions table), `/admin/audit` (filter by action, paged).
+- Billing (M14): dashboard tab `billing` (status banners, plan cards with set up payment / upgrade / downgrade /
+  keep, cancel autopay, invoice table with PDF via `saveBlob` from `lib/download.ts`), `lib/billing.ts`,
+  `openRazorpaySubscription` in `lib/razorpay.ts` (mock: approve panel), Profile → `components/dashboard/compliance-card.tsx`
+  (`lib/gst-states.ts`).
 - Chef `/chef/settings` (profile, consent accept / withdraw). The KDS consent gate has Accept / Decline.
+- Production (M15): Sentry via `@sentry/nextjs` 10.75.3 (`instrumentation.ts` + `sentry.server/edge.config.ts`,
+  `instrumentation-client.ts`, `app/global-error.tsx`, `withSentryConfig` from `@sentry/nextjs/config` in
+  `next.config.ts`; off without a DSN; source maps upload only with `SENTRY_AUTH_TOKEN`). `next.config.ts` adds
+  security headers (nosniff, DENY framing, Referrer-Policy, Permissions-Policy camera/geolocation self). Server-side
+  backend calls (`callBackend`, `lib/api/server.ts`) add `proxyHeaders()`. Legal pages `/privacy`, `/terms`,
+  `/recording-consent` (`components/legal/legal-page.tsx`, values from `lib/legal.ts` env vars, draft banner until
+  `LEGAL_PAGES_REVIEWED=true`), `SiteFooter` in the `(customer)` and `(app)` layouts, consent notes on both sign-up
+  forms. `vercel.json`: region `bom1`, Git deploys of `main` off (production deploys come from `deploy.yml`).
 - `lib/api/`: `schema.ts` is generated by `npm run api:gen` from `openapi/openapi.json`; never edit it by hand.
   `client.ts` is the `openapi-fetch` client with a bearer-token middleware; `unwrap()` turns errors into `ApiError`.
 - Auth (one session for every role since M10.5): `app/api/session/*` route handlers keep the refresh token in an
@@ -331,18 +519,38 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - **Test helpers:** `support/AuthClient` (register, login, `approvedOwnerToken()`, `send(...)`),
   `support/OwnerFixtures` (restaurant, menu, chef/station builders, `consentedChefOnStation`), and
   `order/OrderTestKitchen` (a ready-to-order restaurant).
-- **Testcontainers** is pinned to 1.21.4, which Docker Desktop 29 requires. Last full run (M10.5): 346 unit + 142 integration tests passing.
+- **Testcontainers** is pinned to 1.21.4, which Docker Desktop 29 requires. Last full run (M15): 360 unit + 166 integration tests passing; ai-service 23 tests.
 - **FFmpeg:** clip tests need `ffmpeg`/`ffprobe` on PATH (`brew install ffmpeg`; skipped otherwise). Sample chunks:
   `src/test/resources/clips/chunk-{1,2}.webm` (30 s, 320×180, black / blue). Job worker threads are 0 in tests;
   `order/ClipPipelineIT` drives `JobWorker.runOnce` by hand.
-- **Docker:** `backend/Dockerfile` (multi-stage, Temurin 21, runtime installs ffmpeg + DejaVu fonts, non-root uid 10001).
+- **AI service:** `cd ai-service && docker build --target test .` runs its 23 pytest tests in python:3.11 (local
+  Python is 3.14; don't install another). Pins chosen ≥ 2 weeks old; torch/torchvision come from the CPU-only index.
+  Backend side: `order/HygieneIT` uses `support/FakeAiService` (JDK HttpServer that also fetches the presigned video).
+- **Docker:** `backend/Dockerfile` (multi-stage, Temurin 21, runtime installs ffmpeg + DejaVu fonts + curl, non-root
+  uid 10001, HEALTHCHECK on `/actuator/health/liveness`, `APP_VERSION` build arg). `ai-service/Dockerfile` runtime sets
+  `LOG_FORMAT=json` (`app/logs.py`) and a Python HEALTHCHECK.
+- **Production (M15), see `PRODUCTION.md`:** `infra/docker-compose.prod.yml` (caddy 2.11.4, backend, ai-service,
+  backup; images `${IMAGE_REGISTRY}/vlk-{backend,ai,backup}:${IMAGE_TAG}`; env files `backend.env`/`ai.env`/`backup.env`
+  from `infra/prod/*.env.example`; json-file log rotation), `infra/caddy/Caddyfile` (TLS, HSTS, 2 MB bodies, actuator
+  except health → 404), `infra/backup/` (image on postgres:16.15-alpine3.24 + aws-cli + age: `backup-now`, `schedule`
+  daily at `BACKUP_AT` UTC, `restore <url> [latest|key] [--overwrite]`, prunes by `BACKUP_RETENTION_DAYS`, optional age
+  encryption + heartbeat URL; `restore-test.sh` = drill into a throwaway container; `test/roundtrip.sh` = CI test),
+  `infra/deploy/deploy.sh` (on the VM: pre-deploy backup, pull with the new tag first, write `IMAGE_TAG` to `.env`,
+  `up -d`, wait for `/actuator/health` UP, else roll back to the previous tag) and `validate.sh` (compose + Caddyfile).
+  Verified in M15 by a full local rehearsal (local registry, RustFS for R2, Caddy on localhost): deploy, rollback of a
+  broken release, missing tag, upgrade, backup + drill, Sentry events, rate limits, JSON logs.
+- **CI/CD:** `.github/workflows/ci.yml` (PRs + called by deploy: backend verify with ffmpeg, OpenAPI drift check
+  `backend/target/openapi.json` vs `web/openapi/openapi.json`, web checks on Node 22, ai-service `--target test`,
+  shellcheck + `validate.sh` + backup roundtrip) and `deploy.yml` (main: tests → GHCR images tagged with the SHA →
+  SSH deploy in environment `production` → public health check → `vercel@61.1.0` pull/build/deploy --prebuilt).
+  Lint locally with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7` and koalaman/shellcheck:v0.11.0.
 - **Browser end-to-end (manual, not in CI):** headless Chrome with `--use-fake-device-for-media-stream` via
   `puppeteer-core`, against throwaway containers. It verified pairing → recording → READY → upload → `UPLOADED`
   in M9. The Claude-in-Chrome extension wasn't connected in M6–M9.
 - **Razorpay in tests:** `support/FakeRazorpay` (JDK HttpServer) stands in for the Razorpay API. `RazorpayPaymentIT` runs the
   real provider against it. Webhook/signature secrets used there are test-only constants.
 - **springdoc** is pinned to 2.8.8. 2.8.9+ targets Boot 3.5 and fails on Boot 3.4 with an invalid swagger-ui path pattern.
-- **Web:** `cd web && npm test && npm run typecheck && npm run lint && npm run build` (34 unit tests, Vitest + jsdom).
+- **Web:** `cd web && npm test && npm run typecheck && npm run lint && npm run build` (42 unit tests, Vitest + jsdom).
 - **E2E:** `cd web && npm run test:e2e` (Playwright 1.63.0, `e2e/happy-path.spec.ts`: table-QR PAY_LATER order → owner
   accepts → chef starts/readies on /kitchen → customer sees Ready → owner marks paid at counter). Needs a running stack
   with the backend's `dev-seed` profile and `DEV_SEED_PASSWORD`; uses installed Google Chrome (`PLAYWRIGHT_CHANNEL` to
@@ -359,7 +567,8 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 ### Known gaps / backlog
 
 - Phone numbers are not verified (OTP pending). Guest-account claiming and guest reuse trust the phone.
-- Guest checkout has no rate limit. Login rate limiting is in-memory, so it only works on a single node.
+- Rate limits (per phone for login, per IP for public endpoints including guest checkout, M15) are in memory, so they
+  only work on a single node.
 - Unpaid online orders never expire. There is no way to settle PAY_LATER bills. Order placement has no
   idempotency key. Owners only see active orders, not history.
 - Chefs cannot change the initial password their owner sets.
@@ -368,6 +577,8 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - The QR PDF uses Helvetica (Latin only); non-Latin restaurant names need an embedded Unicode font.
 - `application-local.yml` hardcodes the local DB password, against the env-vars-only rule. Raised with
   the user; not changed yet.
+- Admin can't create, disable or delete users, or reset passwords. DPDP data requests (export/erasure) are manual
+  SQL. Nobody can change their own password (owners, chefs, admin).
 - Web: delivery addresses need lat/lng (browser geolocation or typed in; no geocoding yet). With
   `PAYMENT_PROVIDER=mock` the order page shows a test-mode payment panel.
 - Payments: counter payments are not refunded automatically (staff return cash in person). An amount mismatch
@@ -384,11 +595,42 @@ Milestones announced so far: 11 = clip player and sharing on the order page, 14 
 - KDS PWA: installing and the service worker need HTTPS (or localhost), so a tablet on LAN `http://192.168…` can
   run the board but can't install it. Owners can't "Start" an order from the KDS (the backend needs a chef + station).
 - Clips: one job renders one order, so orders sharing a window are rendered separately (simple, more CPU). The
-  timelapse has no audio (recordings have none). Presigned clip links last `S3_DOWNLOAD_URL_TTL` (1h); the order
-  page refetches. No download/share buttons or chef tips yet. FAILED clips aren't retried automatically; requeue by
-  inserting a job. Fonts on the overlay depend on the host (DejaVu in Docker); non-Latin names need a suitable font.
+  timelapse has no audio (recordings have none). Watch/download links last 10 min (`CLIP_WATCH_URL_TTL`, M11); the
+  player refetches on error. FAILED clips aren't retried automatically: owners use "Retry" while raw footage exists
+  (24 h), else requeue by inserting a job. Fonts on the overlay depend on the host (DejaVu in Docker); non-Latin names need a suitable font.
+- Hygiene (M13): the model must be trained on a PPE dataset and validated with `scripts/eval.py` before public scores
+  are turned on. Judgement is per frame, not per person. Results aren't re-analysed when the model changes (new clips
+  use the new version). Disputes can be raised on the 10 worst clips shown (no full results list). The ai-service image
+  is ~2.2 GB (CPU torch). Trend weeks are IST.
+- Tips (M12): the platform's Razorpay account receives each tip payment and Route transfers the chef's share on capture
+  (that's how Route works; it never settles to the platform's bank). Gateway fees are borne by the platform (chef gets
+  100% by default). A failed setup after `POST /v2/accounts` leaves an orphaned linked account at Razorpay (resubmitting
+  creates a new one). No refunds/reversals of tips. Linked-account business category/subcategory are config
+  (`RAZORPAY_ROUTE_CATEGORY/SUBCATEGORY`); verify them against the account in test mode. Customers can tip a chef they
+  follow on any of their orders at that restaurant (not only ones that chef cooked). Chefs can't see who tipped.
+- Clips (M11): views count share-page visits only (not plays on the order page or by the owner). The visitor id comes
+  from the browser, so a determined person can inflate views (the per-IP public-write limit, M15, only slows this). Storage
+  keys (and so presigned URLs) contain the order UUID. A revoked link's preview image may stay cached by chat apps
+  (`og.jpg` is cacheable for 10 min). Guests share with their order token, so the link survives only as long as the
+  clip. Admins have no clip browser; they watch clips through hygiene disputes (`/api/admin/clips/{orderId}/playback`,
+  audited).
+- Web lockfile: the user's commit of 13 Oct 2026 dropped `@rolldown/binding-*` from `web/package-lock.json` (Vitest
+  then fails with "Cannot find module './rolldown-binding…'"); M11 regenerated it. Check for this before committing.
 - M10.5 frontend: owners' live orders show active orders plus unpaid bills only (no order history). Chef "current
   station" is the assignment, not where they last cooked. Every anonymous page load makes one 401
   `/api/session/refresh` call (session restore). The restaurant logo has no preview URL in the API (only `logoKey`).
-  Admin is minimal until Milestone 14.
+- Billing (M14): changing a plan's price doesn't move existing Razorpay mandates (they keep the old price until the owner
+  changes plan; a new gateway plan is created per price). The SAC code (998315) and invoice layout need an
+  accountant's review; the supplier GSTIN/address come from env. No proration on upgrades (the gateway's update applies
+  at once; Razorpay may charge the difference by its own rules). The plan's `analytics` feature isn't gated anywhere
+  yet. Enforcement runs hourly, so suspension can lag grace expiry by up to an hour. Invoices aren't emailed. Credit
+  notes and refunds of subscription charges aren't supported. The admin restaurant page writes an audit entry on every
+  load (it issues a licence link each time).
+- Production (M15): rate limits, login limits and the STOMP broker are in memory (one backend instance only). Sentry
+  misses crashes during startup (Spring closes it first; the deploy health check and logs cover those). No
+  Content-Security-Policy yet (Razorpay checkout + Sentry need a tuned policy). R2 has no India jurisdiction (APAC
+  hint). Account deletion / DPDP data requests are handled by hand. Legal pages and the recording consent are drafts
+  for a lawyer. Deploys restart the backend in place (a few seconds of 502 from Caddy; `lb_try_duration` rides out
+  short gaps). The web's `/recording-consent` is ISR (1 h) and needs the API reachable at build time.
+  `next` was bumped to 16.3.8 (security fixes: image-optimizer SSRF, cache poisoning).
 - Web: ESLint is pinned to 9.39.x, which npm flags as end-of-life; move to ESLint 10 once `eslint-config-next` supports it.

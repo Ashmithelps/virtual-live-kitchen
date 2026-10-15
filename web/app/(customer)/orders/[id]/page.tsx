@@ -15,6 +15,8 @@ import { cancelOrder, confirmPayment, fetchOrder, startPayment, type OrderAccess
 import { openRazorpayCheckout, type Checkout } from "@/lib/razorpay";
 import { useHydrated } from "@/lib/storage";
 import { OrderTimeline } from "@/components/order-timeline";
+import { OrderClip } from "@/components/clip/order-clip";
+import { TipPanel } from "@/components/tip/tip-panel";
 import { Badge, Button, Card, EmptyState, ErrorState, InlineError, PageLoading, TextLink, VegMark } from "@/components/ui";
 
 /** Fallback only: used while the WebSocket isn't connected (or was refused). */
@@ -23,7 +25,12 @@ const POLL_MS = 5_000;
 export default function OrderPage() {
   const { id } = useParams<{ id: string }>();
   // Set by the checkout page: open the payment dialog straight away.
-  const autoPay = useSearchParams().get("pay") === "1";
+  const search = useSearchParams();
+  const autoPay = search.get("pay") === "1";
+  // Set by checkout when the customer picked a tip for a chef they follow.
+  const tipChef = search.get("tipChef");
+  const tipAmount = Number(search.get("tipAmount"));
+  const tipIntent = tipChef && Number.isInteger(tipAmount) && tipAmount > 0 ? { chefId: tipChef, amountPaise: tipAmount } : undefined;
   const auth = useAuth();
   const hydrated = useHydrated();
   const guestToken = useGuestToken(id);
@@ -85,12 +92,24 @@ export default function OrderPage() {
     }
     return <ErrorState message={errorMessage(order.error)} onRetry={() => order.refetch()} />;
   }
-  return <OrderDetails order={order.data} access={access} live={socket === "connected"} autoPay={autoPay} />;
+  return <OrderDetails order={order.data} access={access} live={socket === "connected"} autoPay={autoPay} tipIntent={tipIntent} />;
 }
 
 type OrderEvent = { type: string; order: Order };
 
-function OrderDetails({ order, access, live, autoPay }: { order: Order; access: OrderAccess; live: boolean; autoPay: boolean }) {
+function OrderDetails({
+  order,
+  access,
+  live,
+  autoPay,
+  tipIntent,
+}: {
+  order: Order;
+  access: OrderAccess;
+  live: boolean;
+  autoPay: boolean;
+  tipIntent?: { chefId: string; amountPaise: number };
+}) {
   const queryClient = useQueryClient();
   const update = (o: Order) => queryClient.setQueryData(["order", o.id, access.kind], o);
   const [paymentResult, setPaymentResult] = useState<"paid" | "failed" | null>(null);
@@ -161,7 +180,8 @@ function OrderDetails({ order, access, live, autoPay }: { order: Order; access: 
         )}
       </Card>
 
-      <ClipCard order={order} />
+      {tipIntent && <TipPanel orderId={order.id} access={access} source="CHECKOUT" preselect={tipIntent} />}
+      <OrderClip order={order} access={access} offerTip={!tipIntent} />
 
       <Card>
         <h2 className="mb-2 font-semibold">Items</h2>
@@ -189,52 +209,6 @@ function OrderDetails({ order, access, live, autoPay }: { order: Order; access: 
 
       {canCustomerCancel(order.status) && <CancelPanel order={order} access={access} onCancelled={update} />}
     </div>
-  );
-}
-
-/**
- * Kitchen clip status. When READY the customer sees the thumbnail; the player and sharing arrive in
- * Milestone 11.
- */
-function ClipCard({ order }: { order: Order }) {
-  const status = order.clipStatus;
-  if (status === "READY" && order.clip) {
-    return (
-      <Card className="overflow-hidden p-0!">
-        { }
-        <img src={order.clip.thumbnailUrl} alt={`Kitchen clip of order #${order.displayNumber}`} className="aspect-video w-full bg-black object-cover" />
-        <div className="p-4">
-          <p className="font-semibold">Your kitchen clip is ready 🎬</p>
-          <p className="text-sm text-stone-500">
-            {Math.round(order.clip.durationSeconds)} s of your food being made · available until {formatDateTime(order.clip.expiresAt)}. Watching and sharing are coming soon.
-          </p>
-        </div>
-      </Card>
-    );
-  }
-  const cooking = order.preparation
-    ? `${order.preparation.chefDisplayName ?? "Your chef"} is cooking at the ${order.preparation.stationName ?? "kitchen"} station.`
-    : "Once the kitchen starts cooking, you'll get a short video of your food being made.";
-  const view: Record<NonNullable<Order["clipStatus"]>, { title: string; text: string }> = {
-    PENDING: { title: "Being prepared", text: "The kitchen camera is sending us the footage of your order." },
-    UPLOADED: { title: "Being prepared", text: "We've got the footage. Your clip is next in line." },
-    PROCESSING: { title: "Processing", text: "Your clip is being edited. It usually takes a minute or two." },
-    READY: { title: "Ready", text: "Your clip is ready." },
-    FAILED: { title: "Not available", text: "Sorry, we couldn't make a clip of this order." },
-    NOT_AVAILABLE: { title: "Not available", text: "There's no kitchen clip for this order." },
-    EXPIRED: { title: "Not available", text: "This order's kitchen clip has expired." },
-  };
-  const current = status ? view[status] : { title: "Kitchen clip", text: cooking };
-  return (
-    <Card className="border-dashed bg-stone-50 text-center">
-      <p className="text-2xl" aria-hidden>
-        🎥
-      </p>
-      <p className="font-semibold">
-        Kitchen clip: {current.title}
-      </p>
-      <p className="mt-1 text-sm text-stone-500">{current.text}</p>
-    </Card>
   );
 }
 

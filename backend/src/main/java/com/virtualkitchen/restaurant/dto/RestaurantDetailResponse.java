@@ -1,5 +1,6 @@
 package com.virtualkitchen.restaurant.dto;
 
+import com.virtualkitchen.common.hygiene.PublicHygieneScore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.virtualkitchen.menu.dto.MenuCategoryResponse;
 import com.virtualkitchen.restaurant.OrderType;
@@ -22,5 +23,7 @@ public record RestaurantDetailResponse(
         Set<OrderType> orderTypes,
         @Schema(nullable = true) Double deliveryRadiusKm,
         boolean openNow,
-        List<MenuCategoryResponse> menu) {
+        List<MenuCategoryResponse> menu,
+        @Schema(nullable = true, description = "Only when public hygiene scores are on and enough clips were scored")
+        PublicHygieneScore hygiene) {
 }

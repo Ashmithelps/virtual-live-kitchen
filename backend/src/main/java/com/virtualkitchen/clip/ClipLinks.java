@@ -11,16 +11,18 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Short-lived signed links to READY clips, for order responses and pushes. */
+/** Thumbnail links of READY clips for order responses and pushes (watch links come from ClipPlaybackService). */
 @Component
 public class ClipLinks implements OrderClipLinks {
 
     private final ClipRepository clips;
     private final ObjectStorage storage;
+    private final ClipProperties properties;
 
-    public ClipLinks(ClipRepository clips, ObjectStorage storage) {
+    public ClipLinks(ClipRepository clips, ObjectStorage storage, ClipProperties properties) {
         this.clips = clips;
         this.storage = storage;
+        this.properties = properties;
     }
 
     @Override
@@ -34,8 +36,8 @@ public class ClipLinks implements OrderClipLinks {
                 .entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> {
                     Clip c = e.getValue();
-                    return new ClipView(c.getDurationSeconds().doubleValue(), storage.clipDownloadUrl(c.getVideoKey()),
-                            storage.clipDownloadUrl(c.getThumbKey()), c.getExpiresAt());
+                    return new ClipView(c.getDurationSeconds().doubleValue(), storage.clipUrl(c.getThumbKey(), properties.watchUrlTtl()),
+                            c.getExpiresAt());
                 }));
     }
 }

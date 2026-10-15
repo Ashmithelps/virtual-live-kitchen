@@ -16,5 +16,7 @@ public record ChefResponse(
         @Schema(nullable = true) String specialty,
         boolean recordingConsent,
         @Schema(nullable = true) Instant consentAcceptedAt,
-        Instant createdAt) {
+        Instant createdAt,
+        @Schema(description = "Tips received (count only; amounts are the chef's business)") long tipCount,
+        @Schema(description = "NOT_SET_UP, PENDING_KYC or ACTIVE; tips are offered only when ACTIVE") String payoutStatus) {
 }

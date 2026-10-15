@@ -44,6 +44,7 @@ export default function ChefsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="max-w-xl text-sm text-stone-600">
           Chefs log in at <code>/kitchen</code> with their mobile number and the password you set. They must accept recording consent before you can put them on a station.
+          Tips go straight to each chef&apos;s own bank account through Razorpay; you see how many they received, never amounts, and can&apos;t redirect or hold them.
         </p>
         {!creating && <Button onClick={() => setCreating(true)}>Add chef</Button>}
       </div>
@@ -99,6 +100,10 @@ export default function ChefsPage() {
                 <p className="text-sm text-stone-600">
                   {chef.recordingConsent && chef.consentAcceptedAt ? `Accepted ${formatDateTime(chef.consentAcceptedAt)} · ` : ""}
                   Station: {stationsOf(chef.id).join(", ") || "none"}
+                </p>
+                <p className="text-sm text-stone-600">
+                  💸 {chef.tipCount} {chef.tipCount === 1 ? "tip" : "tips"} received · payouts{" "}
+                  {chef.payoutStatus === "ACTIVE" ? "active" : chef.payoutStatus === "PENDING_KYC" ? "being verified" : "not set up"}
                 </p>
                 <div className="flex gap-2">
                   <Button variant="secondary" onClick={() => setEditing(chef)}>

@@ -8,7 +8,12 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       connection-timeout: 20000
-      maximum-pool-size: 10
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      data-source-properties:
+        # Seconds. Without a socket timeout a stalled database (network blip, failover) hangs request threads
+        # forever; with it they fail, return 500 and are reported. Longest legitimate query is far below this.
+        connectTimeout: 10
+        socketTimeout: ${DB_SOCKET_TIMEOUT_SECONDS:30}
 
   jpa:
     hibernate:
@@ -46,7 +51,22 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: always
+      # Component details (database, disk) only for signed-in callers in production (application-prod.yml).
+      show-details: ${HEALTH_SHOW_DETAILS:always}
+      probes:
+        enabled: true
+
+# Error reporting. Disabled while SENTRY_DSN is empty. ERROR log lines and unhandled exceptions become Sentry events;
+# no request bodies, cookies or user identities are sent.
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:local}
+  release: ${APP_VERSION:dev}
+  send-default-pii: false
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0}
+  logging:
+    minimum-event-level: error
+    minimum-breadcrumb-level: info
 
 app:
   cors:
@@ -58,6 +78,30 @@ app:
     issuer: virtual-kitchen
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
     refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:30d}
+
+  rate-limit:
+    # Per-client-IP limits on public endpoints (in memory, single node). Signed-in API calls and webhooks aren't
+    # limited here; login also has a per-phone limit (below).
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    # Shared with the web app's server (Vercel), which sends the visitor's IP in X-Client-IP with this secret.
+    trusted-proxy-secret: ${BACKEND_PROXY_SECRET:}
+    max-tracked-clients: 100000
+    rules:
+      - name: auth
+        methods: [POST]
+        paths: [/api/auth/login, /api/auth/register, /api/auth/refresh, /api/station-device/pair]
+        capacity: ${RATE_LIMIT_AUTH_PER_MINUTE:30}
+        period: 1m
+      - name: public-write
+        methods: [POST, PUT, PATCH, DELETE]
+        paths: [/api/guest/**, /api/public/**]
+        capacity: ${RATE_LIMIT_PUBLIC_WRITE_PER_MINUTE:60}
+        period: 1m
+      - name: public-read
+        methods: [GET]
+        paths: [/api/restaurants, /api/restaurants/**, /api/tables/*, /api/guest/**, /api/public/**, /api/time]
+        capacity: ${RATE_LIMIT_PUBLIC_READ_PER_MINUTE:300}
+        period: 1m
 
   auth:
     login-rate-limit:
@@ -99,6 +143,43 @@ app:
       # Set in Razorpay Dashboard → Settings → Webhooks; used to verify X-Razorpay-Signature.
       webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
       api-base-url: ${RAZORPAY_API_BASE_URL:https://api.razorpay.com}
+      # Route linked accounts for chefs' tips (business profile Razorpay requires).
+      route:
+        business-category: ${RAZORPAY_ROUTE_CATEGORY:food}
+        business-subcategory: ${RAZORPAY_ROUTE_SUBCATEGORY:restaurant}
+
+  billing:
+    # Defaults; admins can change trial and grace days at runtime (Admin → Billing).
+    default-trial-days: ${BILLING_TRIAL_DAYS:30}
+    default-grace-days: ${BILLING_GRACE_DAYS:7}
+    gst-rate-bps: ${BILLING_GST_RATE_BPS:1800}
+    # SAC for software/SaaS services; confirm with your accountant.
+    sac-code: ${BILLING_SAC_CODE:998315}
+    invoice-prefix: ${BILLING_INVOICE_PREFIX:VLK}
+    # Supplier (the platform) on GST invoices.
+    supplier-legal-name: ${BILLING_SUPPLIER_LEGAL_NAME:Virtual Live Kitchen Pvt Ltd}
+    supplier-gstin: ${BILLING_SUPPLIER_GSTIN:}
+    supplier-address: ${BILLING_SUPPLIER_ADDRESS:Bengaluru, Karnataka}
+    supplier-state-code: ${BILLING_SUPPLIER_STATE_CODE:29}
+
+  hygiene:
+    # AI hygiene scoring of READY clips. Off unless the AI service is running (see ai-service/README.md).
+    enabled: ${HYGIENE_ENABLED:false}
+    service-url: ${AI_SERVICE_URL:http://localhost:8000}
+    api-key: ${AI_SERVICE_API_KEY:}
+    request-timeout: ${AI_SERVICE_TIMEOUT:5m}
+    # Storage endpoint as the AI service sees it (e.g. http://minio:9000 inside docker-compose); empty = S3_ENDPOINT.
+    video-s3-endpoint: ${AI_VIDEO_S3_ENDPOINT:}
+    # Rolling window and the minimum number of scored clips before a score may be shown publicly.
+    window: ${HYGIENE_WINDOW:30d}
+    min-public-clips: ${HYGIENE_MIN_PUBLIC_CLIPS:20}
+
+  tips:
+    # Platform's share of each tip in basis points (0 = the chef gets 100%). Gateway fees are the platform's cost.
+    platform-fee-bps: ${TIP_PLATFORM_FEE_BPS:0}
+    min-paise: ${TIP_MIN_PAISE:1000}
+    max-paise: ${TIP_MAX_PAISE:500000}
+    presets-paise: 2000,5000,10000
 
   clips:
     # Footage window around an order: PREPARING minus lead .. READY plus tail.
@@ -119,6 +200,8 @@ app:
     ffmpeg-timeout: ${FFMPEG_TIMEOUT:10m}
     # Watermark text in the corner of every clip.
     watermark: ${CLIP_WATERMARK:Virtual Live Kitchen}
+    # Presigned watch/download links for clips expire after this.
+    watch-url-ttl: ${CLIP_WATCH_URL_TTL:10m}
 
   jobs:
     # Background worker threads in this instance. 0 = don't process jobs here (e.g. API-only nodes
@@ -130,6 +213,9 @@ app:
     max-attempts: ${JOB_MAX_ATTEMPTS:5}
     # Retry delay: base × 2^(attempt−1).
     retry-base-delay: ${JOB_RETRY_BASE_DELAY:30s}
+    # Extra worker lanes (threads each). "hygiene" = AI analysis, kept apart so it never delays clip rendering.
+    lanes:
+      hygiene: ${JOB_HYGIENE_THREADS:1}
 
   chef-consent:
     # Text lives in src/main/resources/consent/recording-consent-<version>.txt.

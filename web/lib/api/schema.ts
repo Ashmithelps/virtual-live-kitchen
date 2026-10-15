@@ -100,6 +100,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/compliance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["compliance"];
+        put: operations["updateCompliance"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants/{restaurantId}/chefs/{chefId}": {
         parameters: {
             query?: never;
@@ -116,6 +132,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/billing/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["changePlan"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chefs/{chefId}/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["status"];
+        put: operations["follow"];
+        post?: never;
+        delete: operations["unfollow"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chef/payout-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_2"];
+        put: operations["submit"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/hygiene/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["settings"];
+        put: operations["update_2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["settings_1"];
+        put: operations["updateSettings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/plans/{planId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update_3"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/station-device/pair": {
         parameters: {
             query?: never;
@@ -126,6 +238,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["pair"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/clips/{token}/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["view"];
         delete?: never;
         options?: never;
         head?: never;
@@ -292,6 +420,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/hygiene/results/{resultId}/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["dispute"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants/{restaurantId}/clips/{orderId}/retry": {
         parameters: {
             query?: never;
@@ -324,6 +468,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["checkout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/owner/restaurants/{restaurantId}/billing/checkout/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/owner/restaurants/{restaurantId}/billing/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders": {
         parameters: {
             query?: never;
@@ -334,6 +526,38 @@ export interface paths {
         get: operations["list_4"];
         put?: never;
         post: operations["place"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{orderId}/tips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["options"];
+        put?: never;
+        post: operations["start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{orderId}/tips/{tipId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["confirm_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -372,6 +596,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders/{orderId}/clip/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["share"];
+        delete: operations["revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders/{orderId}/cancel": {
         parameters: {
             query?: never;
@@ -381,7 +621,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cancel"];
+        post: operations["cancel_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -398,6 +638,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["place_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/orders/{orderId}/tips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["options_1"];
+        put?: never;
+        post: operations["start_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/orders/{orderId}/tips/{tipId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["confirm_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -436,6 +708,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/guest/orders/{orderId}/clip/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["share_1"];
+        delete: operations["revoke_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/guest/orders/{orderId}/cancel": {
         parameters: {
             query?: never;
@@ -445,7 +733,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cancel_1"];
+        post: operations["cancel_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -478,6 +766,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["chunksUploaded"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chef/payout-account/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -541,7 +845,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["refresh"];
+        post: operations["refresh_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -622,6 +926,54 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["approve_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/hygiene/disputes/{disputeId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/restaurants/{restaurantId}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["simulate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["plans"];
+        put?: never;
+        post: operations["create_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -772,6 +1124,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/legal/recording-consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["current_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/clips/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/chefs/{chefId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_4"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants/{restaurantId}/tables/qr-codes.pdf": {
         parameters: {
             query?: never;
@@ -811,7 +1211,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_2"];
+        get: operations["get_5"];
         put?: never;
         post?: never;
         delete?: never;
@@ -852,6 +1252,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/hygiene": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/owner/restaurants/{restaurantId}/clips": {
         parameters: {
             query?: never;
@@ -868,6 +1284,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/owner/restaurants/{restaurantId}/clips/{orderId}/playback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["playback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/owner/restaurants/{restaurantId}/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["overview_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/owner/restaurants/{restaurantId}/billing/invoices/{invoiceId}.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invoice"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/orders/{orderId}": {
         parameters: {
             query?: never;
@@ -875,7 +1339,23 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_3"];
+        get: operations["get_6"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{orderId}/clip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["playback_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -892,6 +1372,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["me_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/followed-chefs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["followed"];
         put?: never;
         post?: never;
         delete?: never;
@@ -923,7 +1419,39 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["get_4"];
+        get: operations["get_7"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/guest/orders/{orderId}/clip": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["playback_2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chef/tips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["tips"];
         put?: never;
         post?: never;
         delete?: never;
@@ -964,6 +1492,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chef/clips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["clips"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -996,6 +1540,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/restaurants/{restaurantId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detail_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/owners/pending": {
         parameters: {
             query?: never;
@@ -1004,6 +1564,102 @@ export interface paths {
             cookie?: never;
         };
         get: operations["pendingOwners"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["metrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/hygiene/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["disputes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/clips/{orderId}/playback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["playback_3"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["subscriptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/billing/restaurants/{restaurantId}/invoices/{invoiceId}.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invoice_1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["audit"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1058,6 +1714,11 @@ export interface components {
             deliveryRadiusKm: number | null;
             /** @enum {string} */
             status: "PENDING_APPROVAL" | "ACTIVE" | "SUSPENDED";
+            /**
+             * @description ADMIN or BILLING when SUSPENDED
+             * @enum {string|null}
+             */
+            suspendedReason: "ADMIN" | "BILLING" | null;
             logoKey: string | null;
             /** Format: date-time */
             createdAt: string;
@@ -1144,6 +1805,22 @@ export interface components {
             sortOrder: number;
             items: components["schemas"]["MenuItemResponse"][];
         };
+        ComplianceRequest: {
+            fssaiNumber?: string;
+            fssaiDocKey?: string;
+            legalName?: string;
+            gstin?: string;
+            billingStateCode?: string;
+        };
+        ComplianceResponse: {
+            fssaiNumber: string | null;
+            fssaiDocKey: string | null;
+            /** @description Short-lived link to the uploaded licence */
+            fssaiDocUrl: string | null;
+            legalName: string | null;
+            gstin: string | null;
+            billingStateCode: string | null;
+        };
         UpdateChefRequest: {
             displayName: string;
             photoKey?: string;
@@ -1166,6 +1843,151 @@ export interface components {
             consentAcceptedAt: string | null;
             /** Format: date-time */
             createdAt: string;
+            /**
+             * Format: int64
+             * @description Tips received (count only; amounts are the chef's business)
+             */
+            tipCount: number;
+            /** @description NOT_SET_UP, PENDING_KYC or ACTIVE; tips are offered only when ACTIVE */
+            payoutStatus: string;
+        };
+        ChoosePlanRequest: {
+            /** Format: uuid */
+            planId: string;
+        };
+        BillingOverviewResponse: {
+            /** @enum {string} */
+            status: "TRIALING" | "ACTIVE" | "PAST_DUE" | "SUSPENDED" | "CANCELLED";
+            plan: components["schemas"]["PlanResponse"];
+            pendingPlan: components["schemas"]["PlanResponse"] | null;
+            /** Format: date-time */
+            trialEndsAt: string;
+            /** Format: date-time */
+            currentPeriodEnd: string | null;
+            /**
+             * Format: date-time
+             * @description When the next charge is due (null when no payment method is set up)
+             */
+            nextChargeAt: string | null;
+            /**
+             * Format: date-time
+             * @description Listing is hidden after this if still unpaid
+             */
+            graceUntil: string | null;
+            paymentMethodReady: boolean;
+            cancelRequested: boolean;
+            /** @description Legal name and GST state are set (needed for invoices) */
+            billingDetailsComplete: boolean;
+            plans: components["schemas"]["PlanResponse"][];
+            invoices: components["schemas"]["InvoiceResponse"][];
+        };
+        InvoiceResponse: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            planName: string;
+            /** Format: date-time */
+            periodStart: string | null;
+            /** Format: date-time */
+            periodEnd: string | null;
+            /** Format: int64 */
+            taxablePaise: number;
+            /** Format: int64 */
+            cgstPaise: number;
+            /** Format: int64 */
+            sgstPaise: number;
+            /** Format: int64 */
+            igstPaise: number;
+            /** Format: int64 */
+            totalPaise: number;
+            /** Format: date-time */
+            issuedAt: string;
+        };
+        PlanFeatures: {
+            /** Format: int32 */
+            maxStations: number;
+            /** Format: int32 */
+            clipRetentionDays: number;
+            analytics: boolean;
+        };
+        PlanResponse: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            /** Format: int64 */
+            pricePaise: number;
+            /** Format: int64 */
+            gstPaise: number;
+            /** Format: int64 */
+            totalPaise: number;
+            features: components["schemas"]["PlanFeatures"];
+            active: boolean;
+            /** Format: int32 */
+            sortOrder: number;
+        };
+        PayoutAccountRequest: {
+            legalName: string;
+            email: string;
+            bankAccountNumber: string;
+            ifsc: string;
+            pan: string;
+            street: string;
+            city: string;
+            state: string;
+            postalCode: string;
+        };
+        PayoutAccountResponse: {
+            /** @enum {string} */
+            status: "NOT_SET_UP" | "PENDING_KYC" | "ACTIVE";
+            legalName: string | null;
+            /** @description e.g. HDFC ••••1234 */
+            bankAccountMasked: string | null;
+            /** @description e.g. ••••••234F */
+            panMasked: string | null;
+            /** @description Gateway's own status, e.g. under_review, needs_clarification */
+            providerStatus: string | null;
+            /** Format: date-time */
+            updatedAt: string | null;
+            /** Format: date-time */
+            activatedAt: string | null;
+        };
+        HygieneSettingsRequest: {
+            publicScoresEnabled: boolean;
+        };
+        HygieneSettingsResponse: {
+            publicScoresEnabled: boolean;
+            /** Format: int32 */
+            minPublicClips: number;
+            /** Format: int32 */
+            windowDays: number;
+            analysisEnabled: boolean;
+        };
+        BillingSettingsRequest: {
+            /** Format: int32 */
+            trialDays: number;
+            /** Format: int32 */
+            graceDays: number;
+        };
+        BillingSettingsResponse: {
+            /** Format: int32 */
+            trialDays: number;
+            /** Format: int32 */
+            graceDays: number;
+            /** Format: int32 */
+            gstRateBps: number;
+            provider: string;
+            simulationAvailable: boolean;
+        };
+        PlanRequest: {
+            code?: string;
+            name: string;
+            /** Format: int64 */
+            pricePaise: number;
+            features: components["schemas"]["PlanFeatures"];
+            active: boolean;
+            /** Format: int32 */
+            sortOrder: number;
         };
         PairRequest: {
             pairingCode: string;
@@ -1182,9 +2004,12 @@ export interface components {
             restaurantId: string;
             restaurantName: string;
         };
+        ClipViewRequest: {
+            visitorId: string;
+        };
         UploadRequest: {
             /** @enum {string} */
-            purpose: "MENU_ITEM_IMAGE" | "CHEF_PHOTO" | "RESTAURANT_LOGO";
+            purpose: "MENU_ITEM_IMAGE" | "CHEF_PHOTO" | "RESTAURANT_LOGO" | "FSSAI_LICENCE";
             contentType: string;
         };
         UploadResponse: {
@@ -1218,11 +2043,10 @@ export interface components {
         ClipView: {
             /** Format: double */
             durationSeconds: number;
-            videoUrl: string;
             thumbnailUrl: string;
             /** Format: date-time */
             expiresAt: string;
-        } | null;
+        };
         OrderItemResponse: {
             /** Format: uuid */
             menuItemId: string | null;
@@ -1309,7 +2133,7 @@ export interface components {
             /** @enum {string|null} */
             counterMethod: "CASH" | "UPI" | "CARD" | null;
             failureReason: string | null;
-        } | null;
+        };
         Preparation: {
             /** Format: uuid */
             chefId: string;
@@ -1317,7 +2141,21 @@ export interface components {
             /** Format: uuid */
             stationId: string;
             stationName: string | null;
-        } | null;
+        };
+        HygieneDisputeRequest: {
+            reason: string;
+        };
+        HygieneDisputeResponse: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            reason: string;
+            adminNote: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            resolvedAt: string | null;
+        };
         OwnerClipResponse: {
             /** Format: uuid */
             orderId: string;
@@ -1330,12 +2168,24 @@ export interface components {
             failureReason: string | null;
             /** Format: double */
             durationSeconds: number | null;
-            videoUrl: string | null;
+            /** @description READY clips only; play via GET …/clips/{orderId}/playback */
             thumbnailUrl: string | null;
             chefName: string | null;
             stationName: string | null;
             /** @description FAILED with raw footage still stored, so it can be rendered again */
             retryable: boolean;
+            /**
+             * Format: int64
+             * @description Share-page views, one per visitor per day
+             */
+            viewCount: number;
+            /**
+             * Format: int64
+             * @description Share links the customer created (including revoked ones)
+             */
+            shareCount: number;
+            /** @description The customer has a live share link */
+            shared: boolean;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -1351,6 +2201,24 @@ export interface components {
             photoKey?: string;
             bio?: string;
             specialty?: string;
+        };
+        SubscriptionCheckoutResponse: {
+            provider: string;
+            keyId: string | null;
+            subscriptionId: string;
+            /** @description Hosted authorisation page, as an alternative */
+            shortUrl: string | null;
+            merchantName: string;
+            description: string;
+            /** Format: int64 */
+            amountPaise: number;
+            prefillName: string | null;
+            prefillContact: string | null;
+        };
+        ConfirmSubscriptionRequest: {
+            subscriptionId: string;
+            paymentId: string;
+            signature?: string;
         };
         DeliveryAddressRequest: {
             address: string;
@@ -1378,6 +2246,14 @@ export interface components {
             paymentMethod?: "ONLINE" | "PAY_LATER";
             notes?: string;
         };
+        TipRequest: {
+            /** Format: uuid */
+            chefId: string;
+            /** Format: int64 */
+            amountPaise: number;
+            /** @enum {string} */
+            source: "CLIP" | "CHECKOUT";
+        };
         PaymentCheckoutResponse: {
             provider: string;
             providerOrderId: string;
@@ -1390,10 +2266,39 @@ export interface components {
             prefillName: string | null;
             prefillContact: string | null;
         };
+        TipCheckoutResponse: {
+            tip: components["schemas"]["TipResponse"];
+            checkout: components["schemas"]["PaymentCheckoutResponse"];
+        };
+        TipResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            chefId: string;
+            chefName: string;
+            /** Format: int64 */
+            amountPaise: number;
+            /** @enum {string} */
+            status: "CREATED" | "PAID" | "TRANSFERRED" | "FAILED";
+            /** @enum {string} */
+            source: "CLIP" | "CHECKOUT";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            paidAt: string | null;
+        };
         ConfirmPaymentRequest: {
             providerOrderId: string;
             providerPaymentId: string;
             signature?: string;
+        };
+        ClipShareResponse: {
+            /** Format: uuid */
+            id: string;
+            token: string;
+            url: string;
+            /** Format: date-time */
+            createdAt: string;
         };
         CancelOrderRequest: {
             reason?: string;
@@ -1500,6 +2405,80 @@ export interface components {
             phone: string;
             password: string;
         };
+        ResolveDisputeRequest: {
+            /** @enum {string} */
+            decision: "UPHOLD" | "REJECT";
+            /** Format: double */
+            overrideScore?: number;
+            exclude?: boolean;
+            note?: string;
+        };
+        AdminDisputeResponse: {
+            dispute: components["schemas"]["HygieneDisputeResponse"];
+            /** Format: uuid */
+            restaurantId: string;
+            restaurantName: string;
+            result: components["schemas"]["HygieneResultResponse"];
+        };
+        HygieneResultResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            orderId: string;
+            /** Format: int32 */
+            orderDisplayNumber: number;
+            chefName: string | null;
+            /** Format: date-time */
+            readyAt: string | null;
+            modelVersion: string;
+            /** Format: int32 */
+            personFrames: number;
+            /** Format: double */
+            glovesPct: number | null;
+            /** Format: double */
+            headCoverPct: number | null;
+            /** Format: double */
+            maskPct: number | null;
+            /**
+             * Format: double
+             * @description As computed from the model
+             */
+            score: number | null;
+            /** Format: double */
+            effectiveScore: number | null;
+            excluded: boolean;
+            /** Format: double */
+            overrideScore: number | null;
+            overrideNote: string | null;
+            /** @description Up to 3 timestamps (seconds into the clip) per item: gloves, headCover, mask */
+            violations: {
+                [key: string]: number[];
+            };
+            thumbnailUrl: string | null;
+            dispute: components["schemas"]["HygieneDisputeResponse"] | null;
+        };
+        SimulateRequest: {
+            /** @enum {string} */
+            event: "ACTIVATED" | "CHARGED" | "PENDING" | "HALTED" | "CANCELLED";
+        };
+        AdminSubscriptionResponse: {
+            /** Format: uuid */
+            restaurantId: string;
+            restaurantName: string;
+            /** @enum {string} */
+            status: "TRIALING" | "ACTIVE" | "PAST_DUE" | "SUSPENDED" | "CANCELLED";
+            planName: string;
+            /** Format: int64 */
+            pricePaise: number;
+            /** Format: date-time */
+            trialEndsAt: string;
+            /** Format: date-time */
+            currentPeriodEnd: string | null;
+            /** Format: date-time */
+            graceUntil: string | null;
+            paymentMethodReady: boolean;
+            providerSubscriptionId: string | null;
+        };
         OrderStatusChangeRequest: {
             /** @enum {string} */
             status: "PLACED" | "ACCEPTED" | "REJECTED" | "PREPARING" | "READY" | "SERVED" | "PICKED_UP" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
@@ -1566,6 +2545,21 @@ export interface components {
             pureVeg: boolean;
             openNow: boolean;
         };
+        /** @description Only when public hygiene scores are on and enough clips were scored */
+        PublicHygieneScore: {
+            /**
+             * Format: double
+             * @description Rolling average, 0–100
+             */
+            score: number;
+            /**
+             * Format: int64
+             * @description Scored clips in the window it's based on
+             */
+            clipCount: number;
+            /** Format: int32 */
+            windowDays: number;
+        };
         RestaurantDetailResponse: {
             /** Format: uuid */
             id: string;
@@ -1584,6 +2578,97 @@ export interface components {
             deliveryRadiusKm: number | null;
             openNow: boolean;
             menu: components["schemas"]["MenuCategoryResponse"][];
+            hygiene: components["schemas"]["PublicHygieneScore"] | null;
+        };
+        PublicConsentResponse: {
+            version: string;
+            text: string;
+            textHash: string;
+        };
+        PublicClipResponse: {
+            title: string;
+            restaurantName: string;
+            restaurantSlug: string;
+            restaurantCity: string;
+            /** @description False when the restaurant isn't taking orders on the platform */
+            restaurantOrderable: boolean;
+            /** Format: uuid */
+            chefId: string | null;
+            chefName: string | null;
+            /** Format: double */
+            durationSeconds: number;
+            videoUrl: string;
+            thumbnailUrl: string;
+            /** Format: date-time */
+            recordedAt: string;
+            /** Format: date-time */
+            linksExpireAt: string;
+        };
+        PublicChefResponse: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            photoUrl: string | null;
+            bio: string | null;
+            specialty: string | null;
+            restaurantName: string;
+            restaurantSlug: string;
+            restaurantCity: string;
+            /** Format: int64 */
+            clipCount: number;
+            /**
+             * Format: int64
+             * @description Share-page views across the chef's clips
+             */
+            totalViews: number;
+            /**
+             * Format: int64
+             * @description Number of tips received (never amounts)
+             */
+            tipCount: number;
+            /** Format: int64 */
+            followerCount: number;
+            /** @description Payouts set up: customers can tip this chef */
+            tippable: boolean;
+            hygiene: components["schemas"]["PublicHygieneScore"] | null;
+        };
+        ChefScore: {
+            /** Format: uuid */
+            chefId: string;
+            displayName: string;
+            /** Format: double */
+            score: number | null;
+            /** Format: int64 */
+            clipCount: number;
+            shownPublicly: boolean;
+        };
+        HygieneOverviewResponse: {
+            /**
+             * Format: double
+             * @description Rolling average over windowDays; null = no scored clips
+             */
+            score: number | null;
+            /** Format: int64 */
+            clipCount: number;
+            /** Format: int32 */
+            windowDays: number;
+            /** Format: int32 */
+            minPublicClips: number;
+            /** @description An admin has turned public hygiene scores on for the platform */
+            publicScoresEnabled: boolean;
+            /** @description Customers currently see the score (enabled and at least minPublicClips) */
+            shownPublicly: boolean;
+            trend: components["schemas"]["TrendPoint"][];
+            chefs: components["schemas"]["ChefScore"][];
+            worst: components["schemas"]["HygieneResultResponse"][];
+        };
+        TrendPoint: {
+            /** Format: date */
+            weekStart: string;
+            /** Format: double */
+            score: number | null;
+            /** Format: int64 */
+            clips: number;
         };
         PageResponseOwnerClipResponse: {
             items: components["schemas"]["OwnerClipResponse"][];
@@ -1596,6 +2681,34 @@ export interface components {
             /** Format: int32 */
             totalPages: number;
         };
+        ClipPlaybackResponse: {
+            /** Format: uuid */
+            orderId: string;
+            /** Format: int32 */
+            displayNumber: number;
+            restaurantName: string;
+            chefName: string | null;
+            /** Format: double */
+            durationSeconds: number;
+            videoUrl: string;
+            thumbnailUrl: string;
+            /** @description Saves the file as downloadFilename (Content-Disposition: attachment) */
+            downloadUrl: string;
+            downloadFilename: string;
+            /** Format: date-time */
+            linksExpireAt: string;
+            /**
+             * Format: date-time
+             * @description When the clip itself is deleted
+             */
+            clipExpiresAt: string;
+            /**
+             * Format: int64
+             * @description Views of the public share page, one per visitor per day
+             */
+            viewCount: number;
+            share: components["schemas"]["ClipShareResponse"] | null;
+        };
         PageResponseOrderResponse: {
             items: components["schemas"]["OrderResponse"][];
             /** Format: int32 */
@@ -1607,10 +2720,77 @@ export interface components {
             /** Format: int32 */
             totalPages: number;
         };
+        OrderTipsResponse: {
+            chefs: components["schemas"]["TippableChef"][];
+            tips: components["schemas"]["TipResponse"][];
+            presetsPaise: number[];
+            /** Format: int64 */
+            minPaise: number;
+            /** Format: int64 */
+            maxPaise: number;
+        };
+        TippableChef: {
+            /** Format: uuid */
+            chefId: string;
+            displayName: string;
+            photoUrl: string | null;
+            cookedThisOrder: boolean;
+        };
+        FollowedChefResponse: {
+            /** Format: uuid */
+            chefId: string;
+            displayName: string;
+            photoUrl: string | null;
+            specialty: string | null;
+            /** Format: uuid */
+            restaurantId: string;
+            restaurantName: string;
+            restaurantSlug: string;
+            /** @description Payouts ACTIVE: tips can be offered */
+            tippable: boolean;
+        };
         HealthResponse: {
             status: string;
             /** Format: date-time */
             time: string;
+        };
+        FollowStatusResponse: {
+            following: boolean;
+        };
+        ChefTipResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            orderDisplayNumber: number;
+            /** Format: int64 */
+            amountPaise: number;
+            /** Format: int64 */
+            chefAmountPaise: number;
+            /** @enum {string} */
+            status: "CREATED" | "PAID" | "TRANSFERRED" | "FAILED";
+            /** @enum {string} */
+            source: "CLIP" | "CHECKOUT";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            paidAt: string | null;
+            /** Format: date-time */
+            transferredAt: string | null;
+        };
+        ChefTipsPage: {
+            items: components["schemas"]["ChefTipResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int64 */
+            tipCount: number;
+            /** Format: int64 */
+            totalChefAmountPaise: number;
         };
         ChefSelfResponse: {
             /** Format: uuid */
@@ -1630,8 +2810,101 @@ export interface components {
             id: string;
             name: string;
         };
+        ChefClipResponse: {
+            /** Format: int32 */
+            orderDisplayNumber: number;
+            /** Format: date */
+            businessDate: string;
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "READY" | "FAILED" | "NOT_AVAILABLE" | "EXPIRED";
+            /** Format: double */
+            durationSeconds: number | null;
+            thumbnailUrl: string | null;
+            /** Format: int64 */
+            viewCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            readyAt: string | null;
+        };
+        PageResponseChefClipResponse: {
+            items: components["schemas"]["ChefClipResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
         PageResponseUserResponse: {
             items: components["schemas"]["UserResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            size: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int32 */
+            totalPages: number;
+        };
+        AdminRestaurantDetailResponse: {
+            restaurant: components["schemas"]["RestaurantResponse"];
+            owner: components["schemas"]["UserResponse"];
+            compliance: components["schemas"]["ComplianceResponse"];
+            subscription: components["schemas"]["AdminSubscriptionResponse"] | null;
+            invoices: components["schemas"]["InvoiceResponse"][];
+        };
+        Day: {
+            /** Format: date */
+            date: string | null;
+            /** Format: int64 */
+            orders: number;
+            /** Format: int64 */
+            gmvPaise: number;
+            /** Format: int64 */
+            clips: number;
+            /** Format: int64 */
+            clipViews: number;
+            /** Format: int64 */
+            shares: number;
+            /** Format: int64 */
+            tips: number;
+        };
+        MetricsResponse: {
+            /** Format: int32 */
+            days: number;
+            series: components["schemas"]["Day"][];
+            totals: components["schemas"]["Day"];
+            /** Format: int64 */
+            activeRestaurants: number;
+            /**
+             * Format: int64
+             * @description Monthly recurring revenue: plan prices (excl. GST) of ACTIVE subscriptions
+             */
+            mrrPaise: number;
+            subscriptionsByStatus: {
+                [key: string]: number;
+            };
+        };
+        AuditEntryResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            adminId: string;
+            adminName: string;
+            action: string;
+            targetType: string;
+            targetId: string | null;
+            details: {
+                [key: string]: Record<string, never>;
+            };
+            /** Format: date-time */
+            createdAt: string;
+        };
+        PageResponseAuditEntryResponse: {
+            items: components["schemas"]["AuditEntryResponse"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -1938,6 +3211,54 @@ export interface operations {
             };
         };
     };
+    compliance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ComplianceResponse"];
+                };
+            };
+        };
+    };
+    updateCompliance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComplianceRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ComplianceResponse"];
+                };
+            };
+        };
+    };
     get_1: {
         parameters: {
             query?: never;
@@ -2009,6 +3330,252 @@ export interface operations {
             };
         };
     };
+    changePlan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChoosePlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingOverviewResponse"];
+                };
+            };
+        };
+    };
+    status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chefId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FollowStatusResponse"];
+                };
+            };
+        };
+    };
+    follow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chefId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    unfollow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chefId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PayoutAccountResponse"];
+                };
+            };
+        };
+    };
+    submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayoutAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PayoutAccountResponse"];
+                };
+            };
+        };
+    };
+    settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HygieneSettingsResponse"];
+                };
+            };
+        };
+    };
+    update_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HygieneSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HygieneSettingsResponse"];
+                };
+            };
+        };
+    };
+    settings_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingSettingsResponse"];
+                };
+            };
+        };
+    };
+    updateSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BillingSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingSettingsResponse"];
+                };
+            };
+        };
+    };
+    update_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                planId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlanResponse"];
+                };
+            };
+        };
+    };
     pair: {
         parameters: {
             query?: never;
@@ -2030,6 +3597,30 @@ export interface operations {
                 content: {
                     "*/*": components["schemas"]["PairedDevice"];
                 };
+            };
+        };
+    };
+    view: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClipViewRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2347,6 +3938,33 @@ export interface operations {
             };
         };
     };
+    dispute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                resultId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HygieneDisputeRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HygieneDisputeResponse"];
+                };
+            };
+        };
+    };
     retry: {
         parameters: {
             query?: never;
@@ -2418,6 +4036,80 @@ export interface operations {
             };
         };
     };
+    checkout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChoosePlanRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SubscriptionCheckoutResponse"];
+                };
+            };
+        };
+    };
+    confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmSubscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingOverviewResponse"];
+                };
+            };
+        };
+    };
+    cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingOverviewResponse"];
+                };
+            };
+        };
+    };
     list_4: {
         parameters: {
             query?: {
@@ -2461,6 +4153,81 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["OrderResponse"];
+                };
+            };
+        };
+    };
+    options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrderTipsResponse"];
+                };
+            };
+        };
+    };
+    start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TipRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TipCheckoutResponse"];
+                };
+            };
+        };
+    };
+    confirm_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+                tipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmPaymentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TipResponse"];
                 };
             };
         };
@@ -2513,7 +4280,49 @@ export interface operations {
             };
         };
     };
-    cancel: {
+    share: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipShareResponse"];
+                };
+            };
+        };
+    };
+    revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    cancel_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2559,6 +4368,87 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["GuestOrderResponse"];
+                };
+            };
+        };
+    };
+    options_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["OrderTipsResponse"];
+                };
+            };
+        };
+    };
+    start_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TipRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TipCheckoutResponse"];
+                };
+            };
+        };
+    };
+    confirm_2: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+                tipId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmPaymentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TipResponse"];
                 };
             };
         };
@@ -2615,7 +4505,53 @@ export interface operations {
             };
         };
     };
-    cancel_1: {
+    share_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipShareResponse"];
+                };
+            };
+        };
+    };
+    revoke_1: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    cancel_2: {
         parameters: {
             query?: never;
             header?: {
@@ -2691,6 +4627,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ClipRequestResponse"];
+                };
+            };
+        };
+    };
+    refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PayoutAccountResponse"];
                 };
             };
         };
@@ -2783,7 +4739,7 @@ export interface operations {
             };
         };
     };
-    refresh: {
+    refresh_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2915,6 +4871,102 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                disputeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveDisputeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDisputeResponse"];
+                };
+            };
+        };
+    };
+    simulate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminSubscriptionResponse"];
+                };
+            };
+        };
+    };
+    plans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlanResponse"][];
+                };
+            };
+        };
+    };
+    create_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PlanResponse"];
                 };
             };
         };
@@ -3131,6 +5183,70 @@ export interface operations {
             };
         };
     };
+    current_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicConsentResponse"];
+                };
+            };
+        };
+    };
+    get_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicClipResponse"];
+                };
+            };
+        };
+    };
+    get_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chefId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicChefResponse"];
+                };
+            };
+        };
+    };
     qrSheet: {
         parameters: {
             query?: never;
@@ -3177,7 +5293,7 @@ export interface operations {
             };
         };
     };
-    get_2: {
+    get_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -3244,6 +5360,28 @@ export interface operations {
             };
         };
     };
+    overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["HygieneOverviewResponse"];
+                };
+            };
+        };
+    };
     list_7: {
         parameters: {
             query?: {
@@ -3270,7 +5408,75 @@ export interface operations {
             };
         };
     };
-    get_3: {
+    playback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipPlaybackResponse"];
+                };
+            };
+        };
+    };
+    overview_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BillingOverviewResponse"];
+                };
+            };
+        };
+    };
+    invoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                invoiceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    get_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -3288,6 +5494,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["OrderResponse"];
+                };
+            };
+        };
+    };
+    playback_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipPlaybackResponse"];
                 };
             };
         };
@@ -3312,6 +5540,28 @@ export interface operations {
             };
         };
     };
+    followed: {
+        parameters: {
+            query?: {
+                restaurantId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FollowedChefResponse"][];
+                };
+            };
+        };
+    };
     health: {
         parameters: {
             query?: never;
@@ -3332,7 +5582,7 @@ export interface operations {
             };
         };
     };
-    get_4: {
+    get_7: {
         parameters: {
             query?: never;
             header?: {
@@ -3352,6 +5602,53 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["OrderResponse"];
+                };
+            };
+        };
+    };
+    playback_2: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Guest-Order-Token"?: string;
+            };
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipPlaybackResponse"];
+                };
+            };
+        };
+    };
+    tips: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ChefTipsPage"];
                 };
             };
         };
@@ -3394,6 +5691,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ChefSelfResponse"];
+                };
+            };
+        };
+    };
+    clips: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseChefClipResponse"];
                 };
             };
         };
@@ -3444,6 +5764,28 @@ export interface operations {
             };
         };
     };
+    detail_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminRestaurantDetailResponse"];
+                };
+            };
+        };
+    };
     pendingOwners: {
         parameters: {
             query?: never;
@@ -3460,6 +5802,139 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["UserResponse"][];
+                };
+            };
+        };
+    };
+    metrics: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MetricsResponse"];
+                };
+            };
+        };
+    };
+    disputes: {
+        parameters: {
+            query?: {
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminDisputeResponse"][];
+                };
+            };
+        };
+    };
+    playback_3: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["ClipPlaybackResponse"];
+                };
+            };
+        };
+    };
+    subscriptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AdminSubscriptionResponse"][];
+                };
+            };
+        };
+    };
+    invoice_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                restaurantId: string;
+                invoiceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                };
+            };
+        };
+    };
+    audit: {
+        parameters: {
+            query?: {
+                action?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageResponseAuditEntryResponse"];
                 };
             };
         };

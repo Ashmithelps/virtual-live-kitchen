@@ -25,6 +25,7 @@ public record RestaurantResponse(
         Set<OrderType> orderTypes,
         @Schema(nullable = true) Double deliveryRadiusKm,
         RestaurantStatus status,
+        @Schema(nullable = true, description = "ADMIN or BILLING when SUSPENDED") com.virtualkitchen.restaurant.SuspensionReason suspendedReason,
         @Schema(nullable = true) String logoKey,
         Instant createdAt,
         Instant updatedAt) {
@@ -33,6 +34,6 @@ public record RestaurantResponse(
         return new RestaurantResponse(r.getId(), r.getOwnerId(), r.getName(), r.getSlug(), r.getAddress(), r.getCity(),
                 r.getLatitude(), r.getLongitude(), r.getCuisineTags(),
                 r.getOpeningHours().stream().map(OpeningSlotDto::from).toList(),
-                r.orderTypes(), r.getDeliveryRadiusKm(), r.getStatus(), r.getLogoKey(), r.getCreatedAt(), r.getUpdatedAt());
+                r.orderTypes(), r.getDeliveryRadiusKm(), r.getStatus(), r.getSuspendedReason(), r.getLogoKey(), r.getCreatedAt(), r.getUpdatedAt());
     }
 }

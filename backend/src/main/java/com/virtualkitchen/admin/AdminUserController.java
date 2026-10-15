@@ -18,9 +18,11 @@ import java.util.UUID;
 public class AdminUserController {
 
     private final UserAccountService userAccountService;
+    private final AdminAudit audit;
 
-    public AdminUserController(UserAccountService userAccountService) {
+    public AdminUserController(UserAccountService userAccountService, AdminAudit audit) {
         this.userAccountService = userAccountService;
+        this.audit = audit;
     }
 
     @GetMapping("/pending")
@@ -29,7 +31,9 @@ public class AdminUserController {
     }
 
     @PostMapping("/{userId}/approve")
-    public UserResponse approve(@PathVariable UUID userId) {
-        return UserResponse.from(userAccountService.approveOwner(userId));
+    public UserResponse approve(@org.springframework.security.core.annotation.AuthenticationPrincipal
+                                com.virtualkitchen.auth.security.AuthenticatedUser admin, @PathVariable UUID userId) {
+        return audit.audited(admin.id(), "OWNER_APPROVED", "user", userId, java.util.Map.of(),
+                () -> UserResponse.from(userAccountService.approveOwner(userId)));
     }
 }

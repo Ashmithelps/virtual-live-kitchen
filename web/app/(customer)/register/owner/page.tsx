@@ -63,6 +63,10 @@ export default function OwnerRegisterPage() {
           <Button type="submit" className="w-full" busy={busy}>
             Create owner account
           </Button>
+          <p className="text-xs text-stone-500">
+            By registering you agree to the <Link href="/terms" className="underline">terms</Link> (including the restaurant subscription and recording-consent duties) and the{" "}
+            <Link href="/privacy" className="underline">privacy policy</Link>.
+          </p>
         </form>
       </Card>
       <p className="text-center text-sm text-stone-600">

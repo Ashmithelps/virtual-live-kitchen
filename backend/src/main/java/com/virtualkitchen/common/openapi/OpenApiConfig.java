@@ -53,6 +53,9 @@ public class OpenApiConfig {
             }
             Set<String> requestSchemas = requestBodySchemas(openApi, schemas);
             schemas.forEach((name, schema) -> {
+                // A field's @Schema(nullable = true) leaks onto the referenced component; nullability belongs
+                // to the field (the allOf wrapper below), so a type used elsewhere as non-null stays non-null.
+                schema.setNullable(null);
                 if (!requestSchemas.contains(name) && schema.getProperties() != null) {
                     schema.setRequired(new ArrayList<>(schema.getProperties().keySet()));
                 }

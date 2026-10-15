@@ -87,6 +87,11 @@ public class GuestOrderService {
     public record GuestAccess(UUID orderId, UUID customerId) {
     }
 
+    /** The customer a guest token stands for, if it's valid for this order; 401 otherwise. */
+    public UUID requireCustomer(UUID orderId, String guestToken) {
+        return customerFor(orderId, guestToken);
+    }
+
     private UUID customerFor(UUID orderId, String guestToken) {
         Claims claims = tokens.verify(PURPOSE, guestToken)
                 .filter(c -> orderId.toString().equals(c.getSubject()))

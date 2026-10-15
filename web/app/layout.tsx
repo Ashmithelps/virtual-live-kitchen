@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
+  // Absolute base for link previews (og:image etc.); the public address of this web app.
+  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
   title: "Virtual Live Kitchen",
   description: "Order from restaurants and watch your food being made.",
 };

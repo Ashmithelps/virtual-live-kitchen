@@ -37,15 +37,23 @@ export default function ClipsPage() {
   const toast = useToast();
   const [status, setStatus] = useState<ClipState | "">("");
   const [page, setPage] = useState(0);
-  const [playing, setPlaying] = useState<string | null>(null);
+  const [playing, setPlaying] = useState<{ orderId: string; url: string } | null>(null);
 
   const clips = useQuery({
     queryKey: ownerKeys.clips(restaurantId, status, page),
     queryFn: () =>
       unwrap(api.GET("/api/owner/restaurants/{restaurantId}/clips", { params: { path: { restaurantId }, query: { status: status || undefined, page, size: PAGE_SIZE } } })),
     placeholderData: keepPreviousData,
-    // Clips move PENDING → PROCESSING → READY in the background.
-    refetchInterval: 15_000,
+    // Clips move PENDING → PROCESSING → READY in the background; poll only while some are on the way.
+    refetchInterval: (query) => (query.state.data?.items.some((c) => c.status === "PENDING" || c.status === "PROCESSING") ? 15_000 : false),
+  });
+
+  // Watch links are issued on demand (10 minutes), not with the list.
+  const play = useMutation({
+    mutationFn: (clip: OwnerClip) =>
+      unwrap(api.GET("/api/owner/restaurants/{restaurantId}/clips/{orderId}/playback", { params: { path: { restaurantId, orderId: clip.orderId } } })),
+    onSuccess: (playback) => setPlaying({ orderId: playback.orderId, url: playback.videoUrl }),
+    onError: (error) => toast.error(errorMessage(error)),
   });
 
   const retry = useMutation({
@@ -74,7 +82,9 @@ export default function ClipsPage() {
             </option>
           ))}
         </select>
-        <p className="text-sm text-stone-600">Kitchen clips are made from the station phone&apos;s recording when an order is marked ready.</p>
+        <p className="text-sm text-stone-600">
+          Kitchen clips are made from the station phone&apos;s recording when an order is marked ready. Views count people who opened a customer&apos;s shared link (once per person per day).
+        </p>
       </div>
 
       {clips.isPending ? (
@@ -89,11 +99,15 @@ export default function ClipsPage() {
             {clips.data.items.map((clip) => (
               <Card key={clip.orderId} className="flex flex-col gap-3 sm:flex-row">
                 <div className="sm:w-64 sm:shrink-0">
-                  {playing === clip.orderId && clip.videoUrl ? (
-                    <video src={clip.videoUrl} poster={clip.thumbnailUrl ?? undefined} controls autoPlay playsInline className="aspect-video w-full rounded-lg bg-black" />
+                  {playing?.orderId === clip.orderId ? (
+                    <video src={playing.url} poster={clip.thumbnailUrl ?? undefined} controls autoPlay playsInline className="aspect-video w-full rounded-lg bg-black" />
                   ) : clip.thumbnailUrl ? (
-                    <button onClick={() => setPlaying(clip.orderId)} className="group relative block w-full" aria-label={`Play clip for order ${clip.displayNumber}`}>
-                      { }
+                    <button
+                      onClick={() => play.mutate(clip)}
+                      disabled={play.isPending}
+                      className="group relative block w-full"
+                      aria-label={`Play clip for order ${clip.displayNumber}`}
+                    >
                       <img src={clip.thumbnailUrl} alt="" className="aspect-video w-full rounded-lg object-cover" />
                       <span className="absolute inset-0 flex items-center justify-center text-4xl text-white drop-shadow group-hover:scale-110">▶</span>
                     </button>
@@ -108,6 +122,12 @@ export default function ClipsPage() {
                     <p className="text-lg font-semibold">Order #{clip.displayNumber}</p>
                     <Badge tone={STATUS[clip.status].tone}>{STATUS[clip.status].label}</Badge>
                     {clip.durationSeconds != null && <span className="text-sm text-stone-500">{Math.round(clip.durationSeconds)} s</span>}
+                    {clip.status === "READY" && (
+                      <span className="text-sm text-stone-600">
+                        👀 {clip.viewCount} {clip.viewCount === 1 ? "view" : "views"} · 🔗 {clip.shareCount} {clip.shareCount === 1 ? "share" : "shares"}
+                        {clip.shared ? " (link live)" : ""}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-stone-600">
                     {clip.businessDate} · {clip.chefName ?? "Unknown chef"} · {clip.stationName ?? "Unknown station"}

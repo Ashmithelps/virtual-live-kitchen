@@ -1,0 +1,40 @@
+# HTTPS for the backend API (certificates from Let's Encrypt, renewed automatically).
+# The web app is on Vercel; only the API (and its WebSocket at /ws) is served here.
+{
+	email {$ACME_EMAIL}
+	# Access logs are JSON on stdout (docker logs caddy).
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# API bodies are small JSON; uploads go straight to R2 with presigned URLs.
+	request_body {
+		max_size 2MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		-Server
+	}
+
+	# Only the health probes of Spring's actuator are public.
+	@actuator {
+		path /actuator /actuator/*
+		not path /actuator/health /actuator/health/*
+	}
+	respond @actuator 404
+
+	reverse_proxy backend:8080 {
+		# Fail fast while the backend restarts during a deploy instead of hanging clients.
+		lb_try_duration 20s
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

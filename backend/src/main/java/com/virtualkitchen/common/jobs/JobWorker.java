@@ -41,14 +41,19 @@ public class JobWorker implements SmartLifecycle {
     @Override
     public void start() {
         running = true;
-        for (int i = 0; i < properties.workerThreads(); i++) {
-            Thread thread = Thread.ofPlatform().name("job-worker-" + i).daemon(true).unstarted(this::loop);
-            threads.add(thread);
-            thread.start();
-        }
-        if (!threads.isEmpty()) {
-            log.info("Started {} job worker thread(s) for {}", threads.size(), handlers.keySet());
-        }
+        Map<String, List<String>> typesByLane = handlers.values().stream()
+                .collect(Collectors.groupingBy(JobHandler::lane, Collectors.mapping(JobHandler::type, Collectors.toList())));
+        typesByLane.forEach((lane, types) -> {
+            int count = properties.threadsFor(lane);
+            for (int i = 0; i < count; i++) {
+                Thread thread = Thread.ofPlatform().name("job-" + lane + "-" + i).daemon(true).unstarted(() -> loop(types));
+                threads.add(thread);
+                thread.start();
+            }
+            if (count > 0) {
+                log.info("Started {} job worker thread(s) in lane '{}' for {}", count, lane, types);
+            }
+        });
     }
 
     @Override
@@ -78,9 +83,14 @@ public class JobWorker implements SmartLifecycle {
         }
     }
 
-    /** Takes and runs at most one job; returns false if there was none. Used by the loop and by tests. */
+    /** Takes and runs at most one job of any type; returns false if there was none. Used by tests. */
     public boolean runOnce(String workerId) {
-        Optional<JobQueue.ClaimedJob> claimed = queue.claim(workerId, handlers.keySet());
+        return runOnce(workerId, handlers.keySet());
+    }
+
+    /** Takes and runs at most one job of the given types; returns false if there was none. */
+    public boolean runOnce(String workerId, java.util.Collection<String> types) {
+        Optional<JobQueue.ClaimedJob> claimed = queue.claim(workerId, types);
         if (claimed.isEmpty()) {
             return false;
         }
@@ -106,11 +116,11 @@ public class JobWorker implements SmartLifecycle {
         return true;
     }
 
-    private void loop() {
+    private void loop(List<String> types) {
         String workerId = instanceId + "#" + Thread.currentThread().getName();
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                if (!runOnce(workerId)) {
+                if (!runOnce(workerId, types)) {
                     Thread.sleep(properties.pollInterval());
                 }
             } catch (InterruptedException e) {

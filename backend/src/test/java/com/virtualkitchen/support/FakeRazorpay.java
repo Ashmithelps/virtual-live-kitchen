@@ -37,12 +37,15 @@ public class FakeRazorpay {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final Pattern PAYMENT = Pattern.compile("^/v1/payments/([^/]+)(/capture|/refund|/refunds)?$");
+    private static final Pattern ACCOUNT = Pattern.compile("^/v2/accounts/([^/]+)/(stakeholders|products)(?:/([^/]+))?$");
 
     private final HttpServer server;
     private final AtomicInteger ids = new AtomicInteger();
     public final List<Call> calls = new CopyOnWriteArrayList<>();
     private final Map<String, Map<String, Object>> payments = new ConcurrentHashMap<>();
     private final Map<String, List<Map<String, Object>>> refunds = new ConcurrentHashMap<>();
+    /** Route products by id → activation_status ("under_review" until {@link #activate}). */
+    private final Map<String, String> productStatus = new ConcurrentHashMap<>();
     /** 502 on refund creation. */
     public volatile boolean refundsFail;
     /** Creates the refund but answers 504, like a timeout after the gateway acted. */
@@ -72,6 +75,11 @@ public class FakeRazorpay {
         payment.put("currency", "INR");
         payment.put("status", status);
         payments.put(paymentId, payment);
+    }
+
+    /** What the Razorpay Dashboard does when a linked account passes review. */
+    public void activate(String productId) {
+        productStatus.put(productId, "activated");
     }
 
     public List<Call> calls(String method, String pathPrefix) {
@@ -106,6 +114,46 @@ public class FakeRazorpay {
                     "amount", body.path("amount").asLong(), "currency", body.path("currency").asText(), "status", "created",
                     "receipt", body.path("receipt").asText());
             respond(exchange, 200, order);
+            return;
+        }
+        if (method.equals("POST") && path.equals("/v1/plans")) {
+            respond(exchange, 200, Map.of("id", "plan_fake" + ids.incrementAndGet(), "entity", "plan", "period", body.path("period").asText(),
+                    "item", Map.of("amount", body.path("item").path("amount").asLong())));
+            return;
+        }
+        if (method.equals("POST") && path.equals("/v1/subscriptions")) {
+            String id = "sub_fake" + ids.incrementAndGet();
+            respond(exchange, 200, Map.of("id", id, "entity", "subscription", "status", "created", "short_url", "https://rzp.io/i/" + id,
+                    "plan_id", body.path("plan_id").asText()));
+            return;
+        }
+        if (path.startsWith("/v1/subscriptions/")) {
+            String id = path.substring("/v1/subscriptions/".length()).replace("/cancel", "");
+            respond(exchange, 200, Map.of("id", id, "entity", "subscription", "status", path.endsWith("/cancel") ? "cancelled" : "active"));
+            return;
+        }
+        if (method.equals("POST") && path.equals("/v2/accounts")) {
+            respond(exchange, 200, Map.of("id", "acc_fake" + ids.incrementAndGet(), "type", "route", "status", "created"));
+            return;
+        }
+        Matcher a = ACCOUNT.matcher(path);
+        if (a.matches()) {
+            String accountId = a.group(1);
+            if (a.group(2).equals("stakeholders") && method.equals("POST")) {
+                respond(exchange, 200, Map.of("id", "sth_fake" + ids.incrementAndGet()));
+            } else if (a.group(3) == null && method.equals("POST")) {
+                String productId = "acc_prd_fake" + ids.incrementAndGet();
+                productStatus.put(productId, "requested");
+                respond(exchange, 200, Map.of("id", productId, "account_id", accountId, "activation_status", "requested"));
+            } else if (a.group(3) != null && productStatus.containsKey(a.group(3))) {
+                String productId = a.group(3);
+                if (method.equals("PATCH") && !"activated".equals(productStatus.get(productId))) {
+                    productStatus.put(productId, "under_review");
+                }
+                respond(exchange, 200, Map.of("id", productId, "account_id", accountId, "activation_status", productStatus.get(productId)));
+            } else {
+                respond(exchange, 404, Map.of());
+            }
             return;
         }
         Matcher m = PAYMENT.matcher(path);

@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { api } from "@/lib/api/client";
+import { saveBlob } from "@/lib/download";
 import { errorMessage, unwrap } from "@/lib/api/errors";
 import type { DiningTable } from "@/lib/api/types";
 import { ownerKeys } from "@/lib/owner/queries";
@@ -40,14 +41,7 @@ export default function TablesPage() {
     setDownloading(true);
     try {
       const result = await api.GET("/api/owner/restaurants/{restaurantId}/tables/qr-codes.pdf", { params: { path }, parseAs: "blob" });
-      const status = result.response.status;
-      if (!result.response.ok || !result.data) throw new Error(`Couldn't create the PDF (HTTP ${status})`);
-      const url = URL.createObjectURL(result.data as Blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "table-qr-codes.pdf";
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      saveBlob(result, "table-qr-codes.pdf");
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
