@@ -455,7 +455,10 @@ The next migration is **V14**.
 - **Role checks:** class-level `@PreAuthorize("hasRole('X')")`. Only ACTIVE users get a role authority, so
   PENDING_APPROVAL owners and DISABLED users fail every `hasRole`.
 - **Services:** return DTOs built inside the transaction (`open-in-view` is off). Controllers never touch entities.
-- **Time:** inject `Clock` wherever "now" matters, so tests can control it. Restaurant-local logic (opening
+- **Time:** inject `Clock` wherever "now" matters, so tests can control it. The bean (`ClockConfig.MicrosecondClock`)
+  truncates to microseconds, Postgres's precision: Linux clocks have nanoseconds, which Postgres rounds on write, so a
+  value pushed before commit wouldn't match the stored one (this failed CI once). Never use `Instant.now()` for
+  persisted values (or truncate to `ChronoUnit.MICROS`), and never `Clock.tick(…, < 1 ms)` (its `millis()` divides by zero). Restaurant-local logic (opening
   hours, order business date) uses `app.restaurant.timezone` (Asia/Kolkata).
 - **Secrets at rest:** store only a SHA-256 of credentials (refresh tokens, station device tokens). Table QR
   tokens are stored raw because they must be re-printable.
@@ -519,7 +522,7 @@ The next migration is **V14**.
 - **Test helpers:** `support/AuthClient` (register, login, `approvedOwnerToken()`, `send(...)`),
   `support/OwnerFixtures` (restaurant, menu, chef/station builders, `consentedChefOnStation`), and
   `order/OrderTestKitchen` (a ready-to-order restaurant).
-- **Testcontainers** is pinned to 1.21.4, which Docker Desktop 29 requires. Last full run (M15): 360 unit + 166 integration tests passing; ai-service 23 tests.
+- **Testcontainers** is pinned to 1.21.4, which Docker Desktop 29 requires. Last full run (CI fix after M15): 362 unit + 166 integration tests passing on macOS and in a Linux container (as CI); ai-service 23 tests.
 - **FFmpeg:** clip tests need `ffmpeg`/`ffprobe` on PATH (`brew install ffmpeg`; skipped otherwise). Sample chunks:
   `src/test/resources/clips/chunk-{1,2}.webm` (30 s, 320×180, black / blue). Job worker threads are 0 in tests;
   `order/ClipPipelineIT` drives `JobWorker.runOnce` by hand.
@@ -543,7 +546,14 @@ The next migration is **V14**.
   `backend/target/openapi.json` vs `web/openapi/openapi.json`, web checks on Node 22, ai-service `--target test`,
   shellcheck + `validate.sh` + backup roundtrip) and `deploy.yml` (main: tests → GHCR images tagged with the SHA →
   SSH deploy in environment `production` → public health check → `vercel@61.1.0` pull/build/deploy --prebuilt).
-  Lint locally with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7` and koalaman/shellcheck:v0.11.0.
+  Lint locally with `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7` and koalaman/shellcheck:v0.11.0
+  (CI runs the same shellcheck image; the runner's apt shellcheck 0.9.0 has different rules). Actions are pinned to
+  exact Node 24 releases (checkout v7.0.1, setup-java v5.7.0, setup-node v7.0.0, upload-artifact v7.0.1, buildx v4.4.1,
+  login v4.6.0, build-push v7.4.0). The deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`.
+  To reproduce CI's Linux test run locally: `docker run --rm -v "$PWD:/src" -v /var/run/docker.sock:/var/run/docker.sock
+  -w /src -e TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal -e TESTCONTAINERS_RYUK_DISABLED=true
+  eclipse-temurin:21.0.12_8-jdk-noble ./mvnw -B verify` (from `backend/`; install ffmpeg first for the clip tests).
+  `gh` is installed and logged in (`gh run view <id> --log-failed`).
 - **Browser end-to-end (manual, not in CI):** headless Chrome with `--use-fake-device-for-media-stream` via
   `puppeteer-core`, against throwaway containers. It verified pairing → recording → READY → upload → `UPLOADED`
   in M9. The Claude-in-Chrome extension wasn't connected in M6–M9.

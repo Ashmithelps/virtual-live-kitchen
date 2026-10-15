@@ -5,7 +5,11 @@
 # shellcheck source=common.sh disable=SC1091
 source /usr/local/bin/common.sh
 
-heartbeat() { [ -n "${BACKUP_HEARTBEAT_URL:-}" ] && wget -q -T 10 -O /dev/null "$BACKUP_HEARTBEAT_URL$1" || true; }
+heartbeat() {
+  if [ -n "${BACKUP_HEARTBEAT_URL:-}" ]; then
+    wget -q -T 10 -O /dev/null "$BACKUP_HEARTBEAT_URL$1" || true
+  fi
+}
 trap 'log ERROR "backup failed (line $LINENO)"; heartbeat /fail' ERR
 
 : "${PGHOST:?PGHOST is required}" "${PGDATABASE:?PGDATABASE is required}"

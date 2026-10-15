@@ -53,7 +53,7 @@ public class User {
         this.passwordHash = passwordHash;
         this.role = role;
         this.status = status;
-        this.createdAt = Instant.now();
+        this.createdAt = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     }
 
     public boolean isActive() {

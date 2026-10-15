@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-java@v5.7.0
         with:
           distribution: temurin
           java-version: "21"
@@ -39,7 +39,7 @@ jobs:
           fi
       - name: Test reports
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: backend-test-reports
           path: |
@@ -57,8 +57,8 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
           cache: npm
@@ -74,10 +74,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@v7.0.1
+      - uses: docker/setup-buildx-action@v4.4.1
       - name: docker build --target test
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7.4.0
         with:
           context: ai-service
           target: test
@@ -90,9 +90,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
+      # Pinned image, the same one used locally (the runner's apt shellcheck is an older release with other rules).
       - name: shellcheck
-        run: shellcheck infra/backup/*.sh infra/backup/test/*.sh infra/deploy/*.sh
+        run: >-
+          docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:v0.11.0
+          infra/backup/backup.sh infra/backup/common.sh infra/backup/restore.sh infra/backup/restore-test.sh
+          infra/backup/schedule.sh infra/backup/test/roundtrip.sh infra/deploy/deploy.sh infra/deploy/validate.sh
       - name: Production compose file and Caddyfile are valid
         run: infra/deploy/validate.sh
       - name: Backup → restore roundtrip (plain, encrypted, retention)

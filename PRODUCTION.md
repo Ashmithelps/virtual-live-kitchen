@@ -281,6 +281,8 @@ Setup:
   | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Vercel → Account → Tokens; IDs from `vercel link` (`web/.vercel/project.json`) |
 
 - ☐ Environment variable (not secret): `API_DOMAIN` = `api.example.in`.
+- ☐ Repository variable `DEPLOY_ENABLED` = `true` once the server and all secrets exist. Until then, `main` only runs
+  tests and pushes images; both deploy jobs are skipped.
 - ☐ Branch protection on `main`: require the CI checks to pass and require pull requests.
 - The VM pulls images with the job's short-lived `GITHUB_TOKEN`, so no long-lived registry credential stays on the
   server. Packages stay private.
